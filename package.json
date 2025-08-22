@@ -1,16 +1,38 @@
 {
-  "name": "nextjs",
+  "name": "my-budget-planner",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start"
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\"",
+    "db:migrate": "echo 'Run migration SQL in Supabase dashboard'"
   },
   "dependencies": {
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.0"
+    "next": "15.5.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/ssr": "^0.1.0",
+    "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "plaid": "^23.0.0",
+    "react-plaid-link": "^3.5.1",
+    "@vercel/ai": "^1.0.0",
+    "@anthropic-ai/sdk": "^0.24.0",
+    "xlsx": "^0.18.5",
+    "react-dropzone": "^14.2.3",
+    "recharts": "^2.10.4",
+    "lucide-react": "^0.323.0",
+    "date-fns": "^3.3.1",
+    "zod": "^3.22.4",
+    "react-hook-form": "^7.49.3",
+    "@hookform/resolvers": "^3.3.4",
+    "sonner": "^1.4.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
     "typescript": "^5",
@@ -18,6 +40,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "eslint": "^8",
+    "eslint-config-next": "15.5.0",
+    "@types/xlsx": "^0.0.36"
   }
 }
