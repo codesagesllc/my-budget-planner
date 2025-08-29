@@ -1,0 +1,16 @@
+Bill Name,Amount,Due Date,Billing Cycle,Category
+Netflix,15.99,1,monthly,Entertainment
+Spotify,9.99,1,monthly,Entertainment
+Amazon Prime,14.99,15,monthly,Shopping
+Disney Plus,7.99,10,monthly,Entertainment
+Electric Bill,125.50,5,monthly,Utilities
+Water Bill,45.00,10,monthly,Utilities
+Gas Bill,65.00,15,monthly,Utilities
+Internet,79.99,20,monthly,Utilities
+Mobile Phone,85.00,25,monthly,Utilities
+Car Insurance,165.00,15,monthly,Insurance
+Health Insurance,250.00,1,monthly,Insurance
+Gym Membership,49.99,1,monthly,Health
+Cloud Storage,9.99,5,monthly,Technology
+YouTube Premium,11.99,12,monthly,Entertainment
+Rent,1500.00,1,monthly,Housing

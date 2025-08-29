@@ -16,13 +16,12 @@
     "react-dom": "19.1.0",
     "next": "15.5.0",
     "@supabase/supabase-js": "^2.49.0",
-    "@supabase/ssr": "^0.1.0",
-    "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "@supabase/ssr": "^0.5.1",
     "plaid": "^23.0.0",
-    "react-plaid-link": "^4.1.1",
+    "react-plaid-link": "^3.5.2",
     "ai": "^3.2.37",
     "@anthropic-ai/sdk": "^0.29.0",
-    "xlsx": "^0.18.5",
+    "exceljs": "^4.4.0",
     "react-dropzone": "^14.2.3",
     "recharts": "^2.12.7",
     "lucide-react": "^0.417.0",
@@ -43,6 +42,7 @@
     "postcss": "^8.4.31",
     "eslint": "^8.57.0",
     "eslint-config-next": "15.5.0",
-    "@types/xlsx": "^0.0.36"
+    "prettier": "^3.3.3",
+    "autoprefixer": "^10.4.19"
   }
 }

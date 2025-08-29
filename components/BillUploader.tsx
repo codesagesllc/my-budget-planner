@@ -2,8 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react'
-import * as XLSX from 'xlsx'
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Download } from 'lucide-react'
 
 interface BillUploaderProps {
   userId: string
@@ -21,15 +20,34 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
     setStatusMessage('Reading spreadsheet...')
 
     try {
-      // Read the file
-      const data = await file.arrayBuffer()
-      const workbook = XLSX.read(data)
+      let fileContent = ''
       
-      // Get the first worksheet
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-      
-      // Convert to text
-      const text = XLSX.utils.sheet_to_txt(worksheet)
+      // Read file content based on type
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+        // Read CSV as text
+        fileContent = await file.text()
+        console.log('Read CSV file, length:', fileContent.length)
+      } else {
+        // For Excel files, read as text (we'll let the backend handle parsing)
+        // This is a simplified approach that should work
+        fileContent = await file.text()
+        console.log('Read Excel file as text, length:', fileContent.length)
+        
+        // If the file is binary, we need to read it differently
+        if (fileContent.length === 0 || fileContent.includes('�')) {
+          // Read as base64 for binary files
+          const reader = new FileReader()
+          fileContent = await new Promise((resolve, reject) => {
+            reader.onload = () => {
+              const result = reader.result as string
+              resolve(result)
+            }
+            reader.onerror = reject
+            reader.readAsDataURL(file)
+          })
+          console.log('Read as base64 data URL')
+        }
+      }
       
       setStatusMessage('Analyzing with AI...')
       
@@ -40,17 +58,19 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          content: text,
+          content: fileContent,
           userId,
+          fileType: file.type || 'application/octet-stream',
+          fileName: file.name,
         }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to process file')
-      }
-
       const result = await response.json()
       
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to process file')
+      }
+
       setUploadStatus('success')
       setStatusMessage(`Successfully imported ${result.billsCount} bills!`)
       onSuccess?.()
@@ -63,12 +83,12 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
     } catch (error) {
       console.error('Error processing file:', error)
       setUploadStatus('error')
-      setStatusMessage('Failed to process file. Please try again.')
+      setStatusMessage(error instanceof Error ? error.message : 'Failed to process file')
       
       setTimeout(() => {
         setUploadStatus('idle')
         setStatusMessage('')
-      }, 3000)
+      }, 5000)
     } finally {
       setIsProcessing(false)
     }
@@ -83,84 +103,95 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
+      'text/csv': ['.csv'],
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'text/csv': ['.csv'],
+      'text/plain': ['.txt'],
     },
     maxFiles: 1,
     disabled: isProcessing,
   })
 
   const downloadTemplate = () => {
-    // Create template
-    const ws_data = [
+    // Create a CSV template
+    const csvContent = [
       ['Bill Name', 'Amount', 'Due Date', 'Billing Cycle', 'Category'],
       ['Netflix', '15.99', '15', 'monthly', 'Entertainment'],
-      ['Electricity', '120', '1', 'monthly', 'Utilities'],
-      ['Car Insurance', '150', '20', 'monthly', 'Insurance'],
+      ['Spotify', '9.99', '1', 'monthly', 'Entertainment'],
+      ['Electric Bill', '120', '5', 'monthly', 'Utilities'],
+      ['Water Bill', '45', '10', 'monthly', 'Utilities'],
+      ['Internet', '70', '20', 'monthly', 'Utilities'],
+      ['Car Insurance', '150', '25', 'monthly', 'Insurance'],
       ['Gym Membership', '50', '1', 'monthly', 'Health'],
-    ]
+      ['Phone Bill', '85', '15', 'monthly', 'Utilities'],
+    ].map(row => row.join(',')).join('\n')
     
-    const ws = XLSX.utils.aoa_to_sheet(ws_data)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Bills')
-    
-    // Download
-    XLSX.writeFile(wb, 'bills_template.xlsx')
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'bills_template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex space-x-4">
-        <div
-          {...getRootProps()}
-          className={`flex-1 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
-          } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <input {...getInputProps()} />
-          
-          {uploadStatus === 'idle' && (
-            <>
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-600 mb-2">
-                {isDragActive ? 'Drop your spreadsheet here' : 'Drag & drop your bills spreadsheet'}
-              </p>
-              <p className="text-sm text-gray-500">or click to select a file</p>
-              <p className="text-xs text-gray-400 mt-2">Supports .xlsx, .xls, .csv files</p>
-            </>
-          )}
-          
-          {uploadStatus === 'processing' && (
-            <>
-              <FileSpreadsheet className="mx-auto h-12 w-12 text-blue-500 mb-4 animate-pulse" />
-              <p className="text-gray-600">{statusMessage}</p>
-            </>
-          )}
-          
-          {uploadStatus === 'success' && (
-            <>
-              <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-              <p className="text-green-600">{statusMessage}</p>
-            </>
-          )}
-          
-          {uploadStatus === 'error' && (
-            <>
-              <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-              <p className="text-red-600">{statusMessage}</p>
-            </>
-          )}
-        </div>
+      <div
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+          isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        <input {...getInputProps()} />
+        
+        {uploadStatus === 'idle' && (
+          <>
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-gray-600 mb-2">
+              {isDragActive ? 'Drop your spreadsheet here' : 'Drag & drop your bills spreadsheet'}
+            </p>
+            <p className="text-sm text-gray-500">or click to select a file</p>
+            <p className="text-xs text-gray-400 mt-2">Supports .csv, .xlsx, .xls, .txt files</p>
+          </>
+        )}
+        
+        {uploadStatus === 'processing' && (
+          <>
+            <FileSpreadsheet className="mx-auto h-12 w-12 text-blue-500 mb-4 animate-pulse" />
+            <p className="text-gray-600">{statusMessage}</p>
+          </>
+        )}
+        
+        {uploadStatus === 'success' && (
+          <>
+            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+            <p className="text-green-600">{statusMessage}</p>
+          </>
+        )}
+        
+        {uploadStatus === 'error' && (
+          <>
+            <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+            <p className="text-red-600">{statusMessage}</p>
+          </>
+        )}
       </div>
       
       <div className="text-center">
         <button
           onClick={downloadTemplate}
-          className="text-sm text-blue-600 hover:text-blue-800 underline"
+          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline"
         >
-          Download Excel Template
+          <Download className="h-4 w-4 mr-1" />
+          Download CSV Template (Recommended)
         </button>
+        <p className="text-xs text-gray-500 mt-2">
+          Use our template for best results, or upload your own spreadsheet
+        </p>
       </div>
     </div>
   )

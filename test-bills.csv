@@ -1,0 +1,21 @@
+Bill Name,Amount,Due Date,Billing Cycle,Category
+Verizon Wireless,140.00,15,monthly,Phone
+Comcast Internet,89.99,1,monthly,Internet
+Netflix,15.99,10,monthly,Entertainment
+Spotify,9.99,5,monthly,Entertainment
+Amazon Prime,14.99,20,monthly,Shopping
+Electric Company,150.00,25,monthly,Utilities
+Water Department,65.00,10,monthly,Utilities
+Natural Gas,85.00,15,monthly,Utilities
+Car Insurance - Progressive,185.00,1,monthly,Insurance
+Renter's Insurance,25.00,1,monthly,Insurance
+Gym Membership - LA Fitness,39.99,1,monthly,Health
+iCloud Storage,2.99,28,monthly,Technology
+HBO Max,15.99,12,monthly,Entertainment
+Mortgage/Rent,1800.00,1,monthly,Housing
+Student Loan,350.00,15,monthly,Loan
+Credit Card Minimum,200.00,20,monthly,Debt
+Car Payment,425.00,5,monthly,Transportation
+Hulu,12.99,8,monthly,Entertainment
+YouTube TV,72.99,18,monthly,Entertainment
+Trash Service,35.00,1,quarterly,Utilities

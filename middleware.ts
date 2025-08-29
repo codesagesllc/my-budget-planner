@@ -27,19 +27,32 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Check authentication for protected routes
-  const { data: { user } } = await supabase.auth.getUser()
+  // Refresh session if expired
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
+  const isAuthPage = request.nextUrl.pathname === '/login' || 
+                     request.nextUrl.pathname === '/signup'
+  const isAuthCallback = request.nextUrl.pathname === '/auth/callback'
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
+  const isHomePage = request.nextUrl.pathname === '/'
+
+  // Allow auth callback to proceed
+  if (isAuthCallback) {
+    return supabaseResponse
+  }
 
   // Redirect to login if accessing protected route without authentication
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (!user && isProtectedRoute) {
+    console.log('No user found, redirecting to login')
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/login'
-    redirectUrl.searchParams.set(`redirectedFrom`, request.nextUrl.pathname)
+    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
   // Redirect to dashboard if accessing auth pages while logged in
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+  if (user && (isAuthPage || isHomePage)) {
+    console.log('User logged in, redirecting to dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
@@ -54,7 +67,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes (they have their own auth)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -11,33 +11,45 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Fetch initial data
-  const [accountsResult, transactionsResult, billsResult] = await Promise.all([
-    supabase
-      .from('accounts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('date', { ascending: false })
-      .limit(50),
-    supabase
-      .from('bills')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .order('due_date', { ascending: true })
-  ])
+  // Fetch initial data with error handling
+  let accounts = []
+  let transactions = []
+  let bills = []
+
+  try {
+    const [accountsResult, transactionsResult, billsResult] = await Promise.all([
+      supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(50),
+      supabase
+        .from('bills')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .order('due_date', { ascending: true })
+    ])
+
+    accounts = accountsResult.data || []
+    transactions = transactionsResult.data || []
+    bills = billsResult.data || []
+  } catch (error) {
+    console.error('Error fetching initial data:', error)
+  }
 
   return (
     <DashboardClient 
       user={user}
-      initialAccounts={accountsResult.data || []}
-      initialTransactions={transactionsResult.data || []}
-      initialBills={billsResult.data || []}
+      initialAccounts={accounts}
+      initialTransactions={transactions}
+      initialBills={bills}
     />
   )
 }
