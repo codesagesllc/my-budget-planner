@@ -4,18 +4,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "PLAID_CLIENT_ID": "@plaid_client_id",
-    "PLAID_SECRET": "@plaid_secret",
-    "PLAID_ENV": "@plaid_env",
-    "PLAID_PRODUCTS": "@plaid_products",
-    "PLAID_COUNTRY_CODES": "@plaid_country_codes",
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "NEXT_PUBLIC_APP_URL": "@app_url"
-  },
   "regions": ["iad1"],
   "functions": {
     "app/api/bills/upload/route.ts": {
