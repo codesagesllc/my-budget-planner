@@ -86,17 +86,21 @@ export default function DashboardClient({
 
   const refreshData = async () => {
     setLoading(true)
-    const [accountsResult, transactionsResult, billsResult, incomeResult] = await Promise.all([
-      supabase.from('accounts').select('*').eq('user_id', user.id),
-      supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(50),
-      supabase.from('bills').select('*').eq('user_id', user.id).eq('is_active', true),
-      supabase.from('income_sources').select('*').eq('user_id', user.id).eq('is_active', true)
-    ])
+    try {
+      const [accountsResult, transactionsResult, billsResult, incomeResult] = await Promise.all([
+        supabase.from('accounts').select('*').eq('user_id', user.id),
+        supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(100),
+        supabase.from('bills').select('*').eq('user_id', user.id).eq('is_active', true),
+        supabase.from('income_sources').select('*').eq('user_id', user.id).eq('is_active', true)
+      ])
 
-    if (accountsResult.data) setAccounts(accountsResult.data)
-    if (transactionsResult.data) setTransactions(transactionsResult.data)
-    if (billsResult.data) setBills(billsResult.data)
-    if (incomeResult.data) setIncomeSources(incomeResult.data)
+      if (accountsResult.data) setAccounts(accountsResult.data)
+      if (transactionsResult.data) setTransactions(transactionsResult.data)
+      if (billsResult.data) setBills(billsResult.data)
+      if (incomeResult.data) setIncomeSources(incomeResult.data)
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    }
     setLoading(false)
   }
 
@@ -408,7 +412,11 @@ export default function DashboardClient({
 
               {activeTab === 'transactions' && (
                 <div className="p-6">
-                  <TransactionsList transactions={transactions} />
+                  <TransactionsList 
+                    transactions={transactions} 
+                    userId={user.id}
+                    onUpdate={refreshData}
+                  />
                 </div>
               )}
 
