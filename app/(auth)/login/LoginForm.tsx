@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { LogIn, Mail, Lock, Chrome, Loader2, CreditCard } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -94,18 +95,25 @@ export default function LoginForm() {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <>
-              <Chrome className="h-5 w-5 mr-2" />
-              Continue with Google
+
+              <Image
+                src="/google.svg"
+                alt="Google Logo"
+                width={20}
+                height={20}
+                className="mr-2"
+              />
+              <span className="text-sm text-blue-600">Continue with Google </span>
             </>
           )}
         </Button>
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-black-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+            <span className="text-sm text-blue-600">Or continue with email</span>
           </div>
         </div>
         

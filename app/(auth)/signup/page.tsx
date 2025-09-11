@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { UserPlus, Mail, Lock, Chrome, Loader2, CreditCard, CheckCircle } from 'lucide-react'
+import Image from 'next/image'
+import { UserPlus, Mail, Lock, Loader2, CreditCard, CheckCircle } from 'lucide-react'
 import { appConfig } from '@/lib/config/app'
 
 function SignupForm() {
@@ -331,8 +332,14 @@ function SignupForm() {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <>
-              <Chrome className="h-5 w-5 mr-2" />
-              Sign up with Google
+              <Image
+                src="/google.svg"
+                alt="Google Logo"
+                width={20}
+                height={20}
+                className="mr-2"
+              />
+              Continue with Google
             </>
           )}
         </button>
