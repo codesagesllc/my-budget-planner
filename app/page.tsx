@@ -14,13 +14,19 @@ export default function Home() {
             </div>
             <div className="flex space-x-4">
               <Link
+                href="/pricing"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Pricing
+              </Link>
+              <Link
                 href="/login"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Sign In
               </Link>
               <Link
-                href="/signup"
+                href="/pricing"
                 className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
               >
                 Get Started
@@ -43,10 +49,10 @@ export default function Home() {
           </p>
           <div className="flex justify-center space-x-4">
             <Link
-              href="/signup"
+              href="/pricing"
               className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3 rounded-lg text-lg font-medium transition duration-200"
             >
-              Start Free Today
+              Start 14-Day Free Trial
             </Link>
             <Link
               href="/login"
@@ -55,6 +61,9 @@ export default function Home() {
               Sign In
             </Link>
           </div>
+          <p className="mt-4 text-sm text-gray-500">
+            No credit card required for free trial
+          </p>
         </div>
       </section>
 
@@ -140,6 +149,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing Preview Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Simple, Transparent Pricing
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Start with a 14-day free trial. No credit card required.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="font-semibold text-lg mb-2">Free Trial</h3>
+              <p className="text-3xl font-bold mb-2">$0<span className="text-sm font-normal">/14 days</span></p>
+              <p className="text-gray-600 text-sm">Perfect to explore all features</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-600">
+              <h3 className="font-semibold text-lg mb-2">Membership</h3>
+              <p className="text-3xl font-bold mb-2">$15<span className="text-sm font-normal">/month</span></p>
+              <p className="text-gray-600 text-sm">For personal finance management</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="font-semibold text-lg mb-2">Premium</h3>
+              <p className="text-3xl font-bold mb-2">$30<span className="text-sm font-normal">/month</span></p>
+              <p className="text-gray-600 text-sm">Complete financial suite</p>
+            </div>
+          </div>
+          <Link
+            href="/pricing"
+            className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-3 rounded-lg text-lg font-semibold transition duration-200 inline-block"
+          >
+            View All Features & Pricing
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -150,11 +194,14 @@ export default function Home() {
             Join thousands of users who are already saving smarter with AI-powered insights
           </p>
           <Link
-            href="/signup"
+            href="/pricing"
             className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition duration-200 inline-block"
           >
-            Get Started Free
+            Start Your Free Trial
           </Link>
+          <p className="mt-4 text-sm text-blue-100">
+            14-day free trial • No credit card required • Cancel anytime
+          </p>
         </div>
       </section>
 
@@ -165,6 +212,20 @@ export default function Home() {
           <p className="mt-2 text-sm">
             Powered by Next.js, Vercel, Supabase, and Anthropic AI
           </p>
+          <div className="mt-4 space-x-4">
+            <Link href="/login" className="text-gray-400 hover:text-white text-sm">
+              Sign In
+            </Link>
+            <Link href="/pricing" className="text-gray-400 hover:text-white text-sm">
+              Pricing
+            </Link>
+            <Link href="/privacy" className="text-gray-400 hover:text-white text-sm">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="text-gray-400 hover:text-white text-sm">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

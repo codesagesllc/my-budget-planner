@@ -15,9 +15,10 @@ export default async function DashboardPage() {
   let accounts = []
   let transactions = []
   let bills = []
+  let incomeSources = []
 
   try {
-    const [accountsResult, transactionsResult, billsResult] = await Promise.all([
+    const [accountsResult, transactionsResult, billsResult, incomeResult] = await Promise.all([
       supabase
         .from('accounts')
         .select('*')
@@ -34,12 +35,28 @@ export default async function DashboardPage() {
         .select('*')
         .eq('user_id', user.id)
         .eq('is_active', true)
-        .order('due_date', { ascending: true })
+        .order('due_date', { ascending: true }),
+      supabase
+        .from('income_sources')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
     ])
 
     accounts = accountsResult.data || []
     transactions = transactionsResult.data || []
     bills = billsResult.data || []
+    incomeSources = incomeResult.data || []
+    
+    // Log for debugging
+    console.log('Initial data fetch:', {
+      accounts: accounts.length,
+      transactions: transactions.length,
+      bills: bills.length,
+      incomeSources: incomeSources.length,
+      incomeData: incomeSources
+    })
   } catch (error) {
     console.error('Error fetching initial data:', error)
   }
@@ -50,6 +67,7 @@ export default async function DashboardPage() {
       initialAccounts={accounts}
       initialTransactions={transactions}
       initialBills={bills}
+      initialIncomeSources={incomeSources}
     />
   )
 }

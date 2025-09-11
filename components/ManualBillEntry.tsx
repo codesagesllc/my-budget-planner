@@ -14,7 +14,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
     name: '',
     amount: '',
     dueDate: '',
-    billingCycle: 'monthly' as 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly',
+    billingCycle: 'monthly' as 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time',
     category: '',
   })
   const [loading, setLoading] = useState(false)
@@ -87,11 +87,11 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Add Bill Manually</h3>
+        <h3 className="text-xl font-bold text-blue-900">Add Bill Manually</h3>
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700 p-1"
+            className="text-blue-500 hover:text-blue-700 p-1"
           >
             <X className="h-5 w-5" />
           </button>
@@ -107,17 +107,17 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Bill Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-blue-900 mb-1">
             Bill Name *
           </label>
           <div className="relative">
-            <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
             <input
               type="text"
               value={bill.name}
               onChange={(e) => setBill({ ...bill, name: e.target.value })}
               placeholder="e.g., Netflix, Electricity, Rent"
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -125,18 +125,18 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
 
         {/* Amount */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-blue-900 mb-1">
             Amount *
           </label>
           <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
             <input
               type="number"
               step="0.01"
               value={bill.amount}
               onChange={(e) => setBill({ ...bill, amount: e.target.value })}
               placeholder="0.00"
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
@@ -146,11 +146,11 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Due Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-blue-900 mb-1">
               Due Date (Day of Month)
             </label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
               <input
                 type="number"
                 min="1"
@@ -158,28 +158,29 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
                 value={bill.dueDate}
                 onChange={(e) => setBill({ ...bill, dueDate: e.target.value })}
                 placeholder="1-31"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Billing Cycle */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-blue-900 mb-1">
               Billing Cycle
             </label>
             <div className="relative">
-              <RefreshCw className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <RefreshCw className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
               <select
                 value={bill.billingCycle}
                 onChange={(e) => setBill({ ...bill, billingCycle: e.target.value as any })}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                className="w-full pl-10 pr-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
               >
                 <option value="monthly">Monthly</option>
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Bi-weekly</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="annual">Annual</option>
+                <option value="one-time">One-Time</option>
               </select>
             </div>
           </div>
@@ -187,13 +188,13 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel }: ManualB
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-blue-900 mb-1">
             Category
           </label>
           <select
             value={bill.category}
             onChange={(e) => setBill({ ...bill, category: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (

@@ -10,7 +10,7 @@ export const ParsedBillSchema = z.object({
   name: z.string(),
   amount: z.number(),
   dueDate: z.string().optional(),
-  billingCycle: z.enum(['monthly', 'quarterly', 'annual', 'weekly', 'biweekly']).optional(),
+  billingCycle: z.enum(['monthly', 'quarterly', 'annual', 'weekly', 'biweekly', 'one-time']).optional(),
   category: z.string().optional(),
 })
 
@@ -37,7 +37,7 @@ For each bill, identify:
 - Name: The name or description of the bill
 - Amount: The payment amount (as a number, no currency symbols)
 - Due Date: When the bill is due (if available, use day of month like "1" or "15")
-- Billing Cycle: The frequency (monthly, quarterly, annual, weekly, biweekly)
+- Billing Cycle: The frequency (monthly, quarterly, annual, weekly, biweekly, or one-time)
 - Category: The type of expense (utilities, subscription, insurance, etc.)
 
 If the content appears to be base64 encoded or unreadable, try to identify any text patterns that might indicate bill information.

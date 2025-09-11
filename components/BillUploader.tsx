@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, Download } from 'lucide-react'
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Download, FileText } from 'lucide-react'
 
 interface BillUploaderProps {
   userId: string
@@ -17,16 +17,16 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
   const processFile = async (file: File) => {
     setIsProcessing(true)
     setUploadStatus('processing')
-    setStatusMessage('Reading spreadsheet...')
+    setStatusMessage('Reading file...')
 
     try {
       let fileContent = ''
       
       // Read file content based on type
-      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-        // Read CSV as text
+      if (file.type === 'text/csv' || file.name.endsWith('.csv') || file.type === 'text/plain' || file.name.endsWith('.txt')) {
+        // Read CSV or text as text
         fileContent = await file.text()
-        console.log('Read CSV file, length:', fileContent.length)
+        console.log('Read text/CSV file, length:', fileContent.length)
       } else {
         // For Excel files, read as text (we'll let the backend handle parsing)
         // This is a simplified approach that should work
@@ -49,7 +49,7 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
         }
       }
       
-      setStatusMessage('Analyzing with AI...')
+      setStatusMessage('AI is extracting bills...')
       
       // Send to API for AI processing
       const response = await fetch('/api/bills/upload', {
@@ -138,6 +138,32 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
     window.URL.revokeObjectURL(url)
   }
 
+  const downloadPlainTextExample = () => {
+    // Create a plain text example
+    const textContent = `Bills to add:
+--------
+Netflix - 15.99 monthly 15th of each month
+Spotify - 9.99 monthly 1st
+Electric Bill - 120 monthly 5th 
+Water - 45 monthly 10th
+Internet - 70 monthly 20th
+Car Insurance - 150 monthly 25th
+Gym - 50 monthly 1st
+Phone - 85 monthly 15th
+Annual Amazon Prime - 139 yearly January
+One-time car repair - 450 one-time October 15th`
+    
+    const blob = new Blob([textContent], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'bills_example.txt'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="space-y-4">
       <div
@@ -152,10 +178,16 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
           <>
             <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <p className="text-gray-600 mb-2">
-              {isDragActive ? 'Drop your spreadsheet here' : 'Drag & drop your bills spreadsheet'}
+              {isDragActive ? 'Drop your file here' : 'Drag & drop your bills file'}
             </p>
             <p className="text-sm text-gray-500">or click to select a file</p>
-            <p className="text-xs text-gray-400 mt-2">Supports .csv, .xlsx, .xls, .txt files</p>
+            <p className="text-xs text-gray-400 mt-2">
+              Supports: Spreadsheets (.csv, .xlsx), Plain text (.txt), Receipts, Invoices
+            </p>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+              <FileText className="inline h-4 w-4 mr-1" />
+              AI will automatically extract bills from any format - even plain text lists!
+            </div>
           </>
         )}
         
@@ -181,16 +213,25 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
         )}
       </div>
       
-      <div className="text-center">
-        <button
-          onClick={downloadTemplate}
-          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline"
-        >
-          <Download className="h-4 w-4 mr-1" />
-          Download CSV Template (Recommended)
-        </button>
-        <p className="text-xs text-gray-500 mt-2">
-          Use our template for best results, or upload your own spreadsheet
+      <div className="text-center space-y-2">
+        <div>
+          <button
+            onClick={downloadTemplate}
+            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline mr-4"
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Download CSV Template
+          </button>
+          <button
+            onClick={downloadPlainTextExample}
+            className="inline-flex items-center text-sm text-green-600 hover:text-green-800 underline"
+          >
+            <FileText className="h-4 w-4 mr-1" />
+            Download Plain Text Example
+          </button>
+        </div>
+        <p className="text-xs text-gray-500">
+          You can upload spreadsheets, plain text lists, or even paste receipt text into a .txt file
         </p>
       </div>
     </div>

@@ -115,7 +115,7 @@ export interface Database {
           name: string
           amount: number
           due_date: string
-          billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly'
+          billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active: boolean
           category: string | null
           created_at: string
@@ -127,7 +127,7 @@ export interface Database {
           name: string
           amount: number
           due_date: string
-          billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly'
+          billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active?: boolean
           category?: string | null
           created_at?: string
@@ -139,7 +139,7 @@ export interface Database {
           name?: string
           amount?: number
           due_date?: string
-          billing_cycle?: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly'
+          billing_cycle?: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active?: boolean
           category?: string | null
           created_at?: string
@@ -352,7 +352,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly'
+      billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
       transaction_type: 'expense' | 'income' | 'transfer'
       income_frequency: 'monthly' | 'biweekly' | 'weekly' | 'quarterly' | 'annual' | 'one-time'
     }

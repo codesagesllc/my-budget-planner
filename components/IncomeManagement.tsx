@@ -70,7 +70,43 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
   }
 
   const calculateTotalMonthlyIncome = () => {
+    const currentDate = new Date()
+    const currentMonth = currentDate.getMonth()
+    const currentYear = currentDate.getFullYear()
+    const monthStart = new Date(currentYear, currentMonth, 1)
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)
+    
     const total = incomeSources.reduce((sum, income) => {
+      if (!income.is_active) return sum
+      
+      // Handle one-time income
+      if (income.frequency === 'one-time') {
+        if (!income.start_date) return sum
+        
+        const startDate = new Date(income.start_date)
+        
+        if (income.end_date) {
+          const endDate = new Date(income.end_date)
+          
+          // Check if overlaps with current month
+          if (startDate <= monthEnd && endDate >= monthStart) {
+            const effectiveStart = startDate > monthStart ? startDate : monthStart
+            const effectiveEnd = endDate < monthEnd ? endDate : monthEnd
+            const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+            const monthDays = Math.ceil((effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)) + 1
+            const proratedAmount = (income.amount * monthDays) / totalDays
+            return sum + proratedAmount
+          }
+        } else {
+          // Check if start date is in current month
+          if (startDate >= monthStart && startDate <= monthEnd) {
+            return sum + income.amount
+          }
+        }
+        return sum
+      }
+      
+      // Handle recurring income
       const freq = frequencies.find(f => f.value === income.frequency)
       const monthlyAmount = income.amount * (freq?.multiplier || 0)
       return sum + monthlyAmount

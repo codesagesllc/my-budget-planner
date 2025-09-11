@@ -71,3 +71,6 @@ export async function createServiceRoleClient() {
     }
   )
 }
+
+// Generic createClient for API routes (alias for createServerActionClient)
+export const createClient = createServerActionClient

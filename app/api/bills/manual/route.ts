@@ -45,12 +45,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare bill for insertion
+    // For one-time bills, use the current year and month with the specified day
+    // For recurring bills, use a default year/month with the specified day
+    const currentDate = new Date()
+    const year = bill.billingCycle === 'one-time' ? currentDate.getFullYear() : 2024
+    const month = bill.billingCycle === 'one-time' ? currentDate.getMonth() + 1 : 1
+    
     const billToInsert = {
       user_id: userId,
       name: bill.name,
       amount: parseFloat(bill.amount),
       due_date: bill.dueDate 
-        ? new Date(`2024-01-${bill.dueDate.padStart(2, '0')}`).toISOString() 
+        ? new Date(`${year}-${String(month).padStart(2, '0')}-${String(bill.dueDate).padStart(2, '0')}`).toISOString() 
         : new Date().toISOString(),
       billing_cycle: bill.billingCycle || 'monthly',
       category: bill.category || null,

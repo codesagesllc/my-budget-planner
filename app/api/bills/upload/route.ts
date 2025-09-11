@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerActionClient, createServiceRoleClient } from '@/lib/supabase/server'
-import { parseSpreadsheetWithAI } from '@/lib/ai/anthropic'
+import { parseSpreadsheetWithAI, type ParsedBillsResponse } from '@/lib/ai/anthropic'
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
     let textContent = ''
 
     // Process based on file type
-    if (fileType === 'text/csv' || fileName?.endsWith('.csv')) {
-      // CSV content is already in text format
+    if (fileType === 'text/csv' || fileName?.endsWith('.csv') || fileType === 'text/plain' || fileName?.endsWith('.txt')) {
+      // CSV or plain text content is already in text format
       textContent = content
-      console.log('Processing CSV file')
+      console.log('Processing text/CSV file')
     } else if (fileName?.endsWith('.xlsx') || fileName?.endsWith('.xls')) {
       // For Excel files that come as base64 or data URL
       console.log('Processing Excel file')
@@ -77,8 +77,8 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending to AI for parsing...')
     
-    // Use AI to parse the spreadsheet content
-    const parsedData = await parseSpreadsheetWithAI(textContent)
+    // Use AI to parse the spreadsheet content - properly typed
+    const parsedData: ParsedBillsResponse = await parseSpreadsheetWithAI(textContent)
 
     console.log('AI parsed bills:', parsedData.bills.length)
 
@@ -91,16 +91,39 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Prepare bills for insertion
-    const billsToInsert = parsedData.bills.map(bill => ({
-      user_id: userId,
-      name: bill.name,
-      amount: bill.amount,
-      due_date: bill.dueDate ? new Date(bill.dueDate).toISOString() : new Date().toISOString(),
-      billing_cycle: bill.billingCycle || 'monthly',
-      category: bill.category || null,
-      is_active: true,
-    }))
+    // Prepare bills for insertion - now TypeScript knows the structure
+    const billsToInsert = parsedData.bills.map(bill => {
+      // Handle due date properly
+      let dueDate: string
+      if (bill.dueDate) {
+        // If it's just a day number like "15", create a date for this month
+        const dayNumber = parseInt(bill.dueDate)
+        if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) {
+          const now = new Date()
+          const date = new Date(now.getFullYear(), now.getMonth(), dayNumber)
+          dueDate = date.toISOString()
+        } else {
+          // Try to parse as a full date
+          try {
+            dueDate = new Date(bill.dueDate).toISOString()
+          } catch {
+            dueDate = new Date().toISOString()
+          }
+        }
+      } else {
+        dueDate = new Date().toISOString()
+      }
+
+      return {
+        user_id: userId,
+        name: bill.name,
+        amount: bill.amount,
+        due_date: dueDate,
+        billing_cycle: bill.billingCycle || 'monthly',
+        category: bill.category || null,
+        is_active: true,
+      }
+    })
 
     // Insert bills into database using service role to bypass RLS
     const serviceSupabase = await createServiceRoleClient()
