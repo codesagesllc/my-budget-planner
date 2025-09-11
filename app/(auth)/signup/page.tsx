@@ -132,14 +132,14 @@ function SignupForm() {
         } else {
           setMessage('Account created! Redirecting...')
           
-          // If no email confirmation needed
-          if (paymentSuccess) {
+          // If no email confirmation needed and user exists
+          if (paymentSuccess && data.user) {
             // Payment already completed, just activate subscription
             await activateSubscription(data.user.id, sessionId!)
           } else if (selectedPlan?.planId === 'free_trial' && data.user) {
             // Activate free trial
             await activateFreeTrial(data.user.id)
-          } else {
+          } else if (data.user) {
             // Redirect to dashboard
             window.location.href = '/dashboard'
           }
