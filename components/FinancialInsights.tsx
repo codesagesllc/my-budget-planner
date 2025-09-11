@@ -56,15 +56,17 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
     return sum
   }, 0)
 
-  // Category breakdown
-  const categorySpending = transactions.reduce((acc, tx) => {
+  // Category breakdown with proper typing
+  const categorySpending: Record<string, number> = transactions.reduce((acc, tx) => {
     const category = tx.category || 'Other'
     acc[category] = (acc[category] || 0) + Math.abs(tx.amount)
     return acc
   }, {} as Record<string, number>)
 
+  // Sort categories by spending amount - with explicit typing
   const topCategories = Object.entries(categorySpending)
-    .sort(([, a], [, b]) => b - a)
+    .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount)
     .slice(0, 5)
 
   return (
@@ -106,7 +108,7 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
       <div className="bg-white rounded-lg border p-6">
         <h3 className="text-lg font-semibold mb-4">Top Spending Categories</h3>
         <div className="space-y-3">
-          {topCategories.map(([category, amount]) => (
+          {topCategories.map(({ category, amount }) => (
             <div key={category} className="flex items-center justify-between">
               <span className="text-gray-600">{category}</span>
               <span className="font-medium">{formatCurrency(amount)}</span>

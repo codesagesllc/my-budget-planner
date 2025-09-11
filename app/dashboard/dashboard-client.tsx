@@ -452,7 +452,7 @@ export default function DashboardClient({
                   <FinancialInsights 
                     transactions={transactions}
                     bills={bills}
-                    accounts={accounts}
+                    userId={user.id} 
                   />
                 </div>
               )}
