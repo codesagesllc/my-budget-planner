@@ -13,7 +13,6 @@ export async function GET() {
     const { data: tables, error: tablesError } = await serviceSupabase
       .rpc('get_tables', {})
       .single()
-      .catch(() => ({ data: null, error: 'Tables query failed' }))
     
     // Try to count users
     const { count: userCount, error: userCountError } = await serviceSupabase
