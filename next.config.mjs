@@ -1,20 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  transpilePackages: [],
+  
+  // Image configuration for Next.js 15
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        pathname: '/**',
+      },
+    ],
+  },
+  
+  // Webpack customization
   webpack: (config) => {
-    // Add support for resolving modules without extensions
-    config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx', '.json']
-    
-    // Ensure alias for @ is set correctly
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': __dirname,
+    // Ensure proper module resolution
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
     }
     
     return config
-  }
+  },
 }
 
 export default nextConfig
