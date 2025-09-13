@@ -1,26 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "My Budget Planner - AI-Powered Personal Finance",
   description: "Manage your finances with AI-powered insights, budget tracking, and bill management",
   icons: {
-    icon: [
-      { url: '/dollar-icon.svg', type: 'image/svg+xml' },
-      { url: '/money-icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' }
-    ],
+    icon: '/dollar-icon.svg',
     shortcut: '/dollar-icon.svg',
     apple: '/dollar-icon.svg',
   },
@@ -28,19 +13,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="icon" href="/dollar-icon.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/dollar-icon.svg" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>
