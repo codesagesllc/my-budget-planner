@@ -1,19 +1,44 @@
-// Export all UI components - case-insensitive imports
-export { Button } from './button'
-export { Input } from './input'
-export { Alert } from './Alert'
-export { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './card'
-export { Label } from './label'
-export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
-export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
-export { UsageMeter } from './usage-meter'
+// Barrel export for all UI components
+// This ensures consistent imports across the application
 
-// Re-export for case-insensitive imports (for compatibility)
-export * from './button'
-export * from './input'
-export * from './Alert'
-export * from './card'
-export * from './label'
-export * from './select'
-export * from './tabs'
-export * from './usage-meter'
+// Button component
+export { Button } from './button'
+
+// Input component  
+export { Input } from './input'
+
+// Alert component (note: capital A in filename)
+export { Alert } from './Alert'
+
+// Card components
+export { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle, 
+  CardFooter 
+} from './card'
+
+// Label component
+export { Label } from './label'
+
+// Select components
+export { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from './select'
+
+// Tabs components
+export { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from './tabs'
+
+// Usage meter component
+export { UsageMeter } from './usage-meter'

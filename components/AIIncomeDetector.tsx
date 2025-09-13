@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Brain, Loader2, Check, X, TrendingUp, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui';
 
 interface DetectedIncome {
   name: string;
