@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/supabase'
 import FinancialGoals from './FinancialGoals'
+import ForecastSettings from './ForecastSettings'
 import { 
   TrendingUp, TrendingDown, DollarSign, Brain, 
   Calendar, Target, AlertCircle, Zap, ChevronRight,
@@ -58,8 +59,16 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
   const [emergencyFund, setEmergencyFund] = useState(0)
   const [showGoalsModal, setShowGoalsModal] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [tempTargetSavingsRate, setTempTargetSavingsRate] = useState(20)
-  const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
+  const [forecastSettings, setForecastSettings] = useState({
+    targetSavingsRate: 20,
+    emergencyFund: 0,
+    growthMethod: 'ai' as 'manual' | 'ai' | 'historical',
+    inflationMethod: 'ai' as 'manual' | 'ai' | 'historical',
+    expensesMethod: 'ai' as 'manual' | 'ai' | 'seasonal',
+    manualGrowthRate: 3,
+    manualInflationRate: 3,
+    manualSeasonalFactors: new Array(12).fill(100)
+  })
   const supabase = createClient()
 
   const COLORS = ['#10b981', '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6']
@@ -90,7 +99,7 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
 
   useEffect(() => {
     generateForecast()
-  }, [transactions, incomeSources, bills, selectedMethod, targetSavingsRate, emergencyFund])
+  }, [transactions, incomeSources, bills, selectedMethod, targetSavingsRate, emergencyFund, forecastSettings])
 
   // Calculate income for a specific month with proper date handling - TRULY FIXED VERSION
   const calculateIncomeForMonth = (year: number, month: number) => {
@@ -333,9 +342,14 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
       const income = calculateIncomeForMonth(year, month)
       const expenses = calculateExpensesForMonth(year, month)
       
-      // Add some growth/inflation factors
-      const growthFactor = i === 0 ? 1 : 1 + (i * 0.002) // 0.2% monthly growth, but not for current month
-      const inflationFactor = i === 0 ? 1 : 1 + (i * 0.003) // 0.3% monthly inflation, but not for current month
+      // Use settings-based growth/inflation factors
+      const annualGrowthRate = forecastSettings.growthMethod === 'manual' ? forecastSettings.manualGrowthRate : 2.4
+      const annualInflationRate = forecastSettings.inflationMethod === 'manual' ? forecastSettings.manualInflationRate : 3.6
+      const monthlyGrowthRate = annualGrowthRate / 12 / 100
+      const monthlyInflationRate = annualInflationRate / 12 / 100
+      
+      const growthFactor = i === 0 ? 1 : 1 + (i * monthlyGrowthRate)
+      const inflationFactor = i === 0 ? 1 : 1 + (i * monthlyInflationRate)
       
       const predictedIncome = income.total * growthFactor
       const predictedExpenses = expenses.total * inflationFactor
@@ -373,9 +387,14 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
       const income = calculateIncomeForMonth(year, month)
       const expenses = calculateExpensesForMonth(year, month)
       
-      // Exponential growth factors
-      const incomeGrowthRate = Math.pow(1.005, i) // 0.5% monthly compound growth
-      const expenseGrowthRate = Math.pow(1.003, i) // 0.3% monthly compound inflation
+      // Use settings-based exponential growth factors
+      const annualGrowthRate = forecastSettings.growthMethod === 'manual' ? forecastSettings.manualGrowthRate : 6
+      const annualInflationRate = forecastSettings.inflationMethod === 'manual' ? forecastSettings.manualInflationRate : 3.6
+      const monthlyGrowthRate = annualGrowthRate / 12 / 100
+      const monthlyInflationRate = annualInflationRate / 12 / 100
+      
+      const incomeGrowthRate = Math.pow(1 + monthlyGrowthRate, i)
+      const expenseGrowthRate = Math.pow(1 + monthlyInflationRate, i)
       
       const predictedIncome = income.total * incomeGrowthRate
       const predictedExpenses = expenses.total * expenseGrowthRate
@@ -403,8 +422,11 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
     const forecast: ForecastData[] = []
     const currentDate = new Date()
     
-    // Seasonal adjustment factors (e.g., higher expenses in December for holidays)
-    const seasonalFactors = [1, 1.02, 1.05, 1.03, 1, 0.98, 0.97, 0.98, 1, 1.03, 1.08, 1.15]
+    // Use settings-based seasonal adjustment factors
+    const defaultSeasonalFactors = [1, 1.02, 1.05, 1.03, 1, 0.98, 0.97, 0.98, 1, 1.03, 1.08, 1.15]
+    const seasonalFactors = forecastSettings.expensesMethod === 'manual' 
+      ? forecastSettings.manualSeasonalFactors.map(f => f / 100) 
+      : defaultSeasonalFactors
     
     // Start from current month
     for (let i = 0; i < 12; i++) {
@@ -644,16 +666,154 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
     return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
   }
 
-  // Prepare data for pie chart (using first month's data)
-  const firstMonthExpenses = forecastData[0]?.predictedExpenses || 1
-  const categoryBreakdown = [
-    { name: 'Housing', value: firstMonthExpenses * 0.35, color: '#ef4444' },
-    { name: 'Food', value: firstMonthExpenses * 0.15, color: '#f59e0b' },
-    { name: 'Transportation', value: firstMonthExpenses * 0.15, color: '#3b82f6' },
-    { name: 'Utilities', value: firstMonthExpenses * 0.10, color: '#8b5cf6' },
-    { name: 'Entertainment', value: firstMonthExpenses * 0.10, color: '#10b981' },
-    { name: 'Other', value: firstMonthExpenses * 0.15, color: '#6b7280' },
-  ]
+  // Calculate expense categories breakdown from actual bills data
+  const calculateCategoryBreakdown = () => {
+    const categoryTotals: Record<string, number> = {}
+    
+    // Enhanced color palette with more variety
+    const categoryColors: Record<string, string> = {
+      'Housing': '#ef4444',       // red-500
+      'Rent': '#dc2626',          // red-600
+      'Mortgage': '#b91c1c',      // red-700
+      'Utilities': '#8b5cf6',     // violet-500
+      'Food': '#f59e0b',          // amber-500
+      'Food & Dining': '#f97316', // orange-500
+      'Groceries': '#fb923c',     // orange-400
+      'Transportation': '#3b82f6', // blue-500
+      'Entertainment': '#10b981', // emerald-500
+      'Streaming': '#14b8a6',     // teal-500
+      'Subscription': '#06b6d4',  // cyan-500
+      'Technology': '#0ea5e9',    // sky-500
+      'AI Services': '#6366f1',   // indigo-500
+      'Software': '#7c3aed',      // violet-600
+      'Insurance': '#ec4899',     // pink-500
+      'Health': '#f43f5e',        // rose-500
+      'Fitness': '#e11d48',       // rose-600
+      'Medical': '#be123c',       // rose-700
+      'Education': '#a855f7',     // purple-500
+      'Investment': '#84cc16',    // lime-500
+      'Savings': '#22c55e',       // green-500
+      'Credit Card': '#f97316',   // orange-500
+      'Banking': '#facc15',       // yellow-400
+      'Business': '#64748b',      // slate-500
+      'Travel': '#0891b2',        // cyan-600
+      'Charity': '#d946ef',       // fuchsia-500
+      'Gifts': '#f472b6',         // pink-400
+      'Hobbies': '#fb923c',       // orange-400
+      'Pet Care': '#fbbf24',      // amber-400
+      'Childcare': '#c084fc',     // purple-400
+      'Personal Care': '#fb7185', // pink-400
+      'Loan': '#991b1b',          // red-800
+      'Other': '#6b7280',         // gray-500
+    }
+    
+    // Dynamic color generator for categories not in the predefined list
+    const dynamicColors = [
+      '#e11d48', '#db2777', '#c026d3', '#9333ea', '#7c3aed',
+      '#6366f1', '#4f46e5', '#3b82f6', '#2563eb', '#0284c7',
+      '#0891b2', '#0e7490', '#06b6d4', '#14b8a6', '#059669',
+      '#10b981', '#16a34a', '#22c55e', '#65a30d', '#84cc16',
+      '#eab308', '#facc15', '#f59e0b', '#fb923c', '#f97316',
+      '#ea580c', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d'
+    ]
+    
+    let colorIndex = 0
+    
+    // Calculate monthly amounts for each category
+    bills.forEach(bill => {
+      if (!bill.is_active) return
+      
+      // Calculate monthly amount based on billing cycle
+      let monthlyAmount = 0
+      const cycleMultipliers: Record<string, number> = {
+        'monthly': 1,
+        'biweekly': 2.16667,
+        'weekly': 4.33333,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+        'one-time': 0, // Skip one-time for category breakdown
+      }
+      
+      monthlyAmount = Number(bill.amount) * (cycleMultipliers[bill.billing_cycle] || 0)
+      
+      if (monthlyAmount > 0) {
+        // Always use categories array
+        if (bill.categories && Array.isArray(bill.categories) && bill.categories.length > 0) {
+          // Distribute the amount equally among all categories
+          const amountPerCategory = monthlyAmount / bill.categories.length
+          bill.categories.forEach((category: any) => {
+            const categoryName = String(category)
+            categoryTotals[categoryName] = (categoryTotals[categoryName] || 0) + amountPerCategory
+          })
+        } else {
+          // No category specified - use Other
+          categoryTotals['Other'] = (categoryTotals['Other'] || 0) + monthlyAmount
+        }
+      }
+    })
+    
+    // Convert to array format for the pie chart
+    const breakdown = Object.entries(categoryTotals)
+      .map(([name, value]) => {
+        // Use predefined color or assign a dynamic color
+        let color = categoryColors[name]
+        if (!color) {
+          color = dynamicColors[colorIndex % dynamicColors.length]
+          colorIndex++
+        }
+        return {
+          name,
+          value,
+          color,
+          percentage: 0 // Will be calculated below
+        }
+      })
+      .sort((a, b) => b.value - a.value) // Sort by value descending
+    
+    // Calculate percentages
+    const total = breakdown.reduce((sum, cat) => sum + cat.value, 0)
+    breakdown.forEach(cat => {
+      cat.percentage = total > 0 ? (cat.value / total) * 100 : 0
+    })
+    
+    // Group small categories (less than 5%) into "Other"
+    const significantCategories = breakdown.filter(cat => cat.percentage >= 5)
+    const smallCategories = breakdown.filter(cat => cat.percentage < 5)
+    
+    if (smallCategories.length > 0) {
+      const otherTotal = smallCategories.reduce((sum, cat) => sum + cat.value, 0)
+      const existingOther = significantCategories.find(cat => cat.name === 'Other')
+      
+      if (existingOther) {
+        existingOther.value += otherTotal
+        existingOther.percentage = total > 0 ? (existingOther.value / total) * 100 : 0
+      } else if (otherTotal > 0) {
+        significantCategories.push({
+          name: 'Other',
+          value: otherTotal,
+          color: '#6b7280',
+          percentage: total > 0 ? (otherTotal / total) * 100 : 0
+        })
+      }
+    }
+    
+    // If no categories, return default breakdown
+    if (significantCategories.length === 0) {
+      const firstMonthExpenses = forecastData[0]?.predictedExpenses || 1
+      return [
+        { name: 'Housing', value: firstMonthExpenses * 0.35, color: '#ef4444', percentage: 35 },
+        { name: 'Food', value: firstMonthExpenses * 0.15, color: '#f59e0b', percentage: 15 },
+        { name: 'Transportation', value: firstMonthExpenses * 0.15, color: '#3b82f6', percentage: 15 },
+        { name: 'Utilities', value: firstMonthExpenses * 0.10, color: '#8b5cf6', percentage: 10 },
+        { name: 'Entertainment', value: firstMonthExpenses * 0.10, color: '#10b981', percentage: 10 },
+        { name: 'Other', value: firstMonthExpenses * 0.15, color: '#6b7280', percentage: 15 },
+      ]
+    }
+    
+    return significantCategories
+  }
+  
+  const categoryBreakdown = calculateCategoryBreakdown()
 
   return (
     <div className="space-y-6">
@@ -710,8 +870,11 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
               setShowSettings(!showSettings)
               // When opening settings, load current values
               if (!showSettings) {
-                setTempTargetSavingsRate(targetSavingsRate)
-                setTempEmergencyFund(emergencyFund)
+                setForecastSettings(prev => ({
+                  ...prev,
+                  targetSavingsRate,
+                  emergencyFund
+                }))
               }
             }}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
@@ -723,84 +886,32 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
         
         {/* Settings Panel */}
         {showSettings && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Target Savings Rate (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={tempTargetSavingsRate}
-                  onChange={(e) => setTempTargetSavingsRate(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., 20"
-                />
-                <p className="text-xs text-gray-500 mt-1">Your savings goal as % of income</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Emergency Fund Balance ($)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={tempEmergencyFund}
-                  onChange={(e) => setTempEmergencyFund(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., 5000"
-                />
-                <p className="text-xs text-gray-500 mt-1">Current emergency fund saved</p>
-              </div>
-              <div className="flex items-end">
-                <div className="flex gap-2 w-full">
-                  <button
-                    onClick={() => {
-                      // Apply the settings
-                      setTargetSavingsRate(tempTargetSavingsRate)
-                      setEmergencyFund(tempEmergencyFund)
-                      setShowSettings(false)
-                      
-                      // Save to user preferences
-                      supabase.from('user_preferences')
-                        .upsert({
-                          user_id: userId,
-                          savings_target_percentage: tempTargetSavingsRate,
-                          emergency_fund_target: tempEmergencyFund
-                        })
-                        .then(() => {
-                          console.log('Settings saved')
-                        })
-                    }}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Apply Settings
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSettings(false)
-                      setTempTargetSavingsRate(targetSavingsRate)
-                      setTempEmergencyFund(emergencyFund)
-                    }}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Current Analysis:</strong> Based on your forecast, your average savings rate is{' '}
-                <span className="font-semibold">
-                  {((forecastData.reduce((sum, f) => sum + f.predictedSavings, 0) / 
-                     forecastData.reduce((sum, f) => sum + f.predictedIncome, 0)) * 100 || 0).toFixed(1)}%
-                </span>
-                {' '}compared to your target of <span className="font-semibold">{targetSavingsRate}%</span>.
-              </p>
-            </div>
+          <div className="mt-4">
+            <ForecastSettings
+              userId={userId}
+              currentSettings={forecastSettings}
+              onSave={(settings) => {
+                // Apply the settings
+                setForecastSettings(settings)
+                setTargetSavingsRate(settings.targetSavingsRate)
+                setEmergencyFund(settings.emergencyFund)
+                setShowSettings(false)
+                
+                // Save to user preferences
+                supabase.from('user_preferences')
+                  .upsert({
+                    user_id: userId,
+                    savings_target_percentage: settings.targetSavingsRate,
+                    emergency_fund_target: settings.emergencyFund
+                  })
+                  .then(() => {
+                    console.log('Settings saved')
+                  })
+              }}
+              onCancel={() => {
+                setShowSettings(false)
+              }}
+            />
           </div>
         )}
       </div>
@@ -950,7 +1061,7 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
       {/* Expense Breakdown Pie Chart */}
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Expense Categories Breakdown</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">Bill Categories Breakdown</h3>
           <ResponsiveContainer width="100%" height={300}>
             <RePieChart>
               <Pie
@@ -958,7 +1069,43 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={(props) => {
+                  const { cx, cy, midAngle, innerRadius, outerRadius, value, index, percentage } = props
+                  if (percentage < 5) return null // Hide labels for small slices
+                  
+                  const RADIAN = Math.PI / 180
+                  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                  
+                  // Use contrasting colors for better visibility
+                  const labelColors = [
+                    '#ffffff', // white for dark backgrounds
+                    '#000000', // black for light backgrounds
+                  ]
+                  
+                  // Determine if background is dark or light based on the color
+                  const bgColor = categoryBreakdown[index].color
+                  const r = parseInt(bgColor.slice(1, 3), 16)
+                  const g = parseInt(bgColor.slice(3, 5), 16)
+                  const b = parseInt(bgColor.slice(5, 7), 16)
+                  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+                  const textColor = brightness > 128 ? '#000000' : '#ffffff'
+                  
+                  return (
+                    <text 
+                      x={x} 
+                      y={y} 
+                      fill={textColor}
+                      textAnchor={x > cx ? 'start' : 'end'} 
+                      dominantBaseline="central"
+                      className="text-xs font-semibold"
+                      style={{ textShadow: brightness > 128 ? 'none' : '1px 1px 2px rgba(0,0,0,0.7)' }}
+                    >
+                      {`${categoryBreakdown[index].name} ${percentage?.toFixed(0)}%`}
+                    </text>
+                  )
+                }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -967,9 +1114,39 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              <Tooltip 
+                formatter={(value: number) => formatCurrency(value)}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload
+                    return (
+                      <div className="bg-white p-2 border rounded shadow-lg">
+                        <p className="font-semibold text-black">{data.name}</p>
+                        <p className="text-sm text-green-600 font-medium">{formatCurrency(data.value)}</p>
+                        <p className="text-xs text-blue-600">{data.percentage?.toFixed(1)}%</p>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
             </RePieChart>
           </ResponsiveContainer>
+          
+          {/* Legend for all categories */}
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+            {categoryBreakdown.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-sm flex-shrink-0" 
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="truncate text-black">
+                  {entry.name}: {formatCurrency(entry.value)} ({entry.percentage?.toFixed(1)}%)
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Savings Progress */}

@@ -1,7 +1,27 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { DollarSign, Brain, Shield, TrendingUp, Upload, Link as LinkIcon } from 'lucide-react'
 
 export default function Home() {
+  const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    // Check if user is authenticated and redirect to dashboard
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.push('/dashboard')
+      }
+    }
+    
+    checkAuth()
+  }, [router, supabase])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
@@ -10,7 +30,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <DollarSign className="h-8 w-8 text-blue-600 mr-2" />
-              <span className="text-xl font-bold text-gray-900">Budget Planner</span>
+              <span className="text-xl font-bold text-gray-900">My Budget Planner</span>
             </div>
             <div className="flex space-x-4">
               <Link
@@ -209,9 +229,6 @@ export default function Home() {
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p>&copy; 2025 Budget Planner. All rights reserved.</p>
-          <p className="mt-2 text-sm">
-            Powered by Next.js, Vercel, Supabase, and Anthropic AI
-          </p>
           <div className="mt-4 space-x-4">
             <Link href="/login" className="text-gray-400 hover:text-white text-sm">
               Sign In

@@ -41,6 +41,13 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Check if this is an OAuth callback (has 'code' parameter)
+  const code = request.nextUrl.searchParams.get('code')
+  if (code && !user) {
+    // Let the auth callback route handle it
+    return supabaseResponse
+  }
+
   // Redirect to login if accessing protected route without authentication
   if (!user && isProtectedRoute) {
     console.log('No user found, redirecting to login')

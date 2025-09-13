@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Database } from '@/types/supabase'
 import PlaidLinkButton from '@/components/PlaidLinkButton'
 import BillUploader from '@/components/BillUploader'
@@ -14,14 +15,16 @@ import AccountsOverview from '@/components/AccountsOverview'
 import IncomeManagement from '@/components/IncomeManagement'
 import FinancialForecasting from '@/components/FinancialForecasting'
 import ManualBillEntry from '@/components/ManualBillEntry'
+import AITransactionAnalyzer from '@/components/AITransactionAnalyzer'
 import { 
-  LogOut, Upload, Link, Brain, DollarSign, Plus, 
+  LogOut, Upload, Brain, DollarSign, Plus, 
   FileSpreadsheet, Menu, X, Home, Receipt, 
   CreditCard, TrendingUp, PlusCircle, BarChart3,
   Wallet, Settings, ChevronLeft, ChevronRight,
   ArrowUpRight, ArrowDownRight, Target, Calendar,
-  AlertCircle, Edit3
+  AlertCircle, Edit3, PiggyBank, Sparkles, ChartBar
 } from 'lucide-react'
+import { DebtManagement } from '@/components/debt/DebtManagement'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 type Account = Database['public']['Tables']['accounts']['Row']
@@ -47,9 +50,10 @@ export default function DashboardClient({
   const [transactions, setTransactions] = useState(initialTransactions)
   const [bills, setBills] = useState(initialBills)
   const [incomeSources, setIncomeSources] = useState<IncomeSources[]>(initialIncomeSources)
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts'>('overview')
   const [showBillUploader, setShowBillUploader] = useState(false)
   const [showManualBillEntry, setShowManualBillEntry] = useState(false)
+  const [showAIAnalyzer, setShowAIAnalyzer] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -447,6 +451,7 @@ export default function DashboardClient({
     { id: 'income', label: 'Income', icon: TrendingUp },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
     { id: 'bills', label: 'Bills', icon: Receipt },
+    { id: 'debts', label: 'Debts', icon: PiggyBank },
     { id: 'forecast', label: 'Forecast', icon: BarChart3 },
     { id: 'insights', label: 'Insights', icon: Brain },
   ]
@@ -509,7 +514,7 @@ export default function DashboardClient({
           <div className="p-6 border-b border-blue-700/50">
             <div className={`${sidebarCollapsed ? 'text-center' : ''}`}>
               <h1 className={`font-bold text-white ${sidebarCollapsed ? 'text-xl' : 'text-2xl'} transition-all`}>
-                {sidebarCollapsed ? 'BP' : 'Budget Planner'}
+                {sidebarCollapsed ? 'MBP' : 'My Budget Planner'}
               </h1>
               {!sidebarCollapsed && (
                 <p className="text-xs text-blue-200 mt-1 font-medium tracking-wider uppercase">
@@ -843,6 +848,20 @@ export default function DashboardClient({
                     <h3 className="text-xl font-bold text-blue-900">Bills Management</h3>
                     <div className="flex gap-2">
                       <button
+                        onClick={() => setShowAIAnalyzer(true)}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AI Detect Bills
+                      </button>
+                      <Link
+                        href="/dashboard/reports"
+                        className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2"
+                      >
+                        <ChartBar className="w-4 h-4" />
+                        Expense Report
+                      </Link>
+                      <button
                         onClick={() => setShowManualBillEntry(true)}
                         className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                       >
@@ -858,6 +877,25 @@ export default function DashboardClient({
                       </button>
                     </div>
                   </div>
+                  
+                  {/* AI Transaction Analyzer */}
+                  {showAIAnalyzer && (
+                    <div className="mb-6">
+                      <AITransactionAnalyzer
+                        userId={user.id}
+                        transactions={transactions}
+                        onBillsDetected={(detectedBills) => {
+                          console.log('Bills detected:', detectedBills)
+                        }}
+                        onCreateBills={(createdBills) => {
+                          console.log('Bills created:', createdBills)
+                          refreshData()
+                          setShowAIAnalyzer(false)
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   <BillsList bills={bills} />
                 </div>
               )}
@@ -880,6 +918,12 @@ export default function DashboardClient({
                     bills={bills}
                     userId={user.id}
                   />
+                </div>
+              )}
+
+              {activeTab === 'debts' && (
+                <div className="p-6">
+                  <DebtManagement />
                 </div>
               )}
             </div>

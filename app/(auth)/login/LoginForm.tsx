@@ -46,8 +46,10 @@ export default function LoginForm() {
         setError(result.error)
       } else {
         setMessage('Login successful! Redirecting...')
-        // Force a hard refresh to ensure middleware picks up the session
-        window.location.href = '/dashboard'
+        // Simple redirect after successful login
+        setTimeout(() => {
+          window.location.href = '/dashboard'
+        }, 100)
       }
     } catch (err) {
       setError('An unexpected error occurred')

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Budget Planner - AI-Powered Personal Finance",
+  title: "My Budget Planner - AI-Powered Personal Finance",
   description: "Manage your finances with AI-powered insights, budget tracking, and bill management",
 };
 

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         ? new Date(`${year}-${String(month).padStart(2, '0')}-${String(bill.dueDate).padStart(2, '0')}`).toISOString() 
         : new Date().toISOString(),
       billing_cycle: bill.billingCycle || 'monthly',
-      category: bill.category || null,
+      categories: bill.categories || ['Other'], // Only use categories array
       is_active: true,
     }
 
@@ -94,51 +94,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
-  try {
-    const { billId, userId } = await request.json()
-    
-    if (!billId || !userId) {
-      return NextResponse.json(
-        { error: 'Bill ID and User ID are required' },
-        { status: 400 }
-      )
-    }
-
-    const supabase = await createServerActionClient()
-
-    // Verify user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user || user.id !== userId) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
-
-    // Delete bill using service role
-    const serviceSupabase = await createServiceRoleClient()
-    const { error: deleteError } = await serviceSupabase
-      .from('bills')
-      .delete()
-      .eq('id', billId)
-      .eq('user_id', userId)
-
-    if (deleteError) {
-      console.error('Error deleting bill:', deleteError)
-      return NextResponse.json(
-        { error: 'Failed to delete bill', details: deleteError.message },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Bill deleted successfully',
-    })
-  } catch (error) {
-    console.error('Error deleting bill:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete bill', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    )
-  }
-}
+// DELETE method moved to /api/bills/[id]/route.ts for RESTful API design

@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
         amount: bill.amount,
         due_date: dueDate,
         billing_cycle: bill.billingCycle || 'monthly',
-        category: bill.category || null,
+        categories: bill.categories || (bill.category ? [bill.category] : ['Other']), // Always use categories array
         is_active: true,
       }
     })

@@ -113,17 +113,18 @@ export default function BillUploader({ userId, onSuccess }: BillUploaderProps) {
   })
 
   const downloadTemplate = () => {
-    // Create a CSV template
+    // Create a CSV template with multiple categories example
     const csvContent = [
-      ['Bill Name', 'Amount', 'Due Date', 'Billing Cycle', 'Category'],
-      ['Netflix', '15.99', '15', 'monthly', 'Entertainment'],
-      ['Spotify', '9.99', '1', 'monthly', 'Entertainment'],
-      ['Electric Bill', '120', '5', 'monthly', 'Utilities'],
-      ['Water Bill', '45', '10', 'monthly', 'Utilities'],
-      ['Internet', '70', '20', 'monthly', 'Utilities'],
-      ['Car Insurance', '150', '25', 'monthly', 'Insurance'],
-      ['Gym Membership', '50', '1', 'monthly', 'Health'],
-      ['Phone Bill', '85', '15', 'monthly', 'Utilities'],
+      ['Bill Name', 'Amount', 'Due Date', 'Billing Cycle', 'Categories'],
+      ['Netflix', '15.99', '15', 'monthly', 'Subscription, Entertainment, Streaming'],
+      ['Spotify', '9.99', '1', 'monthly', 'Subscription, Entertainment, Streaming'],
+      ['Gemini AI', '19.99', '11', 'monthly', 'Subscription, Technology, AI Services'],
+      ['Electric Bill', '120', '5', 'monthly', 'Utilities, Housing'],
+      ['Water Bill', '45', '10', 'monthly', 'Utilities, Housing'],
+      ['Internet', '70', '20', 'monthly', 'Utilities, Technology'],
+      ['Car Insurance', '150', '25', 'monthly', 'Insurance, Transportation'],
+      ['Planet Fitness', '50', '1', 'monthly', 'Subscription, Health, Fitness'],
+      ['Phone Bill', '85', '15', 'monthly', 'Utilities, Technology'],
     ].map(row => row.join(',')).join('\n')
     
     // Create and download CSV file

@@ -252,11 +252,11 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Amount:</span>
-                      <span className="font-semibold">{formatCurrency(income.amount)}</span>
+                      <span className="font-semibold text-gray-900">{formatCurrency(income.amount)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Frequency:</span>
-                      <span className="text-sm capitalize">{income.frequency}</span>
+                      <span className="text-sm capitalize text-gray-900">{income.frequency}</span>
                     </div>
                     {income.frequency !== 'monthly' && (
                       <div className="flex justify-between pt-2 border-t">

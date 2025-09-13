@@ -118,6 +118,7 @@ export interface Database {
           billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active: boolean
           category: string | null
+          categories: Json | null  // JSON array of categories
           created_at: string
           updated_at: string
         }
@@ -130,6 +131,7 @@ export interface Database {
           billing_cycle: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active?: boolean
           category?: string | null
+          categories?: Json | null  // JSON array of categories
           created_at?: string
           updated_at?: string
         }
@@ -142,6 +144,7 @@ export interface Database {
           billing_cycle?: 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time'
           is_active?: boolean
           category?: string | null
+          categories?: Json | null  // JSON array of categories
           created_at?: string
           updated_at?: string
         }

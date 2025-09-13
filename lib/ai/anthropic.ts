@@ -11,7 +11,8 @@ export const ParsedBillSchema = z.object({
   amount: z.number(),
   dueDate: z.string().optional(),
   billingCycle: z.enum(['monthly', 'quarterly', 'annual', 'weekly', 'biweekly', 'one-time']).optional(),
-  category: z.string().optional(),
+  category: z.string().optional(), // For backward compatibility
+  categories: z.array(z.string()).optional(), // Multiple categories support
 })
 
 export const ParsedBillsResponseSchema = z.object({
@@ -38,7 +39,8 @@ For each bill, identify:
 - Amount: The payment amount (as a number, no currency symbols)
 - Due Date: When the bill is due (if available, use day of month like "1" or "15")
 - Billing Cycle: The frequency (monthly, quarterly, annual, weekly, biweekly, or one-time)
-- Category: The type of expense (utilities, subscription, insurance, etc.)
+- Categories: An array of applicable categories (e.g., ["Subscription", "Technology", "Entertainment"] for Netflix)
+- Category: The primary category (for backward compatibility, use the first category from categories array)
 
 If the content appears to be base64 encoded or unreadable, try to identify any text patterns that might indicate bill information.
 
@@ -52,18 +54,28 @@ Return the data in this exact JSON format:
       "name": "string",
       "amount": number,
       "dueDate": "string (optional)",
-      "billingCycle": "monthly|quarterly|annual|weekly|biweekly (optional)",
-      "category": "string (optional)"
+      "billingCycle": "monthly|quarterly|annual|weekly|biweekly|one-time (optional)",
+      "categories": ["string", "string"] (optional, can have multiple categories)
     }
   ],
   "summary": "A brief summary of what was extracted"
 }
 
+Example categories to use when applicable:
+- For streaming services: ["Subscription", "Entertainment", "Streaming"]
+- For AI services: ["Subscription", "Technology", "AI Services"]
+- For utilities: ["Utilities", "Housing"]
+- For insurance: ["Insurance", "Financial"]
+- For gym: ["Subscription", "Health", "Fitness"]
+
+
 IMPORTANT: 
 - Return ONLY valid JSON, no additional text or explanation
 - If you cannot find any bills, return an empty bills array with a summary explaining why
 - Default to "monthly" for billing cycle if not specified
+-Make sure categories  added the first letter is Uppercase
 - Extract amounts as numbers only (e.g., 15.99 not "$15.99")`
+
 
   try {
     console.log('Sending to Anthropic API...')
