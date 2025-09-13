@@ -1,11 +1,22 @@
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Provider } from '@supabase/supabase-js'
-import { appConfig } from '@/lib/config/app'
 
 interface AuthResult {
   error: string | null
   data?: any
+}
+
+function getRedirectUrl(path: string = '/auth/callback'): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}${path}`
+  }
+  
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
+                  'http://localhost:3000'
+  
+  return `${baseUrl}${path}`
 }
 
 export function useAuth() {
@@ -35,7 +46,7 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: appConfig.getAuthRedirectUrl('/auth/callback'),
+          redirectTo: getRedirectUrl('/auth/callback'),
         },
       })
       
@@ -55,7 +66,7 @@ export function useAuth() {
         email,
         password,
         options: {
-          emailRedirectTo: appConfig.getAuthRedirectUrl('/auth/callback'),
+          emailRedirectTo: getRedirectUrl('/auth/callback'),
         },
       })
       
@@ -87,7 +98,7 @@ export function useAuth() {
   const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: appConfig.getAuthRedirectUrl('/auth/reset-password'),
+        redirectTo: getRedirectUrl('/auth/reset-password'),
       })
       
       if (error) return { error: error.message }

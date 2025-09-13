@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { UserPlus, Mail, Lock, Loader2, CreditCard, CheckCircle } from 'lucide-react'
-import { appConfig } from '@/lib/config/app'
 
 function SignupForm() {
   const [email, setEmail] = useState('')
@@ -95,7 +94,7 @@ function SignupForm() {
         email,
         password,
         options: {
-          emailRedirectTo: appConfig.getAuthRedirectUrl('/auth/callback'),
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
           data: {
             selected_plan: selectedPlan?.planId,
             price_id: selectedPlan?.priceId,
@@ -237,7 +236,7 @@ function SignupForm() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: appConfig.getAuthRedirectUrl('/auth/callback'),
+          redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
         },
       })
 
