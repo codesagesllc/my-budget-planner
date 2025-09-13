@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Debt, DebtType } from '@/types/debt';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button, Input } from '@/components/ui';
 import { X } from 'lucide-react';
 
 interface AddDebtModalProps {
