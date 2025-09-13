@@ -49,6 +49,24 @@ class InMemoryCache {
     return value
   }
   
+  async decr(key: string): Promise<number> {
+    const item = this.cache.get(key)
+    let value = -1
+    
+    if (item && Date.now() <= item.expiry) {
+      value = (parseInt(item.value as any) || 0) - 1
+    }
+    
+    if (value < 0) value = 0 // Don't go below 0
+    
+    this.cache.set(key, {
+      value: value.toString(),
+      expiry: Date.now() + 86400000 // 24 hours default
+    })
+    
+    return value
+  }
+  
   async expire(key: string, seconds: number): Promise<number> {
     const item = this.cache.get(key)
     if (!item) return 0
@@ -102,6 +120,16 @@ class InMemoryCache {
     
     const ttl = Math.floor((item.expiry - Date.now()) / 1000)
     return ttl > 0 ? ttl : -2
+  }
+  
+  async flushdb(): Promise<'OK'> {
+    this.cache.clear()
+    return 'OK'
+  }
+  
+  async flushall(): Promise<'OK'> {
+    this.cache.clear()
+    return 'OK'
   }
   
   // Redis compatibility methods

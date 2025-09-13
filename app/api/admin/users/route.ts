@@ -1,12 +1,12 @@
 // app/api/admin/users/route.ts
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 
 export const GET = withAuth(
   async (req) => {
     // Create Supabase client
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Get all users from database
     const { data: users, error } = await supabase
@@ -25,7 +25,7 @@ export const GET = withAuth(
       .order('created_at', { ascending: false })
     
     if (error) {
-      return Response.json(
+      return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
       )
@@ -42,7 +42,7 @@ export const GET = withAuth(
       })
     )
     
-    return Response.json({ users: usersWithStats })
+    return NextResponse.json({ users: usersWithStats })
   },
   { requiredRole: 'admin' }
 )

@@ -3,10 +3,10 @@ import { createServerActionClient, createServiceRoleClient } from '@/lib/supabas
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const billId = params.id
+    const { id: billId } = await params
     const { userId, bill } = await request.json()
     
     if (!userId || !billId || !bill || !bill.name || !bill.amount) {
@@ -79,10 +79,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const billId = params.id
+    const { id: billId } = await params
     const url = new URL(request.url)
     const userId = url.searchParams.get('userId')
     

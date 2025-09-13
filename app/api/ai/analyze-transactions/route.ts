@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-
-interface Transaction {
-  id: string
-  name: string
-  amount: number
-  date: string
-  category?: string
-  merchant_name?: string
-  account_id: string
-  pending: boolean
-}
+import type { Transaction } from '@/types/financial'
 
 interface TransactionPattern {
   merchantName: string
@@ -46,8 +36,7 @@ export async function POST(request: NextRequest) {
       lastDate: pattern.dates[pattern.dates.length - 1].toISOString(),
       occurrences: pattern.dates.length,
       transactions: transactions.filter((t: Transaction) => 
-        t.name.toLowerCase().includes(pattern.merchantName.toLowerCase()) ||
-        (t.merchant_name && t.merchant_name.toLowerCase().includes(pattern.merchantName.toLowerCase()))
+        t.description.toLowerCase().includes(pattern.merchantName.toLowerCase())
       ),
       suggestedDueDate: pattern.frequency === 'monthly' ? pattern.dates[0].getDate() : undefined,
       isRecurring: pattern.isRecurring
@@ -81,9 +70,9 @@ export async function POST(request: NextRequest) {
 function analyzeTransactionPatterns(transactions: Transaction[]): TransactionPattern[] {
   const patterns = new Map<string, TransactionPattern>()
   
-  // Group transactions by merchant/name
+  // Group transactions by merchant/description
   transactions.forEach(transaction => {
-    const merchantKey = cleanMerchantName(transaction.merchant_name || transaction.name)
+    const merchantKey = cleanMerchantName(transaction.description)
     
     if (!patterns.has(merchantKey)) {
       patterns.set(merchantKey, {
@@ -165,7 +154,7 @@ function cleanMerchantName(name: string): string {
     .trim()
 }
 
-function detectFrequency(dates: Date[]): { frequency?: string, confidence: number } {
+function detectFrequency(dates: Date[]): { frequency?: 'monthly' | 'weekly' | 'biweekly' | 'quarterly' | 'annual', confidence: number } {
   if (dates.length < 2) {
     return { confidence: 0 }
   }
@@ -182,7 +171,7 @@ function detectFrequency(dates: Date[]): { frequency?: string, confidence: numbe
   const intervalVariance = calculateVariance(intervals)
   
   // Detect frequency based on average interval
-  let frequency: string | undefined
+  let frequency: 'monthly' | 'weekly' | 'biweekly' | 'quarterly' | 'annual' | undefined
   let confidence = 0
   
   if (avgInterval >= 6 && avgInterval <= 8) {

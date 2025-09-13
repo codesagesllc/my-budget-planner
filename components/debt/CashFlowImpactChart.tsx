@@ -85,7 +85,11 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
               <XAxis dataKey="name" />
               <YAxis tickFormatter={formatCurrency} />
               <Tooltip formatter={(value: number) => formatCurrency(Math.abs(value))} />
-              <Bar dataKey="value" fill={(entry: any) => entry.fill} />
+              <Bar dataKey="value">
+                {cashFlowData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
           

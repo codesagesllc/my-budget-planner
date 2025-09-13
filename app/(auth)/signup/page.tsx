@@ -21,7 +21,7 @@ function SignupForm() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
+  const supabase =  createClient()
 
   useEffect(() => {
     // Check for payment success

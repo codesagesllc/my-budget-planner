@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Debt, DebtSummary, AIDebtStrategy, FinancialSnapshot } from '@/types/debt';
@@ -8,7 +8,7 @@ import { AddDebtModal } from './AddDebtModal';
 import { DebtStrategySelector } from './DebtStrategySelector';
 import { DebtPayoffTimeline } from './DebtPayoffTimeline';
 import { CashFlowImpactChart } from './CashFlowImpactChart';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export function DebtManagement() {

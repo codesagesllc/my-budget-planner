@@ -66,7 +66,7 @@ export default function ExpenseReport() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('currentMonth')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase =  createClient()
 
   // Fetch bills and income data
   useEffect(() => {

@@ -360,7 +360,7 @@ export class AIService {
         await redis.expire(key, 2592000) // 30 days
       }
       
-      return usage <= limit
+      return usage <= (limit as number)
     } catch (error) {
       console.error('Rate limit check error:', error)
       // If Redis fails, allow the request but log it

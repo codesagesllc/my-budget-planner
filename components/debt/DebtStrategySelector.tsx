@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Debt, AIDebtStrategy, FinancialSnapshot, StrategyType } from '@/types/debt';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { 
   Brain, 
   TrendingUp, 

@@ -42,7 +42,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
     transaction: null
   })
   const [bulkActionMode, setBulkActionMode] = useState(false)
-  const supabase = createClient()
+  const supabase =  createClient()
 
   // Categories for transactions
   const categories = [

@@ -24,7 +24,7 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingGoal, setEditingGoal] = useState<FinancialGoal | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase =  createClient()
 
   const goalCategories = [
     { value: 'emergency', label: 'Emergency Fund', icon: PiggyBank, color: 'red' },

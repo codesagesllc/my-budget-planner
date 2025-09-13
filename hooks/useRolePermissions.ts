@@ -24,7 +24,7 @@ export function useRolePermissions() {
   useEffect(() => {
     if (user) {
       const userRole = mapSubscriptionToRole(
-        user.subscription_tier, 
+        user.subscription_tier || null, 
         user.email,
         user.is_admin,
         user.free_trial_start_date,

@@ -24,7 +24,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
   const [editingIncome, setEditingIncome] = useState<IncomeSources | null>(null)
   const [loading, setLoading] = useState(true)
   const [totalMonthlyIncome, setTotalMonthlyIncome] = useState(0)
-  const supabase = createClient()
+  const supabase =  createClient()
 
   const incomeCategories = [
     { value: 'salary', label: 'Salary', icon: Briefcase },

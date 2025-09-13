@@ -1,0 +1,3 @@
+@echo off
+echo Running TypeScript type check...
+call npm run type-check

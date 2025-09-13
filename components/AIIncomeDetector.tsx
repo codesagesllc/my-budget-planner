@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Brain, Loader2, Check, X, TrendingUp, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface DetectedIncome {
   name: string;
@@ -155,17 +155,17 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'salary':
-        return '💼';
+        return 'ðŸ’¼';
       case 'freelance':
-        return '💻';
+        return 'ðŸ’»';
       case 'investment':
-        return '📈';
+        return 'ðŸ“ˆ';
       case 'rental':
-        return '🏠';
+        return 'ðŸ ';
       case 'business':
-        return '🏢';
+        return 'ðŸ¢';
       default:
-        return '💰';
+        return 'ðŸ’°';
     }
   };
 

@@ -227,7 +227,7 @@ export class RBACService {
 
     if (!permission) return false
     if (permission.limit === -1) return true // Unlimited
-    return currentCount < permission.limit
+    return currentCount < (permission.limit ?? 0)
   }
 
   // Get feature limit

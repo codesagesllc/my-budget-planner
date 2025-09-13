@@ -55,7 +55,7 @@ export default function DashboardClient({
   const [transactions, setTransactions] = useState(initialTransactions)
   const [bills, setBills] = useState(initialBills)
   const [incomeSources, setIncomeSources] = useState<IncomeSources[]>(initialIncomeSources)
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts' | 'admin'>('overview')
   const [showBillUploader, setShowBillUploader] = useState(false)
   const [showManualBillEntry, setShowManualBillEntry] = useState(false)
   const [showAIAnalyzer, setShowAIAnalyzer] = useState(false)

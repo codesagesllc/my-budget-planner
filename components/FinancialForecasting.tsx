@@ -69,7 +69,7 @@ export default function FinancialForecasting({ userId, transactions, incomeSourc
     manualInflationRate: 3,
     manualSeasonalFactors: new Array(12).fill(100)
   })
-  const supabase = createClient()
+  const supabase =  createClient()
 
   const COLORS = ['#10b981', '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6']
 const [tempTargetSavingsRate, setTempTargetSavingsRate] = useState(20)

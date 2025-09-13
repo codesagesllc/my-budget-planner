@@ -1,5 +1,5 @@
 // app/api/subscription/upgrade/route.ts
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 
@@ -10,7 +10,7 @@ export const POST = withAuth(async (req) => {
   // Validate tier
   const validTiers = ['free_trial', 'basic', 'premium']
   if (!validTiers.includes(tier)) {
-    return Response.json(
+    return NextResponse.json(
       { error: 'Invalid subscription tier' },
       { status: 400 }
     )
@@ -18,13 +18,13 @@ export const POST = withAuth(async (req) => {
   
   // Don't allow downgrading to free_trial
   if (tier === 'free_trial' && user.role !== 'free_trial') {
-    return Response.json(
+    return NextResponse.json(
       { error: 'Cannot downgrade to free trial' },
       { status: 400 }
     )
   }
   
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     // In production, you would:
@@ -44,20 +44,20 @@ export const POST = withAuth(async (req) => {
     
     if (error) {
       console.error('Subscription update error:', error)
-      return Response.json(
+      return NextResponse.json(
         { error: 'Failed to update subscription' },
         { status: 500 }
       )
     }
     
-    return Response.json({
+    return NextResponse.json({
       success: true,
       subscription_tier: tier,
       message: `Successfully upgraded to ${tier}`,
     })
   } catch (error) {
     console.error('Upgrade error:', error)
-    return Response.json(
+    return NextResponse.json(
       { error: 'An error occurred during upgrade' },
       { status: 500 }
     )

@@ -6,8 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { LogIn, Mail, Lock, Chrome, Loader2, CreditCard } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/Alert'
 
 export default function LoginForm() {

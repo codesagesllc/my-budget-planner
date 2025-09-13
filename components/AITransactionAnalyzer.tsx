@@ -2,17 +2,7 @@
 
 import { useState } from 'react'
 import { Brain, Zap, CheckCircle, AlertCircle, Loader2, Search, Filter, Calendar, DollarSign, Tag } from 'lucide-react'
-
-interface Transaction {
-  id: string
-  name: string
-  amount: number
-  date: string
-  category?: string
-  merchant_name?: string
-  account_id: string
-  pending: boolean
-}
+import type { Transaction } from '@/types/financial'
 
 interface DetectedBill {
   name: string

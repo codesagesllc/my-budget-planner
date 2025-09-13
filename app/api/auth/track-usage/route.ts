@@ -1,5 +1,5 @@
 // app/api/auth/track-usage/route.ts
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, trackUsage } from '@/lib/auth/middleware'
 
 export const POST = withAuth(async (req) => {
@@ -7,7 +7,7 @@ export const POST = withAuth(async (req) => {
   const { feature } = await req.json()
   
   if (!feature) {
-    return Response.json(
+    return NextResponse.json(
       { error: 'Feature name is required' },
       { status: 400 }
     )
@@ -16,7 +16,7 @@ export const POST = withAuth(async (req) => {
   const result = await trackUsage(user.id, feature, user.role)
   
   if (!result.allowed) {
-    return Response.json(
+    return NextResponse.json(
       { 
         error: 'Feature limit exceeded',
         feature,
@@ -27,7 +27,7 @@ export const POST = withAuth(async (req) => {
     )
   }
   
-  return Response.json({
+  return NextResponse.json({
     success: true,
     remaining: result.remaining,
     limit: user.rbac.getFeatureLimit(feature as any)

@@ -1,5 +1,5 @@
 // app/api/admin/stats/route.ts
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 import { redis } from '@/lib/redis'
@@ -7,7 +7,7 @@ import { redis } from '@/lib/redis'
 export const GET = withAuth(
   async (req) => {
     // Create Supabase client
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Get user statistics
     const { data: users, error: usersError } = await supabase
@@ -15,7 +15,7 @@ export const GET = withAuth(
       .select('subscription_tier, subscription_status')
     
     if (usersError) {
-      return Response.json(
+      return NextResponse.json(
         { error: 'Failed to fetch stats' },
         { status: 500 }
       )
@@ -78,7 +78,7 @@ export const GET = withAuth(
       console.error('Error fetching AI usage:', error)
     }
     
-    return Response.json({
+    return NextResponse.json({
       totalUsers: users.length,
       activeUsers,
       totalRevenue,
