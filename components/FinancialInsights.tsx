@@ -21,7 +21,7 @@ interface AIInsight {
 }
 
 export default function FinancialInsights({ transactions, bills, userId }: FinancialInsightsProps) {
-  const [insights, setInsights] = useState<string>('')
+  const [insights, setInsights] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
   const [savingsGoal, setSavingsGoal] = useState({
@@ -150,7 +150,18 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
       if (!response.ok) throw new Error('Failed to generate insights')
       
       const data = await response.json()
-      setInsights(data.insights)
+      
+      // Parse insights if it's a string
+      let parsedInsights
+      try {
+        parsedInsights = typeof data.insights === 'string' 
+          ? JSON.parse(data.insights) 
+          : data.insights
+      } catch (e) {
+        parsedInsights = { insights: data.insights }
+      }
+      
+      setInsights(parsedInsights)
       
       // Generate AI insights based on data
       generateAIInsightsFromData()
@@ -340,24 +351,52 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Monthly Spending Trends</h3>
           <div className="space-y-3">
-            {sortedMonths.map(([month, data]) => {
-              const date = new Date(month + '-01')
-              const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
-              const netFlow = data.income - data.expenses
-              
-              return (
-                <div key={month} className="flex items-center justify-between">
-                  <span className="text-gray-600">{monthName}</span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-green-600 text-sm">+{formatCurrency(data.income)}</span>
-                    <span className="text-red-600 text-sm">-{formatCurrency(data.expenses)}</span>
-                    <span className={`font-medium ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatCurrency(netFlow)}
+            {sortedMonths.length > 0 ? (
+              sortedMonths.map(([month, data]) => {
+                const date = new Date(month + '-01')
+                const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
+                const netFlow = data.income - data.expenses
+                
+                return (
+                  <div key={month} className="flex items-center justify-between">
+                    <span className="text-gray-600">{monthName}</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-green-600 text-sm">+{formatCurrency(data.income)}</span>
+                      <span className="text-red-600 text-sm">-{formatCurrency(data.expenses)}</span>
+                      <span className={`font-medium ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(netFlow)}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              // Show estimated monthly bills when no transaction data
+              <div>
+                <div className="text-sm text-gray-500 mb-3">Based on your bills:</div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Monthly Bills Total</span>
+                    <span className="font-medium text-red-600">
+                      -{formatCurrency(bills.reduce((sum, bill) => {
+                        if (!bill.is_active) return sum
+                        const multipliers: Record<string, number> = {
+                          'monthly': 1,
+                          'biweekly': 2.16667,
+                          'weekly': 4.33333,
+                          'quarterly': 0.33333,
+                          'annual': 0.08333,
+                        }
+                        return sum + (bill.amount * (multipliers[bill.billing_cycle] || 1))
+                      }, 0))}
                     </span>
                   </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    Add transactions to see detailed spending trends
+                  </div>
                 </div>
-              )
-            })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -365,12 +404,28 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Top Spending Categories</h3>
           <div className="space-y-3">
-            {topCategories.map(([category, amount]) => (
-              <div key={category} className="flex items-center justify-between">
-                <span className="text-gray-600">{category}</span>
-                <span className="font-medium">{formatCurrency(amount)}</span>
-              </div>
-            ))}
+            {topCategories.length > 0 ? (
+              topCategories.map(([category, amount]) => (
+                <div key={category} className="flex items-center justify-between">
+                  <span className="text-gray-600">{category}</span>
+                  <span className="font-medium">{formatCurrency(amount)}</span>
+                </div>
+              ))
+            ) : (
+              // Use bills categories if no transaction data
+              calculateCategoryBreakdown().slice(0, 5).map(cat => (
+                <div key={cat.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: cat.color }}
+                    />
+                    <span className="text-gray-600">{cat.name}</span>
+                  </div>
+                  <span className="font-medium">{formatCurrency(cat.value)}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -425,8 +480,83 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
             <Brain className="w-5 h-5 text-blue-600" />
             <h3 className="font-semibold text-blue-900">AI Analysis</h3>
           </div>
-          <div className="prose prose-sm text-gray-700 whitespace-pre-wrap">
-            {insights}
+          <div className="space-y-4">
+            {/* Main insights text */}
+            <div className="prose prose-sm text-gray-700 whitespace-pre-wrap">
+              {typeof insights === 'string' ? insights : insights.insights}
+            </div>
+            
+            {/* Monthly Budget Breakdown */}
+            {insights.monthlyBudget && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-blue-200">
+                <div className="text-center">
+                  <p className="text-xs text-blue-600">Income</p>
+                  <p className="text-lg font-semibold text-blue-900">
+                    {formatCurrency(insights.monthlyBudget.income || 0)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-blue-600">Bills</p>
+                  <p className="text-lg font-semibold text-blue-900">
+                    {formatCurrency(insights.monthlyBudget.bills || 0)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-blue-600">Spending</p>
+                  <p className="text-lg font-semibold text-blue-900">
+                    {formatCurrency(insights.monthlyBudget.spending || 0)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-blue-600">Save</p>
+                  <p className="text-lg font-semibold text-green-600">
+                    {formatCurrency(insights.monthlyBudget.recommended_savings || 0)}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {/* Savings Plan */}
+            {insights.savingsPlan && (
+              <div className="bg-green-50 rounded-lg p-3 mt-3">
+                <h4 className="text-sm font-semibold text-green-900 mb-2">Recommended Savings Plan</h4>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-xs text-green-600">Per Paycheck</p>
+                    <p className="font-semibold text-green-800">
+                      {formatCurrency(insights.savingsPlan.per_paycheck || 0)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-green-600">Monthly Total</p>
+                    <p className="font-semibold text-green-800">
+                      {formatCurrency(insights.savingsPlan.monthly_total || 0)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-green-600">% of Income</p>
+                    <p className="font-semibold text-green-800">
+                      {insights.savingsPlan.percentage || 0}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Action Tips */}
+            {insights.tips && insights.tips.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-semibold text-blue-900 mb-2">Action Items</h4>
+                <ul className="space-y-1">
+                  {insights.tips.map((tip: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-0.5">•</span>
+                      <span className="text-sm text-gray-700">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}

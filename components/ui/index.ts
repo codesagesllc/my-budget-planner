@@ -1,13 +1,9 @@
 // Barrel export for all UI components
 // This ensures consistent imports across the application
 
-// Button component
+// Individual component exports with correct paths
 export { Button } from './button'
-
-// Input component  
 export { Input } from './input'
-
-// Alert component (note: capital A in filename)
 export { Alert } from './Alert'
 
 // Card components
