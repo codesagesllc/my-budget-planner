@@ -1,48 +1,35 @@
-// App configuration for different environments
-
-const getAppUrl = () => {
-  // Production URLs
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL
-  }
-  
-  // Vercel deployment URL (automatically set by Vercel)
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-  }
-  
-  // Development
-  return 'http://localhost:3000'
-}
-
+// App configuration
 export const appConfig = {
-  // Main app URL (will use custom domain when you set NEXT_PUBLIC_APP_URL)
-  url: getAppUrl(),
-  
-  // Your domains
-  domains: {
-    production: 'https://my-budget-planner-seven.vercel.app', // Your Vercel domain
-    custom: process.env.NEXT_PUBLIC_CUSTOM_DOMAIN || '', // Future custom domain
-    development: 'http://localhost:3000'
-  },
-  
-  // Get the appropriate redirect URL for auth callbacks
+  // Get the correct redirect URL based on environment
   getAuthRedirectUrl: (path: string = '/auth/callback') => {
-    const baseUrl = getAppUrl()
+    if (typeof window !== 'undefined') {
+      // Client-side
+      return `${window.location.origin}${path}`
+    }
+    
+    // Server-side
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
+                    'http://localhost:3000'
+    
     return `${baseUrl}${path}`
   },
   
-  // Check if we're in production
-  isProduction: process.env.NODE_ENV === 'production',
+  // Stripe configuration
+  stripe: {
+    publicKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+  },
   
-  // Check if we're on Vercel
-  isVercel: !!process.env.VERCEL,
-}
-
-// Helper to get the absolute URL for any path
-export const getAbsoluteUrl = (path: string = '') => {
-  const baseUrl = appConfig.url
-  // Ensure path starts with /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  return `${baseUrl}${normalizedPath}`
+  // Plaid configuration
+  plaid: {
+    publicKey: process.env.NEXT_PUBLIC_PLAID_PUBLIC_KEY || '',
+    environment: process.env.NEXT_PUBLIC_PLAID_ENV || 'sandbox',
+  },
+  
+  // App metadata
+  app: {
+    name: 'My Budget Planner',
+    description: 'AI-Powered Personal Finance Management',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://my-budget-planner.vercel.app',
+  }
 }
