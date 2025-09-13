@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Debt } from '@/types/debt';
 import { X, Trash2, Calendar, DollarSign, TrendingDown, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui';
 import { toast } from 'sonner';
 
 interface PaymentHistoryModalProps {
