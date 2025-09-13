@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerActionClient, createServiceRoleClient } from '@/lib/supabase/server'
-import { parseSpreadsheetWithAI, type ParsedBillsResponse } from '@/lib/ai/anthropic'
+import { aiService } from '@/lib/ai/services/ai-service'
+import type { SubscriptionTier } from '@/lib/ai/services/ai-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,10 +27,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    // Check if user profile exists, if not create it with service role
+    // Get user subscription tier
     const { data: userProfile, error: profileError } = await supabase
       .from('users')
-      .select('id')
+      .select('id, subscription_tier')
       .eq('id', userId)
       .single()
     
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
         .insert({
           id: userId,
           email: authUser.email || '',
+          subscription_tier: 'free_trial',
         })
       
       if (insertError) {
@@ -51,6 +53,8 @@ export async function POST(request: NextRequest) {
         console.log('User profile created successfully')
       }
     }
+
+    const tier = (userProfile?.subscription_tier || 'free_trial') as SubscriptionTier
 
     let textContent = ''
 
@@ -75,77 +79,96 @@ export async function POST(request: NextRequest) {
       textContent = content
     }
 
-    console.log('Sending to AI for parsing...')
+    console.log('Sending to optimized AI service for parsing...')
     
-    // Use AI to parse the spreadsheet content - properly typed
-    const parsedData: ParsedBillsResponse = await parseSpreadsheetWithAI(textContent)
+    try {
+      // Use optimized AI service with caching and rate limiting
+      const parsedData = await aiService.parseBills(userId, textContent, tier)
 
-    console.log('AI parsed bills:', parsedData.bills.length)
+      console.log('AI parsed bills:', parsedData.bills?.length || 0)
 
-    if (parsedData.bills.length === 0) {
-      return NextResponse.json({
-        success: false,
-        billsCount: 0,
-        summary: 'No bills found in the uploaded file. Please ensure your file contains bill information with amounts and names.',
-        bills: [],
-      })
-    }
+      if (!parsedData.bills || parsedData.bills.length === 0) {
+        return NextResponse.json({
+          success: false,
+          billsCount: 0,
+          summary: 'No bills found in the uploaded file. Please ensure your file contains bill information with amounts and names.',
+          bills: [],
+        })
+      }
 
-    // Prepare bills for insertion - now TypeScript knows the structure
-    const billsToInsert = parsedData.bills.map(bill => {
-      // Handle due date properly
-      let dueDate: string
-      if (bill.dueDate) {
-        // If it's just a day number like "15", create a date for this month
-        const dayNumber = parseInt(bill.dueDate)
-        if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) {
-          const now = new Date()
-          const date = new Date(now.getFullYear(), now.getMonth(), dayNumber)
-          dueDate = date.toISOString()
-        } else {
-          // Try to parse as a full date
-          try {
-            dueDate = new Date(bill.dueDate).toISOString()
-          } catch {
-            dueDate = new Date().toISOString()
+      // Prepare bills for insertion
+      const billsToInsert = parsedData.bills.map((bill: any) => {
+        // Handle due date properly
+        let dueDate: string
+        if (bill.dueDate) {
+          // If it's just a day number like "15", create a date for this month
+          const dayNumber = parseInt(bill.dueDate)
+          if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) {
+            const now = new Date()
+            const date = new Date(now.getFullYear(), now.getMonth(), dayNumber)
+            dueDate = date.toISOString()
+          } else {
+            // Try to parse as a full date
+            try {
+              dueDate = new Date(bill.dueDate).toISOString()
+            } catch {
+              dueDate = new Date().toISOString()
+            }
           }
+        } else {
+          dueDate = new Date().toISOString()
         }
-      } else {
-        dueDate = new Date().toISOString()
+
+        return {
+          user_id: userId,
+          name: bill.name,
+          amount: bill.amount,
+          due_date: dueDate,
+          billing_cycle: bill.billingCycle || 'monthly',
+          categories: bill.categories || (bill.category ? [bill.category] : ['Other']),
+          is_active: true,
+        }
+      })
+
+      // Insert bills into database using service role to bypass RLS
+      const serviceSupabase = await createServiceRoleClient()
+      const { data: insertedBills, error: insertError } = await serviceSupabase
+        .from('bills')
+        .insert(billsToInsert)
+        .select()
+
+      if (insertError) {
+        console.error('Error inserting bills:', insertError)
+        return NextResponse.json(
+          { error: 'Failed to save bills', details: insertError.message },
+          { status: 500 }
+        )
       }
 
-      return {
-        user_id: userId,
-        name: bill.name,
-        amount: bill.amount,
-        due_date: dueDate,
-        billing_cycle: bill.billingCycle || 'monthly',
-        categories: bill.categories || (bill.category ? [bill.category] : ['Other']), // Always use categories array
-        is_active: true,
+      // Get usage stats
+      const usage = await aiService.getUsageStats(userId)
+
+      return NextResponse.json({
+        success: true,
+        billsCount: insertedBills?.length || 0,
+        summary: parsedData.summary,
+        bills: insertedBills,
+        usage,
+        tier,
+      })
+    } catch (aiError: any) {
+      if (aiError.message.includes('limit reached')) {
+        return NextResponse.json(
+          { 
+            error: aiError.message,
+            upgradeRequired: true,
+            tier,
+          },
+          { status: 429 }
+        )
       }
-    })
-
-    // Insert bills into database using service role to bypass RLS
-    const serviceSupabase = await createServiceRoleClient()
-    const { data: insertedBills, error: insertError } = await serviceSupabase
-      .from('bills')
-      .insert(billsToInsert)
-      .select()
-
-    if (insertError) {
-      console.error('Error inserting bills:', insertError)
-      return NextResponse.json(
-        { error: 'Failed to save bills', details: insertError.message },
-        { status: 500 }
-      )
+      throw aiError
     }
-
-    return NextResponse.json({
-      success: true,
-      billsCount: insertedBills?.length || 0,
-      summary: parsedData.summary,
-      bills: insertedBills,
-    })
   } catch (error) {
     console.error('Error processing bills upload:', error)
     return NextResponse.json(

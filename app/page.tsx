@@ -181,17 +181,17 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-semibold text-lg mb-2">Free Trial</h3>
-              <p className="text-3xl font-bold mb-2">$0<span className="text-sm font-normal">/14 days</span></p>
+              <p className="text-3xl font-bold mb-2">$0<span className="text-sm font-normal tex-blue-500">/14 days</span></p>
               <p className="text-gray-600 text-sm">Perfect to explore all features</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-600">
-              <h3 className="font-semibold text-lg mb-2">Membership</h3>
-              <p className="text-3xl font-bold mb-2">$15<span className="text-sm font-normal">/month</span></p>
+              <h3 className="font-semibold text-lg mb-2">Basic</h3>
+              <p className="text-3xl font-bold mb-2">$15<span className="text-sm font-normal text-blue-500">/month</span></p>
               <p className="text-gray-600 text-sm">For personal finance management</p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-semibold text-lg mb-2">Premium</h3>
-              <p className="text-3xl font-bold mb-2">$30<span className="text-sm font-normal">/month</span></p>
+              <p className="text-3xl font-bold mb-2">$30<span className="text-sm font-normal text-blue-500">/month</span></p>
               <p className="text-gray-600 text-sm">Complete financial suite</p>
             </div>
           </div>

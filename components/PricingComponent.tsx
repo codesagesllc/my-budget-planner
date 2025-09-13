@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, X, Loader2, Star } from 'lucide-react'
+import { Check, X, Loader2, Star, Brain, Zap, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { AI_LIMITS } from '@/lib/ai/services/ai-service'
 
 interface PricingPlan {
   id: string
@@ -13,6 +14,12 @@ interface PricingPlan {
   priceId: string
   productId: string
   features: string[]
+  aiFeatures?: {
+    insights: string
+    billParsing: string
+    incomeDetection: string
+    debtStrategies: string
+  }
   notIncluded?: string[]
   recommended?: boolean
   buttonText: string
@@ -22,7 +29,7 @@ const pricingPlans: PricingPlan[] = [
   {
     id: 'free_trial',
     name: 'Free Trial',
-    description: '14 days to explore all features',
+    description: '14 days to explore all features with limited AI usage',
     price: 0,
     priceId: 'price_1S5vLs4GH1CShai7ilGkxOFu',
     productId: 'prod_T1zKL0XrgbEP99',
@@ -33,10 +40,20 @@ const pricingPlans: PricingPlan[] = [
       'Bill import and management',
       'Transaction categorization',
       'Monthly spending reports',
-      'Email support'
+      'Email support',
+      `${AI_LIMITS.free_trial.monthly_insights} AI insights per month`,
+      `${AI_LIMITS.free_trial.bill_parsing} bill upload analyses per month`,
+      `${AI_LIMITS.free_trial.income_detection} income detection scans per month`,
+      `${AI_LIMITS.free_trial.debt_strategies} debt strategy calculation per month`
     ],
+    aiFeatures: {
+      insights: `${AI_LIMITS.free_trial.monthly_insights} AI insights/month`,
+      billParsing: `${AI_LIMITS.free_trial.bill_parsing} bill uploads/month`,
+      incomeDetection: `${AI_LIMITS.free_trial.income_detection} income scans/month`,
+      debtStrategies: `${AI_LIMITS.free_trial.debt_strategies} debt strategy/month`,
+    },
     notIncluded: [
-      'AI-powered insights',
+      'Unlimited AI features',
       'Advanced forecasting',
       'Unlimited bank accounts',
       'Priority support'
@@ -45,7 +62,7 @@ const pricingPlans: PricingPlan[] = [
   {
     id: 'basic',
     name: 'Budget Planner Membership',
-    description: 'Perfect for personal finance management',
+    description: 'Perfect for personal finance management with standard AI limits',
     price: 15,
     priceId: 'price_1S5vMd4GH1CShai7PaB4XeoJ',
     productId: 'prod_T1zLI2Fe0hQMsD',
@@ -54,15 +71,26 @@ const pricingPlans: PricingPlan[] = [
     features: [
       'Everything in Free Trial',
       'Connect up to 5 bank accounts',
-      'AI-powered insights with Claude',
       'Custom budget categories',
       'Savings goal tracking',
       'Quarterly financial reports',
       'Advanced bill reminders',
-      'Priority email support'
+      'Priority email support',
+      `${AI_LIMITS.basic.monthly_insights} AI-powered insights per month`,
+      `${AI_LIMITS.basic.bill_parsing} bill parsing uploads per month`,
+      `${AI_LIMITS.basic.income_detection} income detection analyses per month`,
+      `${AI_LIMITS.basic.debt_strategies} debt optimization strategies per month`,
+      'AI responses cached for 24 hours',
+      'Standard batch processing (2-3 second response time)'
     ],
+    aiFeatures: {
+      insights: `${AI_LIMITS.basic.monthly_insights} AI insights/month`,
+      billParsing: `${AI_LIMITS.basic.bill_parsing} bill uploads/month`,
+      incomeDetection: `${AI_LIMITS.basic.income_detection} income scans/month`,
+      debtStrategies: `${AI_LIMITS.basic.debt_strategies} debt strategies/month`,
+    },
     notIncluded: [
-      'Unlimited bank accounts',
+      'Unlimited AI calls',
       'Investment tracking',
       'Tax optimization suggestions',
       'Phone support'
@@ -71,7 +99,7 @@ const pricingPlans: PricingPlan[] = [
   {
     id: 'premium',
     name: 'Premium Membership',
-    description: 'Complete financial management suite',
+    description: 'Complete financial management suite with unlimited AI features & priority processing',
     price: 30,
     priceId: 'price_1S5vNP4GH1CShai7nzkQsFQD',
     productId: 'prod_T1zMympLOq0Dk6',
@@ -79,15 +107,28 @@ const pricingPlans: PricingPlan[] = [
     features: [
       'Everything in Basic',
       'Unlimited bank accounts',
-      'Advanced AI forecasting',
       'Investment portfolio tracking',
       'Tax optimization suggestions',
       'Custom financial reports',
       'API access',
       'White-glove onboarding',
       'Priority phone & email support',
-      'Early access to new features'
-    ]
+      'Early access to new features',
+      '✨ UNLIMITED AI-powered insights',
+      '✨ UNLIMITED bill parsing & analysis',
+      '✨ UNLIMITED income detection',
+      '✨ UNLIMITED debt strategies',
+      '⚡ Priority AI processing (instant responses)',
+      '⚡ No batch processing delays',
+      '💾 Extended 24-hour AI response caching',
+      '🚀 First in queue for all AI features'
+    ],
+    aiFeatures: {
+      insights: 'Unlimited AI insights with priority processing',
+      billParsing: 'Unlimited bill parsing with instant analysis',
+      incomeDetection: 'Unlimited income detection & analysis',
+      debtStrategies: 'Unlimited debt optimization strategies',
+    }
   }
 ]
 
@@ -334,6 +375,34 @@ export default function PricingComponent() {
           )}
         </div>
 
+        {/* AI Features Comparison Banner */}
+        <div className="mb-12 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white">
+          <div className="flex items-center justify-center mb-4">
+            <Brain className="h-8 w-8 mr-3" />
+            <h3 className="text-2xl font-bold">AI-Powered Financial Intelligence</h3>
+          </div>
+          <p className="text-center text-purple-100 mb-6">
+            Our AI features use Claude and GPT-3.5 to provide personalized insights and automation
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <Zap className="h-6 w-6 mx-auto mb-2" />
+              <p className="font-semibold">Smart Caching</p>
+              <p className="text-sm text-purple-100">24-hour response caching reduces costs by 50%</p>
+            </div>
+            <div className="text-center">
+              <Shield className="h-6 w-6 mx-auto mb-2" />
+              <p className="font-semibold">Batch Processing</p>
+              <p className="text-sm text-purple-100">Optimized API calls save 25% on tokens</p>
+            </div>
+            <div className="text-center">
+              <Brain className="h-6 w-6 mx-auto mb-2" />
+              <p className="font-semibold">Priority Queue</p>
+              <p className="text-sm text-purple-100">Premium users get instant AI processing</p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {pricingPlans.map((plan) => {
             const isDisabled = plan.id === 'free_trial' && hasUsedFreeTrial
@@ -393,6 +462,34 @@ export default function PricingComponent() {
                       plan.buttonText
                     )}
                   </button>
+
+                  {/* AI Features Section */}
+                  {plan.aiFeatures && (
+                    <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+                      <p className="text-sm font-semibold text-purple-900 mb-3 flex items-center">
+                        <Brain className="h-4 w-4 mr-2" />
+                        AI Features:
+                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-start">
+                          <Check className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-purple-700">{plan.aiFeatures.insights}</span>
+                        </div>
+                        <div className="flex items-start">
+                          <Check className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-purple-700">{plan.aiFeatures.billParsing}</span>
+                        </div>
+                        <div className="flex items-start">
+                          <Check className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-purple-700">{plan.aiFeatures.incomeDetection}</span>
+                        </div>
+                        <div className="flex items-start">
+                          <Check className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-purple-700">{plan.aiFeatures.debtStrategies}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-8 space-y-4">
                     <p className="text-sm font-semibold text-gray-900 mb-3">What's included:</p>

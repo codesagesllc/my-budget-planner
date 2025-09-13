@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background Circle -->
+  <circle cx="16" cy="16" r="15" fill="#10B981"/>
+  
+  <!-- Dollar Sign -->
+  <g fill="white">
+    <!-- Vertical line through S -->
+    <rect x="15" y="6" width="2" height="20" fill="white"/>
+    
+    <!-- S shape -->
+    <path d="M11 11.5C11 9.5 12.5 8 15.5 8H17.5C19.5 8 21 9.5 21 11C21 12.5 19.5 13.5 17.5 13.5H14.5C12.5 13.5 11 14.5 11 16.5C11 18.5 12.5 20 14.5 20H17.5C19.5 20 21 18.5 21 16.5" 
+          stroke="white" 
+          stroke-width="2.5" 
+          fill="none"
+          stroke-linecap="round"/>
+  </g>
+</svg>

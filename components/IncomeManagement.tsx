@@ -5,8 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/supabase'
 import { 
   DollarSign, Plus, Edit2, Trash2, Calendar, 
-  TrendingUp, Briefcase, Gift, Home, Car, X
+  TrendingUp, Briefcase, Gift, Home, Car, X, Brain, Sparkles
 } from 'lucide-react'
+import AIIncomeDetector from './AIIncomeDetector'
 
 type IncomeSources = Database['public']['Tables']['income_sources']['Row']
 type IncomeInsert = Database['public']['Tables']['income_sources']['Insert']
@@ -19,6 +20,7 @@ interface IncomeManagementProps {
 export default function IncomeManagement({ userId, onUpdate }: IncomeManagementProps) {
   const [incomeSources, setIncomeSources] = useState<IncomeSources[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showAIDetector, setShowAIDetector] = useState(false)
   const [editingIncome, setEditingIncome] = useState<IncomeSources | null>(null)
   const [loading, setLoading] = useState(true)
   const [totalMonthlyIncome, setTotalMonthlyIncome] = useState(0)
@@ -196,14 +198,23 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
         </div>
       </div>
 
-      {/* Add Income Button */}
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-      >
-        <Plus className="w-5 h-5" />
-        Add Income Source
-      </button>
+      {/* Add Income Buttons */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex-1 sm:flex-none bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Add Income Source
+        </button>
+        <button
+          onClick={() => setShowAIDetector(true)}
+          className="flex-1 sm:flex-none bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+        >
+          <Brain className="w-5 h-5" />
+          AI Detect Income
+        </button>
+      </div>
 
       {/* Income Sources List */}
       <div className="space-y-4">
@@ -276,6 +287,23 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
           </div>
         )}
       </div>
+
+      {/* AI Income Detector Modal */}
+      {showAIDetector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <AIIncomeDetector
+              userId={userId}
+              onIncomeCreated={() => {
+                setShowAIDetector(false)
+                fetchIncomeSources()
+                onUpdate?.()
+              }}
+              onClose={() => setShowAIDetector(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Modal */}
       {(showAddModal || editingIncome) && (

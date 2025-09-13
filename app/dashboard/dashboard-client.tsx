@@ -1,11 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Database } from '@/types/supabase'
+import { useRolePermissions } from '@/hooks/useRolePermissions'
+import { UsageMeter } from '@/components/ui/usage-meter'
+import { toast } from 'sonner'
 import PlaidLinkButton from '@/components/PlaidLinkButton'
 import BillUploader from '@/components/BillUploader'
 import TransactionsList from '@/components/TransactionsList'
@@ -16,13 +19,15 @@ import IncomeManagement from '@/components/IncomeManagement'
 import FinancialForecasting from '@/components/FinancialForecasting'
 import ManualBillEntry from '@/components/ManualBillEntry'
 import AITransactionAnalyzer from '@/components/AITransactionAnalyzer'
+import AddAccountModal from '@/components/AddAccountModal'
 import { 
   LogOut, Upload, Brain, DollarSign, Plus, 
   FileSpreadsheet, Menu, X, Home, Receipt, 
   CreditCard, TrendingUp, PlusCircle, BarChart3,
   Wallet, Settings, ChevronLeft, ChevronRight,
   ArrowUpRight, ArrowDownRight, Target, Calendar,
-  AlertCircle, Edit3, PiggyBank, Sparkles, ChartBar
+  AlertCircle, Edit3, PiggyBank, Sparkles, ChartBar,
+  Crown, Shield, Lock
 } from 'lucide-react'
 import { DebtManagement } from '@/components/debt/DebtManagement'
 
@@ -54,11 +59,36 @@ export default function DashboardClient({
   const [showBillUploader, setShowBillUploader] = useState(false)
   const [showManualBillEntry, setShowManualBillEntry] = useState(false)
   const [showAIAnalyzer, setShowAIAnalyzer] = useState(false)
+  const [showAddAccount, setShowAddAccount] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showUsagePanel, setShowUsagePanel] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  
+  // Role-based permissions
+  const {
+    role,
+    hasFeature,
+    canAccessUI,
+    getFeatureUsage,
+    trackUsage,
+    showUpgradePrompt,
+    usageStats,
+    fetchUsageStats,
+    user: rbacUser
+  } = useRolePermissions()
+  
+  // Check if user is in trial period
+  const isInTrial = role === 'premium' && rbacUser?.subscription_tier === 'free_trial'
+  const trialDaysLeft = React.useMemo(() => {
+    if (!isInTrial || !rbacUser?.free_trial_end_date) return 0
+    const endDate = new Date(rbacUser.free_trial_end_date)
+    const now = new Date()
+    const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    return Math.max(0, daysLeft)
+  }, [isInTrial, rbacUser])
 
   // Always fetch income sources on mount to ensure we have the latest data
   useEffect(() => {
@@ -113,9 +143,6 @@ export default function DashboardClient({
     setLoading(false)
   }
 
-  // Calculate financial metrics with proper one-time and period handling
-  const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0)
-  
   const calculateMonthlyIncome = () => {
     const currentDate = new Date()
     const currentMonth = currentDate.getMonth()
@@ -295,6 +322,197 @@ export default function DashboardClient({
     }, 0)
   }
 
+  // Smart income reconciliation - prevent double counting
+  const reconcileIncomeWithTransactions = () => {
+    const reconciledIncome = {
+      fromTransactions: 0,
+      fromManualSources: 0,
+      matched: 0,
+      unmatched: 0
+    }
+
+    // Get all income transactions for the current month
+    const currentDate = new Date()
+    const currentMonth = currentDate.getMonth()
+    const currentYear = currentDate.getFullYear()
+    const monthStart = new Date(currentYear, currentMonth, 1)
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)
+    
+    const incomeTransactions = transactions.filter(t => {
+      const transDate = new Date(t.date)
+      return (t.transaction_type === 'income' || t.amount > 0) &&
+             transDate >= monthStart && transDate <= monthEnd
+    })
+
+    // Track which transactions have been matched
+    const matchedTransactions = new Set<string>()
+    
+    // Process each income source and find matching transactions
+    incomeSources.forEach(incomeSource => {
+      if (!incomeSource.is_active) return
+      
+      // Calculate expected payments for this month based on frequency
+      let expectedPayments = 0
+      let expectedAmount = incomeSource.amount
+      
+      if (incomeSource.frequency === 'biweekly') {
+        // Biweekly = ~2.16667 payments per month on average
+        // But in any given month, it's either 2 or 3 payments
+        // Check actual dates to be precise
+        if (incomeSource.start_date) {
+          const startDate = new Date(incomeSource.start_date)
+          let paymentDate = new Date(startDate)
+          let paymentsThisMonth = 0
+          
+          // Calculate all biweekly payment dates for this month
+          while (paymentDate <= monthEnd) {
+            if (paymentDate >= monthStart && paymentDate <= monthEnd) {
+              paymentsThisMonth++
+            }
+            paymentDate.setDate(paymentDate.getDate() + 14) // Add 14 days
+            if (paymentsThisMonth >= 3) break // Max 3 biweekly payments in a month
+          }
+          expectedPayments = paymentsThisMonth
+        } else {
+          expectedPayments = 2 // Default to 2 if no start date
+        }
+      } else if (incomeSource.frequency === 'weekly') {
+        expectedPayments = 4 // 4 or 5 weekly payments per month
+      } else if (incomeSource.frequency === 'monthly') {
+        expectedPayments = 1
+      } else if (incomeSource.frequency === 'one-time' && incomeSource.start_date) {
+        const startDate = new Date(incomeSource.start_date)
+        if (startDate >= monthStart && startDate <= monthEnd) {
+          expectedPayments = 1
+        }
+      }
+      
+      // Find matching transactions for this income source
+      const tolerance = expectedAmount * 0.10 // 10% tolerance for taxes/deductions
+      const minAmount = expectedAmount - tolerance
+      const maxAmount = expectedAmount + tolerance
+      
+      let matchedCount = 0
+      let matchedTotal = 0
+      
+      incomeTransactions.forEach(transaction => {
+        // Skip if already matched
+        if (matchedTransactions.has(transaction.id)) return
+        if (matchedCount >= expectedPayments) return
+        
+        const transactionAmount = Math.abs(transaction.amount)
+        
+        // Check if this transaction matches the expected amount
+        if (transactionAmount >= minAmount && transactionAmount <= maxAmount) {
+          const description = transaction.description?.toLowerCase() || ''
+          
+          // Additional confidence checks
+          const isLikelyMatch = 
+            description.includes('payroll') ||
+            description.includes('salary') ||
+            description.includes('direct dep') ||
+            description.includes('dd') ||
+            description.includes('wages') ||
+            description.includes(incomeSource.name.toLowerCase().split(' ')[0])
+          
+          // For biweekly/weekly, be more lenient with matching
+          if (incomeSource.frequency === 'biweekly' || incomeSource.frequency === 'weekly' || isLikelyMatch) {
+            matchedTransactions.add(transaction.id)
+            matchedCount++
+            matchedTotal += transactionAmount
+            reconciledIncome.matched += transactionAmount
+          }
+        }
+      })
+      
+      // Calculate unmatched expected income
+      const expectedTotal = expectedAmount * expectedPayments
+      const unmatchedExpected = Math.max(0, expectedTotal - matchedTotal)
+      
+      if (unmatchedExpected > 0) {
+        reconciledIncome.fromManualSources += unmatchedExpected
+      }
+      
+      console.log(`Income Source: ${incomeSource.name}`, {
+        frequency: incomeSource.frequency,
+        expectedPayments,
+        matchedCount,
+        matchedTotal,
+        unmatchedExpected
+      })
+    })
+    
+    // Add any unmatched transactions as unexpected income
+    incomeTransactions.forEach(transaction => {
+      if (!matchedTransactions.has(transaction.id)) {
+        const amount = Math.abs(transaction.amount)
+        reconciledIncome.unmatched += amount
+        reconciledIncome.fromTransactions += amount
+      }
+    })
+
+    console.log('Income Reconciliation Summary:', {
+      totalMatched: reconciledIncome.matched,
+      unmatchedTransactions: reconciledIncome.unmatched,
+      expectedButNotReceived: reconciledIncome.fromManualSources,
+      totalIncome: reconciledIncome.matched + reconciledIncome.unmatched + reconciledIncome.fromManualSources
+    })
+
+    return reconciledIncome
+  }
+
+  // Calculate financial metrics with proper one-time and period handling
+  const accountsBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0)
+  
+  // Use reconciled income to prevent double counting
+  const reconciledIncome = reconcileIncomeWithTransactions()
+  const totalIncomeFromTransactions = reconciledIncome.fromTransactions
+  const totalExpectedIncome = reconciledIncome.fromManualSources
+  
+  // Calculate total expenses from transactions (withdrawals/charges)
+  const totalExpensesFromTransactions = transactions
+    .filter(t => t.transaction_type === 'expense' || (t.transaction_type !== 'income' && t.amount < 0))
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+  
+  // Calculate expected vs actual for the current month
+  const currentDate = new Date()
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+  const currentDay = currentDate.getDate()
+  const monthProgress = currentDay / daysInMonth
+  
+  // For the current month, use the greater of actual transactions or expected income/expenses
+  // This gives users a realistic view even before transactions are imported
+  const effectiveMonthlyIncome = Math.max(
+    totalIncomeFromTransactions,
+    calculateMonthlyIncome() * monthProgress // Prorated expected income
+  )
+  
+  const effectiveMonthlyExpenses = Math.max(
+    totalExpensesFromTransactions,
+    calculateMonthlyExpenses() * monthProgress // Prorated expected expenses
+  )
+  
+  // Calculate the net balance using reconciled amounts
+  // This prevents double-counting of income that appears in both manual sources and transactions
+  const hasTransactions = transactions.length > 0
+  const totalBalance = hasTransactions
+    ? accountsBalance + totalIncomeFromTransactions + totalExpectedIncome - totalExpensesFromTransactions
+    : accountsBalance + (calculateMonthlyIncome() - calculateMonthlyExpenses())
+  
+  // Log for debugging
+  console.log('Balance Calculation:', {
+    accountsBalance,
+    totalIncomeFromTransactions,
+    totalExpectedIncome,
+    totalExpensesFromTransactions,
+    expectedMonthlyIncome: calculateMonthlyIncome(),
+    expectedMonthlyExpenses: calculateMonthlyExpenses(),
+    reconciledIncome,
+    totalBalance,
+    hasTransactions,
+    transactionCount: transactions.length
+  })
+
   // Helper function to get upcoming one-time items
   const getUpcomingOneTimeItems = () => {
     const today = new Date()
@@ -445,16 +663,35 @@ export default function DashboardClient({
     }).format(amount)
   }
 
-  // Navigation items
+  // Navigation items with role-based visibility
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'income', label: 'Income', icon: TrendingUp },
-    { id: 'transactions', label: 'Transactions', icon: CreditCard },
-    { id: 'bills', label: 'Bills', icon: Receipt },
-    { id: 'debts', label: 'Debts', icon: PiggyBank },
-    { id: 'forecast', label: 'Forecast', icon: BarChart3 },
-    { id: 'insights', label: 'Insights', icon: Brain },
-  ]
+    { id: 'overview', label: 'Overview', icon: Home, requiredFeature: null },
+    { id: 'income', label: 'Income', icon: TrendingUp, requiredFeature: null },
+    { id: 'transactions', label: 'Transactions', icon: CreditCard, requiredFeature: null },
+    { id: 'bills', label: 'Bills', icon: Receipt, requiredFeature: null },
+    { id: 'debts', label: 'Debts', icon: PiggyBank, requiredFeature: 'debt_strategies' },
+    { id: 'forecast', label: 'Forecast', icon: BarChart3, requiredFeature: 'budget_forecasting' },
+    { id: 'insights', label: 'Insights', icon: Brain, requiredFeature: 'ai_insights' },
+  ].filter(item => !item.requiredFeature || hasFeature(item.requiredFeature as any))
+  
+  // Add admin panel if user is admin
+  if (canAccessUI('accessAdminPanel')) {
+    navItems.push({ id: 'admin', label: 'Admin', icon: Shield, requiredFeature: null })
+  }
+  
+  // Helper to check and track feature usage
+  const handleFeatureAccess = async (feature: string, callback: () => void) => {
+    const usage = getFeatureUsage(feature)
+    if (usage.isExhausted) {
+      showUpgradePrompt(feature)
+      return
+    }
+    
+    const allowed = await trackUsage(feature)
+    if (allowed) {
+      callback()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -517,9 +754,31 @@ export default function DashboardClient({
                 {sidebarCollapsed ? 'MBP' : 'My Budget Planner'}
               </h1>
               {!sidebarCollapsed && (
-                <p className="text-xs text-blue-200 mt-1 font-medium tracking-wider uppercase">
-                  AI-Powered Finance
-                </p>
+                <>
+                  <p className="text-xs text-blue-200 mt-1 font-medium tracking-wider uppercase">
+                    AI-Powered Finance
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      role === 'admin' ? 'bg-red-500 text-white' :
+                      role === 'premium' ? 'bg-purple-500 text-white' :
+                      role === 'basic' ? 'bg-blue-500 text-white' :
+                      'bg-gray-500 text-white'
+                    }`}>
+                      {role === 'admin' && <Shield className="w-3 h-3 inline mr-1" />}
+                      {role === 'premium' && <Crown className="w-3 h-3 inline mr-1" />}
+                      {role.toUpperCase()}
+                    </span>
+                    {canAccessUI('showUsageMeters') && (
+                      <button
+                        onClick={() => setShowUsagePanel(!showUsagePanel)}
+                        className="text-blue-200 hover:text-white transition-colors"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -591,9 +850,17 @@ export default function DashboardClient({
               <h2 className="text-2xl font-bold text-gray-900">
                 Welcome back, {user.email?.split('@')[0]}!
               </h2>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-700 mt-1">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
+              {isInTrial && trialDaysLeft > 0 && (
+                <div className="mt-3 inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-lg">
+                  <Crown className="w-5 h-5 text-purple-600" />
+                  <span className="text-sm font-medium text-gray-900">
+                    Premium Trial: {trialDaysLeft} days remaining
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Financial Summary Cards */}
@@ -601,8 +868,40 @@ export default function DashboardClient({
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Total Balance</p>
+                    <p className="text-sm text-gray-600">Net Balance</p>
                     <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(totalBalance)}</p>
+                    {hasTransactions ? (
+                      <>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Base: {formatCurrency(accountsBalance)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          +Income: {formatCurrency(totalIncomeFromTransactions)}
+                        </p>
+                        {totalExpectedIncome > 0 && (
+                          <p className="text-xs text-gray-500">
+                            +Expected: {formatCurrency(totalExpectedIncome)}
+                          </p>
+                        )}
+                        {reconciledIncome.matched > 0 && (
+                          <p className="text-xs text-green-600">
+                            ✓ Matched: {formatCurrency(reconciledIncome.matched)}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          -Expenses: {formatCurrency(totalExpensesFromTransactions)}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Expected monthly net
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatCurrency(calculateMonthlyIncome())} - {formatCurrency(calculateMonthlyExpenses())}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <Wallet className="w-8 h-8 text-blue-500" />
                 </div>
@@ -658,19 +957,54 @@ export default function DashboardClient({
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-blue-900">Financial Overview</h3>
                   
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <PlaidLinkButton 
-                      userId={user.id}
-                      onSuccess={refreshData}
-                    />
+                  {/* Quick Actions with Role-Based Access */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                     <button
-                      onClick={() => setShowBillUploader(true)}
-                      className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                      onClick={() => {
+                        const accountUsage = getFeatureUsage('account_connections')
+                        if (accountUsage.isExhausted) {
+                          showUpgradePrompt('account connections')
+                        } else {
+                          setShowAddAccount(true)
+                        }
+                      }}
+                      className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        getFeatureUsage('account_connections').isExhausted
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      }`}
+                      disabled={getFeatureUsage('account_connections').isExhausted}
+                    >
+                      <Wallet className="w-5 h-5" />
+                      Add Account
+                      {getFeatureUsage('account_connections').isExhausted && (
+                        <Lock className="w-4 h-4 ml-1" />
+                      )}
+                    </button>
+                    
+                    {hasFeature('account_connections') && (
+                      <PlaidLinkButton 
+                        userId={user.id}
+                        onSuccess={refreshData}
+                      />
+                    )}
+                    
+                    <button
+                      onClick={() => handleFeatureAccess('bill_parsing', () => setShowBillUploader(true))}
+                      className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        !hasFeature('bill_parsing')
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
+                      disabled={!hasFeature('bill_parsing')}
                     >
                       <Upload className="w-5 h-5" />
                       Upload Bills
+                      {!hasFeature('bill_parsing') && (
+                        <Lock className="w-4 h-4 ml-1" />
+                      )}
                     </button>
+                    
                     <button
                       onClick={() => setShowManualBillEntry(true)}
                       className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -678,6 +1012,7 @@ export default function DashboardClient({
                       <Edit3 className="w-5 h-5" />
                       Add Bill
                     </button>
+                    
                     <button
                       onClick={() => setActiveTab('income')}
                       className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
@@ -848,11 +1183,19 @@ export default function DashboardClient({
                     <h3 className="text-xl font-bold text-blue-900">Bills Management</h3>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setShowAIAnalyzer(true)}
-                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                        onClick={() => handleFeatureAccess('income_detection', () => setShowAIAnalyzer(true))}
+                        className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                          !hasFeature('income_detection')
+                            ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                        disabled={!hasFeature('income_detection')}
                       >
                         <Sparkles className="w-4 h-4" />
                         AI Detect Bills
+                        {!hasFeature('income_detection') && (
+                          <Lock className="w-3 h-3 ml-1" />
+                        )}
                       </button>
                       <Link
                         href="/dashboard/reports"
@@ -902,34 +1245,239 @@ export default function DashboardClient({
 
               {activeTab === 'forecast' && (
                 <div className="p-6">
-                  <FinancialForecasting 
-                    userId={user.id}
-                    transactions={transactions}
-                    incomeSources={incomeSources}
-                    bills={bills}
-                  />
+                  {hasFeature('budget_forecasting') ? (
+                    <FinancialForecasting 
+                      userId={user.id}
+                      transactions={transactions}
+                      incomeSources={incomeSources}
+                      bills={bills}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Budget Forecasting Requires Upgrade
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Upgrade to Basic or Premium to unlock budget forecasting features.
+                      </p>
+                      <button
+                        onClick={() => showUpgradePrompt('Budget Forecasting')}
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Upgrade Now
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'insights' && (
                 <div className="p-6">
-                  <FinancialInsights 
-                    transactions={transactions}
-                    bills={bills}
-                    userId={user.id}
-                  />
+                  {hasFeature('ai_insights') ? (
+                    <FinancialInsights 
+                      transactions={transactions}
+                      bills={bills}
+                      userId={user.id}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        AI Insights Requires Upgrade
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Upgrade to {role === 'free_trial' ? 'Basic' : 'Premium'} to unlock AI-powered financial insights.
+                      </p>
+                      <button
+                        onClick={() => showUpgradePrompt('AI Insights')}
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Upgrade Now
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'debts' && (
                 <div className="p-6">
-                  <DebtManagement />
+                  {hasFeature('debt_strategies') ? (
+                    <DebtManagement />
+                  ) : (
+                    <div className="text-center py-12">
+                      <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Debt Management Requires Upgrade
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Upgrade to unlock AI-powered debt management strategies.
+                      </p>
+                      <button
+                        onClick={() => showUpgradePrompt('Debt Strategies')}
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Upgrade Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {activeTab === 'admin' && canAccessUI('accessAdminPanel') && (
+                <div className="p-6">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4 text-gray-900">Admin Dashboard</h2>
+                    <p className="text-gray-700 mb-6">Redirecting to admin panel...</p>
+                    <button
+                      onClick={() => router.push('/admin')}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                    >
+                      Go to Admin Panel
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Usage Panel Modal */}
+      {showUsagePanel && canAccessUI('showUsageMeters') && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold">Usage & Limits</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Your {role} plan usage for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+              <button onClick={() => setShowUsagePanel(false)}>
+                <X className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* AI Features */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">AI Features</h4>
+                <div className="space-y-3">
+                  <UsageMeter
+                    label="AI Insights"
+                    used={getFeatureUsage('ai_insights').used}
+                    limit={getFeatureUsage('ai_insights').limit}
+                  />
+                  <UsageMeter
+                    label="Bill Parsing"
+                    used={getFeatureUsage('bill_parsing').used}
+                    limit={getFeatureUsage('bill_parsing').limit}
+                  />
+                  <UsageMeter
+                    label="Income Detection"
+                    used={getFeatureUsage('income_detection').used}
+                    limit={getFeatureUsage('income_detection').limit}
+                  />
+                  <UsageMeter
+                    label="Debt Strategies"
+                    used={getFeatureUsage('debt_strategies').used}
+                    limit={getFeatureUsage('debt_strategies').limit}
+                  />
+                </div>
+              </div>
+              
+              {/* Data Limits */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Data Limits</h4>
+                <div className="space-y-3">
+                  <UsageMeter
+                    label="Transactions"
+                    used={transactions.length}
+                    limit={getFeatureUsage('transaction_limit').limit}
+                  />
+                  <UsageMeter
+                    label="Account Connections"
+                    used={accounts.length}
+                    limit={getFeatureUsage('account_connections').limit}
+                  />
+                  <UsageMeter
+                    label="Financial Goals"
+                    used={getFeatureUsage('goal_tracking').used}
+                    limit={getFeatureUsage('goal_tracking').limit}
+                  />
+                  <UsageMeter
+                    label="File Uploads"
+                    used={getFeatureUsage('file_uploads').used}
+                    limit={getFeatureUsage('file_uploads').limit}
+                  />
+                </div>
+              </div>
+              
+              {/* Features */}
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Features</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <UsageMeter
+                    label="Export Data"
+                    used={0}
+                    limit={hasFeature('export_data')}
+                    compact
+                  />
+                  <UsageMeter
+                    label="Advanced Analytics"
+                    used={0}
+                    limit={hasFeature('advanced_analytics')}
+                    compact
+                  />
+                  <UsageMeter
+                    label="Budget Forecasting"
+                    used={0}
+                    limit={hasFeature('budget_forecasting')}
+                    compact
+                  />
+                  <UsageMeter
+                    label="Custom Categories"
+                    used={0}
+                    limit={hasFeature('custom_categories')}
+                    compact
+                  />
+                </div>
+              </div>
+              
+              {/* Upgrade CTA */}
+              {role !== 'premium' && role !== 'admin' && (
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 text-center">
+                  <Crown className="w-10 h-10 text-purple-600 mx-auto mb-3" />
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    Unlock {role === 'free_trial' ? 'More' : 'Unlimited'} Features
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Upgrade to {role === 'free_trial' ? 'Basic for $9.99/mo' : 'Premium for $29.99/mo'} and get {role === 'free_trial' ? 'increased limits' : 'unlimited access'}.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowUsagePanel(false)
+                      router.push('/pricing')
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+                  >
+                    Upgrade Now
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Add Account Modal */}
+      {showAddAccount && (
+        <AddAccountModal
+          onClose={() => setShowAddAccount(false)}
+          onSuccess={refreshData}
+        />
+      )}
 
       {/* Bill Uploader Modal */}
       {showBillUploader && (
