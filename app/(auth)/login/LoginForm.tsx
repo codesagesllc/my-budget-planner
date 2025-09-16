@@ -8,7 +8,7 @@ import { LogIn, Mail, Lock, Chrome, Loader2, CreditCard } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Alert } from '@/components/ui/Alert'
+import { Alert } from '@/components/ui/alert'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
