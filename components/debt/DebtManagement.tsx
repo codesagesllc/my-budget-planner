@@ -8,7 +8,7 @@ import { AddDebtModal } from './AddDebtModal';
 import { DebtStrategySelector } from './DebtStrategySelector';
 import { DebtPayoffTimeline } from './DebtPayoffTimeline';
 import { CashFlowImpactChart } from './CashFlowImpactChart';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export function DebtManagement() {
