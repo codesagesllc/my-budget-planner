@@ -1,4 +1,4 @@
-import ExpenseReport from '@/app/components/ExpenseReport'
+import ExpenseReport from '@/components/ExpenseReport'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
