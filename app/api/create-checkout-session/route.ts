@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
 
     // Determine success and cancel URLs based on whether signup is required
     const successUrl = requireSignup 
-      ? `${appConfig.url}/signup?payment_success=true&session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`
-      : `${appConfig.url}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`
+      ? `${appConfig.app.url}/signup?payment_success=true&session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`
+      : `${appConfig.app.url}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`
     
-    const cancelUrl = `${appConfig.url}/pricing?canceled=true`
+    const cancelUrl = `${appConfig.app.url}/pricing?canceled=true`
 
     try {
       // Create checkout session

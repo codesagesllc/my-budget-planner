@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+interface Bill {
+  id: string
+  user_id: string
+  name: string
+  amount: number
+  due_date: string
+  billing_cycle: string
+  categories: string[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { userId, bills } = await request.json()
@@ -85,7 +98,7 @@ export async function POST(request: NextRequest) {
         
         const transactionsToInsert = oneTimePayments.map((payment: any) => {
           // Find the created bill to link it
-          const createdBill = data.find(b => b.name === payment.name)
+          const createdBill = data.find((b: Bill) => b.name === payment.name)
           
           return {
             user_id: userId,

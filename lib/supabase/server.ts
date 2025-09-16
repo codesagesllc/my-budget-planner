@@ -2,7 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Database } from '@/types/supabase'
 
+// Check if we're in build time
+const isBuildTime = process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_SUPABASE_URL
+
 export async function createServerComponentClient() {
+  // During build, return a dummy client
+  if (isBuildTime) {
+    return null as any
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -30,6 +38,11 @@ export async function createServerComponentClient() {
 }
 
 export async function createServerActionClient() {
+  // During build, return a dummy client
+  if (isBuildTime) {
+    return null as any
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -56,6 +69,11 @@ export async function createServerActionClient() {
 
 // Service role client for admin operations (bypasses RLS)
 export async function createServiceRoleClient() {
+  // During build, return a dummy client
+  if (isBuildTime) {
+    return null as any
+  }
+
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,

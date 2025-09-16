@@ -4,6 +4,11 @@ import { withAuth } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 import { redis } from '@/lib/redis'
 
+interface UserStats {
+  subscription_tier: string | null
+  subscription_status: string | null
+}
+
 export const GET = withAuth(
   async (req) => {
     // Create Supabase client
@@ -29,7 +34,7 @@ export const GET = withAuth(
     }
     
     let activeUsers = 0
-    users.forEach(user => {
+    users.forEach((user: UserStats) => {
       if (user.subscription_tier) {
         subscriptionBreakdown[user.subscription_tier as keyof typeof subscriptionBreakdown]++
       }
