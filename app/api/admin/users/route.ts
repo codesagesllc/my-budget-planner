@@ -3,6 +3,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/auth/middleware'
 import { createClient } from '@/lib/supabase/server'
 
+interface UserData {
+  id: string
+  email: string
+  subscription_tier: string | null
+  subscription_status: string | null
+  created_at: string
+  free_trial_start_date: string | null
+  free_trial_end_date: string | null
+  subscription_end_date: string | null
+  is_admin: boolean | null
+}
+
 export const GET = withAuth(
   async (req) => {
     // Create Supabase client
@@ -33,7 +45,7 @@ export const GET = withAuth(
     
     // Get usage stats for each user
     const usersWithStats = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user: UserData) => {
         // You could fetch usage stats from Redis here
         return {
           ...user,

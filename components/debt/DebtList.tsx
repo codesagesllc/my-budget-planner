@@ -19,7 +19,7 @@ import {
   ChevronUp,
   History
 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 interface DebtListProps {
   debts: Debt[];

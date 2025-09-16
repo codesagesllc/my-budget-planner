@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         .eq('user_id', userId)
 
       const accountMap = new Map(
-        ourAccounts?.map(acc => [acc.plaid_account_id, acc.id]) || []
+        ourAccounts?.map((acc: any) => [acc.plaid_account_id, acc.id]) || []
       )
 
       // Store transactions

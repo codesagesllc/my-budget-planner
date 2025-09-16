@@ -205,7 +205,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       potentialMatches,
       unreconciled: {
-        transactions: transactions.filter(t => !t.categories?.length),
+        transactions: transactions.filter((t: any) => !t.categories?.length),
         incomeSources
       }
     });

@@ -6,7 +6,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { LogIn, Mail, Lock, Chrome, Loader2, CreditCard } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { Button, Input, Alert } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Alert } from '@/components/ui/alert'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
