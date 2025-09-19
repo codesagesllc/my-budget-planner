@@ -61,7 +61,7 @@ const pricingPlans: PricingPlan[] = [
   },
   {
     id: 'basic',
-    name: 'Budget Planner Membership',
+    name: 'PocketWiseAI Membership',
     description: 'Perfect for personal finance management with standard AI limits',
     price: 15,
     priceId: 'price_1S5vMd4GH1CShai7PaB4XeoJ',
@@ -525,7 +525,7 @@ export default function PricingComponent() {
             All plans include 256-bit SSL encryption, 99.9% uptime guarantee, and GDPR compliance
           </p>
           <p className="text-sm text-gray-500">
-            Questions? Contact us at support@mybudgetplanner.com
+            Questions? Contact us at help-desk@codesages.net
           </p>
         </div>
       </div>

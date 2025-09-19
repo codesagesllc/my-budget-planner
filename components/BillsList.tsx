@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { formatCurrency } from '@/lib/utils/helpers'
-import { Calendar, DollarSign, Clock, CheckCircle, Trash2, Edit, X } from 'lucide-react'
+import { Calendar, DollarSign, Clock, CheckCircle, Trash2, Edit, X, Check, Loader2, AlertTriangle } from 'lucide-react'
+import { toast } from 'sonner'
 import ManualBillEntry from './ManualBillEntry'
 
 interface BillsListProps {
@@ -11,10 +12,11 @@ interface BillsListProps {
 
 export default function BillsList({ bills: initialBills }: BillsListProps) {
   const [bills, setBills] = useState(initialBills)
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'overdue'>('all')
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'overdue' | 'paid'>('all')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [editingBill, setEditingBill] = useState<any | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState<string | null>(null)
 
   const getFilteredBills = () => {
     const today = new Date()
@@ -40,19 +42,21 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
           if (bill.billing_cycle === 'one-time' || bill.billing_cycle === 'annual') {
             return false
           }
-          
+
           const storedDate = new Date(bill.due_date)
           const dueDay = storedDate.getDate()
           const nextDueDate = new Date(today.getFullYear(), today.getMonth(), dueDay)
-          
+
           return nextDueDate < today
         })
+      case 'paid':
+        return bills.filter(bill => bill.is_paid === true)
       default:
         return bills
     }
   }
 
-  const getTabCount = (tab: 'all' | 'upcoming' | 'overdue') => {
+  const getTabCount = (tab: 'all' | 'upcoming' | 'overdue' | 'paid') => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -81,7 +85,11 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
         return nextDueDate < today
       }).length
     }
-    
+
+    if (tab === 'paid') {
+      return bills.filter(bill => bill.is_paid === true).length
+    }
+
     return 0
   }
 
@@ -203,6 +211,67 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
     setShowEditModal(false)
   }
 
+  const handlePaymentToggle = async (billId: string, currentlyPaid: boolean) => {
+    setPaymentLoading(billId)
+
+    try {
+      const response = await fetch('/api/bills/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          billId,
+          action: currentlyPaid ? 'unpay' : 'pay'
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update payment status')
+      }
+
+      // Update the local state
+      setBills(prevBills =>
+        prevBills.map(bill =>
+          bill.id === billId
+            ? { ...bill, ...result.bill }
+            : bill
+        )
+      )
+
+      toast.success(result.message)
+
+    } catch (error) {
+      console.error('Payment toggle error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update payment status')
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
+
+  const getPaymentStatusIcon = (bill: any) => {
+    if (paymentLoading === bill.id) {
+      return <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+    }
+
+    return (
+      <div
+        className={`h-4 w-4 border-2 rounded cursor-pointer transition-colors ${
+          bill.is_paid
+            ? 'bg-green-500 border-green-500'
+            : bill.is_overdue
+            ? 'border-red-300 hover:border-green-400'
+            : 'border-gray-300 hover:border-green-400'
+        }`}
+        onClick={() => handlePaymentToggle(bill.id, bill.is_paid || false)}
+      >
+        {bill.is_paid && <Check className="h-3 w-3 text-white" />}
+      </div>
+    )
+  }
+
   const filteredBills = getFilteredBills()
 
   if (bills.length === 0) {
@@ -219,7 +288,7 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
     <div className="space-y-4">
       {/* Filter Tabs */}
       <div className="flex space-x-2 border-b overflow-x-auto">
-        {(['all', 'upcoming', 'overdue'] as const).map((tab) => (
+        {(['all', 'upcoming', 'overdue', 'paid'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
@@ -241,7 +310,14 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
           return (
             <div key={bill.id} className="bg-white rounded-lg border p-4">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium text-gray-900 flex-1">{bill.name}</h3>
+                <div className="flex items-center space-x-3 flex-1">
+                  {getPaymentStatusIcon(bill)}
+                  <h3 className={`font-medium ${bill.is_paid ? 'text-green-700' : bill.is_overdue ? 'text-red-700' : 'text-gray-900'}`}>
+                    {bill.name}
+                    {bill.is_paid && <span className="ml-2 text-xs text-green-600">✓ Paid</span>}
+                    {bill.is_overdue && !bill.is_paid && <span className="ml-2 text-xs text-red-600">Overdue</span>}
+                  </h3>
+                </div>
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => handleEdit(bill)}
@@ -304,13 +380,15 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
           return (
             <div key={bill.id} className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-medium text-gray-900 flex-1">{bill.name}</h3>
+                <div className="flex items-center space-x-3 flex-1">
+                  {getPaymentStatusIcon(bill)}
+                  <h3 className={`font-medium ${bill.is_paid ? 'text-green-700' : bill.is_overdue ? 'text-red-700' : 'text-gray-900'}`}>
+                    {bill.name}
+                  </h3>
+                </div>
                 <div className="flex items-center space-x-1">
-                  {bill.is_active ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <div className="h-5 w-5 rounded-full bg-gray-300" />
-                  )}
+                  {bill.is_paid && <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Paid</span>}
+                  {bill.is_overdue && !bill.is_paid && <span className="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-full">Overdue</span>}
                   <button
                     onClick={() => handleEdit(bill)}
                     className="text-blue-500 hover:text-blue-700 p-1"
@@ -367,7 +445,9 @@ export default function BillsList({ bills: initialBills }: BillsListProps) {
 
       {filteredBills.length === 0 && (
         <div className="text-center py-6 sm:py-8 text-gray-500">
-          No {filter === 'all' ? '' : filter} bills found
+          {filter === 'paid' ? 'No paid bills found' :
+           filter === 'all' ? 'No bills found' :
+           `No ${filter} bills found`}
         </div>
       )}
 

@@ -211,13 +211,15 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
   const calculateExpensesForMonth = (year: number, month: number) => {
     const monthStart = new Date(year, month, 1)
     const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999)
-    
+
     let recurringExpenses = 0
     let oneTimeExpenses = 0
-    
+    let transactionSpending = 0
+
+    // Calculate bills (recurring and one-time)
     bills.forEach(bill => {
       if (!bill.is_active) return
-      
+
       // Handle one-time bills
       if (bill.billing_cycle === 'one-time') {
         const dueDate = new Date(bill.due_date)
@@ -227,10 +229,10 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       } else {
         // Handle recurring bills
         const dueDate = new Date(bill.due_date)
-        
+
         // Check if bill is active in this month
         if (dueDate > monthEnd) return // Bill hasn't started yet
-        
+
         // Calculate recurring expenses based on billing cycle
         const cycleMultipliers: Record<string, number> = {
           'monthly': 1,
@@ -239,7 +241,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
           'quarterly': 0,  // Handle separately
           'annual': 0      // Handle separately
         }
-        
+
         // Special handling for quarterly bills
         if (bill.billing_cycle === 'quarterly') {
           const monthsDiff = (year - dueDate.getFullYear()) * 12 + (month - dueDate.getMonth())
@@ -259,11 +261,60 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
         }
       }
     })
-    
+
+    // Add historical transaction spending for this month (if available)
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`
+    const currentDate = new Date()
+    const isHistoricalMonth = new Date(year, month, 1) < new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+
+    if (isHistoricalMonth) {
+      // For past months, use actual transaction data
+      transactions.forEach(transaction => {
+        const transactionDate = new Date(transaction.date)
+        if (transaction.transaction_type === 'expense' &&
+            transactionDate >= monthStart &&
+            transactionDate <= monthEnd) {
+          transactionSpending += Math.abs(transaction.amount)
+        }
+      })
+    } else {
+      // For future months, estimate based on recent spending patterns
+      const recentMonths = 3
+      let recentSpending = 0
+      let monthsCount = 0
+
+      for (let i = 1; i <= recentMonths; i++) {
+        const lookbackDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
+        const lookbackStart = new Date(lookbackDate.getFullYear(), lookbackDate.getMonth(), 1)
+        const lookbackEnd = new Date(lookbackDate.getFullYear(), lookbackDate.getMonth() + 1, 0, 23, 59, 59, 999)
+
+        let monthSpending = 0
+        transactions.forEach(transaction => {
+          const transactionDate = new Date(transaction.date)
+          if (transaction.transaction_type === 'expense' &&
+              transactionDate >= lookbackStart &&
+              transactionDate <= lookbackEnd) {
+            monthSpending += Math.abs(transaction.amount)
+          }
+        })
+
+        if (monthSpending > 0) {
+          recentSpending += monthSpending
+          monthsCount++
+        }
+      }
+
+      // Use average of recent months for future predictions
+      if (monthsCount > 0) {
+        transactionSpending = recentSpending / monthsCount
+      }
+    }
+
     return {
-      total: recurringExpenses + oneTimeExpenses,
+      total: recurringExpenses + oneTimeExpenses + transactionSpending,
       recurring: recurringExpenses,
-      oneTime: oneTimeExpenses
+      oneTime: oneTimeExpenses,
+      transactionSpending: transactionSpending
     }
   }
 
@@ -463,53 +514,240 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
     return forecast
   }
 
+  // AI spending pattern analysis helper functions
+  const analyzeSpendingPatterns = () => {
+    const analysis = {
+      avgMonthlySpending: 0,
+      spendingTrend: 0,
+      volatility: 0,
+      seasonalFactors: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      categoryTrends: {} as Record<string, number>,
+      recentGrowthRate: 0
+    }
+
+    // Calculate historical spending averages
+    const monthlySpending: number[] = []
+    const currentDate = new Date()
+
+    // Analyze last 6 months of transaction data
+    for (let i = 5; i >= 0; i--) {
+      const lookbackDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
+      const monthStart = new Date(lookbackDate.getFullYear(), lookbackDate.getMonth(), 1)
+      const monthEnd = new Date(lookbackDate.getFullYear(), lookbackDate.getMonth() + 1, 0, 23, 59, 59, 999)
+
+      let monthSpending = 0
+      transactions.forEach(transaction => {
+        const transactionDate = new Date(transaction.date)
+        if (transaction.transaction_type === 'expense' &&
+            transactionDate >= monthStart &&
+            transactionDate <= monthEnd) {
+          monthSpending += Math.abs(transaction.amount)
+        }
+      })
+
+      if (monthSpending > 0) {
+        monthlySpending.push(monthSpending)
+      }
+    }
+
+    if (monthlySpending.length > 0) {
+      analysis.avgMonthlySpending = monthlySpending.reduce((sum, val) => sum + val, 0) / monthlySpending.length
+
+      // Calculate spending trend (linear regression slope)
+      if (monthlySpending.length >= 3) {
+        const n = monthlySpending.length
+        const sumX = (n * (n - 1)) / 2
+        const sumY = monthlySpending.reduce((sum, val) => sum + val, 0)
+        const sumXY = monthlySpending.reduce((sum, val, idx) => sum + val * idx, 0)
+        const sumX2 = monthlySpending.reduce((sum, _, idx) => sum + idx * idx, 0)
+
+        analysis.spendingTrend = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+      }
+
+      // Calculate volatility (standard deviation)
+      const variance = monthlySpending.reduce((sum, val) => sum + Math.pow(val - analysis.avgMonthlySpending, 2), 0) / monthlySpending.length
+      analysis.volatility = Math.sqrt(variance)
+
+      // Calculate recent growth rate (last 3 months vs previous 3)
+      if (monthlySpending.length >= 6) {
+        const recentAvg = monthlySpending.slice(-3).reduce((sum, val) => sum + val, 0) / 3
+        const previousAvg = monthlySpending.slice(0, 3).reduce((sum, val) => sum + val, 0) / 3
+        analysis.recentGrowthRate = previousAvg > 0 ? (recentAvg - previousAvg) / previousAvg : 0
+      }
+    }
+
+    // Analyze seasonal patterns from transaction data
+    const seasonalSpending = new Array(12).fill(0)
+    const seasonalCounts = new Array(12).fill(0)
+
+    transactions.forEach(transaction => {
+      if (transaction.transaction_type === 'expense') {
+        const month = new Date(transaction.date).getMonth()
+        seasonalSpending[month] += Math.abs(transaction.amount)
+        seasonalCounts[month]++
+      }
+    })
+
+    // Calculate seasonal factors relative to average
+    const totalSeasonalSpending = seasonalSpending.reduce((sum, val) => sum + val, 0)
+    const avgSeasonalSpending = totalSeasonalSpending / 12
+
+    if (avgSeasonalSpending > 0) {
+      analysis.seasonalFactors = seasonalSpending.map(spending =>
+        spending > 0 ? spending / seasonalCounts[seasonalSpending.indexOf(spending)] / avgSeasonalSpending : 1
+      )
+    }
+
+    return analysis
+  }
+
+  const calculateDynamicWeights = (historicalData: any[]) => {
+    const weights = {
+      linear: 0.3,
+      exponential: 0.2,
+      movingAvg: 0.5
+    }
+
+    // Adjust weights based on data quality and patterns
+    if (historicalData.length < 3) {
+      // Limited data - favor simple linear approach
+      weights.linear = 0.6
+      weights.exponential = 0.1
+      weights.movingAvg = 0.3
+    } else if (historicalData.length >= 6) {
+      // Good data quality - trust AI and seasonal patterns more
+      weights.linear = 0.2
+      weights.exponential = 0.3
+      weights.movingAvg = 0.5
+    }
+
+    // Check for growth trends in income sources
+    const hasGrowthIncome = incomeSources.some(income =>
+      income.frequency !== 'one-time' && income.is_active
+    )
+
+    if (hasGrowthIncome) {
+      // Favor exponential when there's growth potential
+      weights.exponential += 0.1
+      weights.linear -= 0.05
+      weights.movingAvg -= 0.05
+    }
+
+    // Check for seasonal business (freelance, business income)
+    const hasSeasonalIncome = incomeSources.some(income =>
+      income.category === 'freelance' || income.category === 'business'
+    )
+
+    if (hasSeasonalIncome) {
+      // Favor seasonal adjustments
+      weights.movingAvg += 0.1
+      weights.linear -= 0.05
+      weights.exponential -= 0.05
+    }
+
+    return weights
+  }
+
+  const applySpendingAdjustments = (baselineExpenses: any, spendingAnalysis: any, year: number, month: number) => {
+    const monthIndex = month - 1 // Convert to 0-based index
+    let adjustedExpenses = { ...baselineExpenses }
+
+    // Apply seasonal adjustments to transaction spending
+    const seasonalFactor = spendingAnalysis.seasonalFactors[monthIndex] || 1
+    adjustedExpenses.transactionSpending *= seasonalFactor
+
+    // Apply spending trend adjustments
+    const currentDate = new Date()
+    const monthsFromNow = (year - currentDate.getFullYear()) * 12 + (month - currentDate.getMonth() - 1)
+
+    if (monthsFromNow > 0 && Math.abs(spendingAnalysis.spendingTrend) > 0.01) {
+      // Apply trend with diminishing impact over time
+      const trendImpact = spendingAnalysis.spendingTrend * Math.pow(0.9, monthsFromNow)
+      adjustedExpenses.transactionSpending *= (1 + trendImpact)
+    }
+
+    // Apply volatility-based uncertainty for future months
+    if (monthsFromNow > 0 && spendingAnalysis.volatility > 0) {
+      // Add slight randomness based on historical volatility (conservative estimate)
+      const volatilityFactor = 1 + (spendingAnalysis.volatility / spendingAnalysis.avgMonthlySpending) * 0.1
+      adjustedExpenses.transactionSpending *= Math.min(volatilityFactor, 1.2) // Cap at 20% increase
+    }
+
+    // Apply recent growth rate trends
+    if (monthsFromNow > 0 && Math.abs(spendingAnalysis.recentGrowthRate) > 0.05) {
+      const growthImpact = spendingAnalysis.recentGrowthRate * Math.pow(0.8, monthsFromNow / 3)
+      adjustedExpenses.transactionSpending *= (1 + growthImpact)
+    }
+
+    // Special adjustments for holiday months (November, December)
+    if (monthIndex === 10 || monthIndex === 11) { // November or December
+      adjustedExpenses.transactionSpending *= 1.15 // 15% increase for holiday spending
+    }
+
+    // Ensure spending doesn't go below a reasonable minimum
+    adjustedExpenses.transactionSpending = Math.max(
+      adjustedExpenses.transactionSpending,
+      spendingAnalysis.avgMonthlySpending * 0.5
+    )
+
+    // Recalculate total
+    adjustedExpenses.total = adjustedExpenses.recurring + adjustedExpenses.oneTime + adjustedExpenses.transactionSpending
+
+    return adjustedExpenses
+  }
+
   const generateAIForecast = async (historicalData: any[]) => {
     // Combine multiple forecasting methods with weights
     const linear = generateLinearForecast(historicalData)
     const exponential = generateExponentialForecast(historicalData)
     const movingAvg = generateMovingAverageForecast(historicalData)
-    
-    // Weighted average of different methods
-    const weights = { linear: 0.4, exponential: 0.2, movingAvg: 0.4 }
-    
-    const aiForecast = linear.map((item, index) => ({
-      month: item.month,
-      predictedIncome: 
-        linear[index].predictedIncome * weights.linear +
-        exponential[index].predictedIncome * weights.exponential +
-        movingAvg[index].predictedIncome * weights.movingAvg,
-      predictedExpenses:
-        linear[index].predictedExpenses * weights.linear +
-        exponential[index].predictedExpenses * weights.exponential +
-        movingAvg[index].predictedExpenses * weights.movingAvg,
-      predictedSavings: 0,
-      incomeBreakdown: {
-        recurring: 
-          (linear[index].incomeBreakdown?.recurring || 0) * weights.linear +
-          (exponential[index].incomeBreakdown?.recurring || 0) * weights.exponential +
-          (movingAvg[index].incomeBreakdown?.recurring || 0) * weights.movingAvg,
-        oneTime: 
-          (linear[index].incomeBreakdown?.oneTime || 0) * weights.linear +
-          (exponential[index].incomeBreakdown?.oneTime || 0) * weights.exponential +
-          (movingAvg[index].incomeBreakdown?.oneTime || 0) * weights.movingAvg
-      },
-      expenseBreakdown: {
-        recurring: 
-          (linear[index].expenseBreakdown?.recurring || 0) * weights.linear +
-          (exponential[index].expenseBreakdown?.recurring || 0) * weights.exponential +
-          (movingAvg[index].expenseBreakdown?.recurring || 0) * weights.movingAvg,
-        oneTime: 
-          (linear[index].expenseBreakdown?.oneTime || 0) * weights.linear +
-          (exponential[index].expenseBreakdown?.oneTime || 0) * weights.exponential +
-          (movingAvg[index].expenseBreakdown?.oneTime || 0) * weights.movingAvg
+
+    // Enhanced AI analysis of spending patterns
+    const spendingAnalysis = analyzeSpendingPatterns()
+
+    // Dynamic weights based on data quality and patterns
+    const weights = calculateDynamicWeights(historicalData)
+
+    const aiForecast = linear.map((item, index) => {
+      const [year, month] = item.month.split('-').map(Number)
+
+      // Get baseline expenses from bills and transaction patterns
+      const baselineExpenses = calculateExpensesForMonth(year, month - 1)
+
+      // Apply AI adjustments based on spending patterns
+      const adjustedExpenses = applySpendingAdjustments(baselineExpenses, spendingAnalysis, year, month)
+
+      return {
+        month: item.month,
+        predictedIncome:
+          linear[index].predictedIncome * weights.linear +
+          exponential[index].predictedIncome * weights.exponential +
+          movingAvg[index].predictedIncome * weights.movingAvg,
+        predictedExpenses: adjustedExpenses.total,
+        predictedSavings: 0,
+        incomeBreakdown: {
+          recurring:
+            (linear[index].incomeBreakdown?.recurring || 0) * weights.linear +
+            (exponential[index].incomeBreakdown?.recurring || 0) * weights.exponential +
+            (movingAvg[index].incomeBreakdown?.recurring || 0) * weights.movingAvg,
+          oneTime:
+            (linear[index].incomeBreakdown?.oneTime || 0) * weights.linear +
+            (exponential[index].incomeBreakdown?.oneTime || 0) * weights.exponential +
+            (movingAvg[index].incomeBreakdown?.oneTime || 0) * weights.movingAvg
+        },
+        expenseBreakdown: {
+          recurring: adjustedExpenses.recurring,
+          oneTime: adjustedExpenses.oneTime,
+          transactionSpending: adjustedExpenses.transactionSpending
+        }
       }
-    }))
-    
+    })
+
     // Calculate savings
     aiForecast.forEach(item => {
       item.predictedSavings = item.predictedIncome - item.predictedExpenses
     })
-    
+
     // Save forecast to database
     try {
       await supabase.from('budget_forecasts').insert(
@@ -526,6 +764,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
             weights,
             incomeBreakdown: item.incomeBreakdown,
             expenseBreakdown: item.expenseBreakdown,
+            spendingAnalysis,
             generated_at: new Date().toISOString()
           }
         }))
@@ -533,7 +772,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
     } catch (error) {
       console.error('Error saving forecast:', error)
     }
-    
+
     return aiForecast
   }
 
@@ -979,6 +1218,9 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                         <div className="ml-2 text-xs text-gray-600">
                           <p>Recurring: {formatCurrency(data.expenseBreakdown.recurring)}</p>
                           <p>One-time: {formatCurrency(data.expenseBreakdown.oneTime)}</p>
+                          {data.expenseBreakdown.transactionSpending && (
+                            <p>Transaction Spending: {formatCurrency(data.expenseBreakdown.transactionSpending)}</p>
+                          )}
                         </div>
                       )}
                       <p className="text-blue-600 font-semibold">Savings: {formatCurrency(data.predictedSavings)}</p>

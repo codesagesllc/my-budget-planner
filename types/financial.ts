@@ -24,10 +24,16 @@ export interface Transaction {
   amount: number
   date: string
   category?: string | null
+  categories?: string[] | null
   subcategory?: string | null
   transaction_type?: 'expense' | 'income' | 'transfer'
   pending?: boolean
   plaid_transaction_id?: string | null
+  bill_id?: string | null
+  is_recurring?: boolean
+  recurring_pattern?: any | null
+  is_bill_payment?: boolean
+  exclude_from_spending?: boolean
   created_at?: string
 }
 

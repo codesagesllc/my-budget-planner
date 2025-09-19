@@ -30,7 +30,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <DollarSign className="h-8 w-8 text-blue-600 mr-2" />
-              <span className="text-xl font-bold text-gray-900">My Budget Planner</span>
+              <span className="text-xl font-bold text-gray-900">PocketWiseAI</span>
             </div>
             <div className="flex space-x-4">
               <Link
@@ -228,7 +228,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2025 Budget Planner. All rights reserved.</p>
+          <p>&copy; 2025 PocketWiseAI. All rights reserved.</p>
           <div className="mt-4 space-x-4">
             <Link href="/login" className="text-gray-400 hover:text-white text-sm">
               Sign In

@@ -85,7 +85,7 @@ export default function LoginForm() {
         </div>
         
         {message && <Alert variant="success">{message}</Alert>}
-        {error && <Alert variant="error">{error}</Alert>}
+        {error && <Alert variant="destructive">{error}</Alert>}
 
         <Button
           onClick={handleGoogleLogin}

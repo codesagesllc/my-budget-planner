@@ -1,12 +1,12 @@
 # Supabase Email Templates
 
-These email templates are designed for My Budget Planner. Copy and paste these into your Supabase dashboard under Authentication → Email Templates.
+These email templates are designed for PocketWiseAI. Copy and paste these into your Supabase dashboard under Authentication → Email Templates.
 
 **Note:** Email clients don't support Tailwind classes, so these use inline styles that match Tailwind's design system.
 
 ## 1. Confirm Signup Email
 
-**Subject:** Welcome to My Budget Planner - Confirm Your Email
+**Subject:** Welcome to PocketWiseAI - Confirm Your Email
 
 ```html
 <!DOCTYPE html>
@@ -24,7 +24,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">My Budget Planner</h1>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">PocketWiseAI</h1>
               <p style="margin: 10px 0 0 0; color: #e0e7ff; font-size: 16px;">Take control of your financial future</p>
             </td>
           </tr>
@@ -35,7 +35,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
               <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Welcome aboard! 🎉</h2>
               
               <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 24px;">
-                Thanks for signing up for My Budget Planner. We're excited to help you manage your finances better!
+                Thanks for signing up for PocketWiseAI. We're excited to help you manage your finances better!
               </p>
               
               <p style="margin: 0 0 30px 0; color: #4b5563; font-size: 16px; line-height: 24px;">
@@ -81,10 +81,10 @@ These email templates are designed for My Budget Planner. Copy and paste these i
                 This link expires in 24 hours for security reasons.
               </p>
               <p style="margin: 0 0 10px 0; color: #9ca3af; font-size: 12px;">
-                If you didn't sign up for My Budget Planner, please ignore this email.
+                If you didn't sign up for PocketWiseAI, please ignore this email.
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                © 2024 My Budget Planner. All rights reserved.
+                © 2024 PocketWiseAI. All rights reserved.
               </p>
             </td>
           </tr>
@@ -98,7 +98,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
 
 ## 2. Invite User Email
 
-**Subject:** You're Invited to Join My Budget Planner
+**Subject:** You're Invited to Join PocketWiseAI
 
 ```html
 <!DOCTYPE html>
@@ -126,10 +126,10 @@ These email templates are designed for My Budget Planner. Copy and paste these i
           <!-- Content -->
           <tr>
             <td style="padding: 40px 30px;">
-              <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Join My Budget Planner Today</h2>
+              <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Join PocketWiseAI Today</h2>
               
               <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 24px;">
-                You've been invited to join My Budget Planner - the smart way to manage your finances and achieve your financial goals.
+                You've been invited to join PocketWiseAI - the smart way to manage your finances and achieve your financial goals.
               </p>
               
               <div style="padding: 20px; background-color: #fef3c7; border-radius: 8px; margin: 20px 0;">
@@ -167,7 +167,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
               
               <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #86efac;">
                 <h3 style="margin: 0 0 10px 0; color: #166534; font-size: 16px; font-weight: 600;">
-                  Why My Budget Planner?
+                  Why PocketWiseAI?
                 </h3>
                 <p style="margin: 0; color: #166534; font-size: 14px; line-height: 20px;">
                   ✓ Connect all your accounts in one place<br>
@@ -190,7 +190,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
                 If you received this email by mistake, you can safely ignore it.
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                © 2024 My Budget Planner. All rights reserved.
+                © 2024 PocketWiseAI. All rights reserved.
               </p>
             </td>
           </tr>
@@ -204,7 +204,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
 
 ## 3. Magic Link Email
 
-**Subject:** Your Login Link for My Budget Planner
+**Subject:** Your Login Link for PocketWiseAI
 
 ```html
 <!DOCTYPE html>
@@ -235,7 +235,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
               <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Click to Sign In</h2>
               
               <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 24px;">
-                We received a request to sign in to My Budget Planner using this email address. Click the button below to sign in instantly:
+                We received a request to sign in to PocketWiseAI using this email address. Click the button below to sign in instantly:
               </p>
               
               <table role="presentation" style="margin: 30px auto;">
@@ -280,7 +280,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
                 For security, never forward this email to anyone.
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                © 2024 My Budget Planner. All rights reserved.
+                © 2024 PocketWiseAI. All rights reserved.
               </p>
             </td>
           </tr>
@@ -325,7 +325,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
               <h2 style="margin: 0 0 20px 0; color: #1f2937; font-size: 24px; font-weight: 600;">Confirm Your New Email</h2>
               
               <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 16px; line-height: 24px;">
-                You've requested to change your email address for your My Budget Planner account. Please confirm this change by clicking the button below:
+                You've requested to change your email address for your PocketWiseAI account. Please confirm this change by clicking the button below:
               </p>
               
               <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
@@ -384,7 +384,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
                 Need help? Contact help-desk@codesages.net
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                © 2024 My Budget Planner. All rights reserved.
+                © 2024 PocketWiseAI. All rights reserved.
               </p>
             </td>
           </tr>
@@ -476,7 +476,7 @@ These email templates are designed for My Budget Planner. Copy and paste these i
               
               <div style="margin-top: 30px; padding: 15px; background-color: #f9fafb; border-radius: 6px;">
                 <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 20px; text-align: center;">
-                  <strong>Remember:</strong> My Budget Planner staff will NEVER ask for this code via email, phone, or text message.
+                  <strong>Remember:</strong> PocketWiseAI staff will NEVER ask for this code via email, phone, or text message.
                 </p>
               </div>
             </td>
@@ -489,10 +489,10 @@ These email templates are designed for My Budget Planner. Copy and paste these i
                 This code expires in 10 minutes.
               </p>
               <p style="margin: 0 0 10px 0; color: #9ca3af; font-size: 12px;">
-                Need help? Contact support@mybudgetplanner.com
+                Need help? Contact help-desk@codesages.net
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                © 2024 My Budget Planner. All rights reserved.
+                © 2024 PocketWiseAI. All rights reserved.
               </p>
             </td>
           </tr>

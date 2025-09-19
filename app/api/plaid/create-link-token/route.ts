@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         user: {
           client_user_id: userId,
         },
-        client_name: 'Budget Planner',
+        client_name: 'PocketWiseAI',
         products: PLAID_PRODUCTS as Products[],
         country_codes: PLAID_COUNTRY_CODES as CountryCode[],
         language: 'en',

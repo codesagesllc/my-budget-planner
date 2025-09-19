@@ -56,6 +56,19 @@ interface IncomeSource {
   end_date?: string
 }
 
+interface Transaction {
+  id: string
+  user_id: string
+  amount: number
+  description: string
+  date: string
+  category?: string
+  categories?: string[]
+  transaction_type?: 'expense' | 'income' | 'transfer'
+  exclude_from_spending?: boolean
+  is_bill_payment?: boolean
+}
+
 type TimePeriod = 'last30' | 'currentMonth' | 'last6months'
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316']
@@ -63,6 +76,7 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 export default function ExpenseReport() {
   const [bills, setBills] = useState<Bill[]>([])
   const [incomes, setIncomes] = useState<IncomeSource[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('currentMonth')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -89,7 +103,6 @@ export default function ExpenseReport() {
           .eq('is_active', true)
 
         if (billsError) {
-          console.error('Bills fetch error:', billsError)
           throw billsError
         }
 
@@ -101,17 +114,28 @@ export default function ExpenseReport() {
           .eq('is_active', true)
 
         if (incomesError) {
-          console.error('Income fetch error:', incomesError)
           throw incomesError
         }
 
-        console.log('Fetched income sources:', incomesData)
-        console.log('Fetched bills:', billsData)
+        // Fetch transactions (for the selected time period)
+        const { start, end } = getDateRangeForPeriod(timePeriod)
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('date', start.toISOString().split('T')[0])
+          .lte('date', end.toISOString().split('T')[0])
+          .eq('transaction_type', 'expense')
+          .eq('exclude_from_spending', false)
+
+        if (transactionsError) {
+          throw transactionsError
+        }
 
         setBills(billsData || [])
         setIncomes(incomesData || [])
+        setTransactions(transactionsData || [])
       } catch (err: any) {
-        console.error('Error fetching data:', err)
         setError(err.message || 'Failed to load expense data')
       } finally {
         setLoading(false)
@@ -119,12 +143,27 @@ export default function ExpenseReport() {
     }
 
     fetchData()
-  }, [])
+  }, [timePeriod])
 
   // Get date range based on selected period
   const getDateRange = () => {
     const now = new Date()
     switch (timePeriod) {
+      case 'last30':
+        return { start: subDays(now, 30), end: now }
+      case 'currentMonth':
+        return { start: startOfMonth(now), end: endOfMonth(now) }
+      case 'last6months':
+        return { start: subMonths(now, 6), end: now }
+      default:
+        return { start: startOfMonth(now), end: endOfMonth(now) }
+    }
+  }
+
+  // Helper function for fetching data based on period
+  const getDateRangeForPeriod = (period: TimePeriod) => {
+    const now = new Date()
+    switch (period) {
       case 'last30':
         return { start: subDays(now, 30), end: now }
       case 'currentMonth':
@@ -153,7 +192,6 @@ export default function ExpenseReport() {
   // Calculate total monthly income with proper frequency handling
   const totalMonthlyIncome = useMemo(() => {
     if (!incomes || incomes.length === 0) {
-      console.log('No income sources available')
       return 0
     }
     
@@ -163,7 +201,6 @@ export default function ExpenseReport() {
     
     const total = incomes.reduce((sum, income) => {
       if (!income.is_active) {
-        console.log(`Skipping inactive income: ${income.name}`)
         return sum
       }
       
@@ -172,7 +209,6 @@ export default function ExpenseReport() {
         if (timePeriod === 'currentMonth' && income.start_date) {
           const startDate = new Date(income.start_date)
           if (startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear) {
-            console.log(`One-time income in current month: ${income.name} = ${income.amount}`)
             return sum + Number(income.amount)
           }
         }
@@ -180,21 +216,20 @@ export default function ExpenseReport() {
       }
       
       const monthlyAmount = getMonthlyAmount(Number(income.amount), income.frequency)
-      console.log(`Income: ${income.name}, Amount: ${income.amount}, Frequency: ${income.frequency}, Monthly: ${monthlyAmount}`)
       return sum + monthlyAmount
     }, 0)
-    
-    console.log('Total monthly income calculated:', total)
+
     return total
   }, [incomes, timePeriod])
 
-  // Process bills by category
+  // Process bills and transactions by category
   const categoryData = useMemo(() => {
     const categoryTotals: Record<string, number> = {}
-    
+
+    // Process bills (convert to monthly amounts)
     bills.forEach(bill => {
       const monthlyAmount = getMonthlyAmount(bill.amount, bill.billing_cycle)
-      
+
       if (bill.categories && Array.isArray(bill.categories)) {
         // If bill has multiple categories, split the amount equally
         const amountPerCategory = monthlyAmount / bill.categories.length
@@ -207,6 +242,28 @@ export default function ExpenseReport() {
       }
     })
 
+    // Process transactions (actual amounts for the selected period)
+    transactions.forEach(transaction => {
+      // Only include expense transactions that aren't excluded from spending
+      if (transaction.transaction_type === 'expense' && !transaction.exclude_from_spending) {
+        const amount = Math.abs(transaction.amount)
+
+        // Handle multiple categories
+        if (transaction.categories && Array.isArray(transaction.categories) && transaction.categories.length > 0) {
+          const amountPerCategory = amount / transaction.categories.length
+          transaction.categories.forEach(category => {
+            categoryTotals[category] = (categoryTotals[category] || 0) + amountPerCategory
+          })
+        } else if (transaction.category) {
+          // Single category
+          categoryTotals[transaction.category] = (categoryTotals[transaction.category] || 0) + amount
+        } else {
+          // No categories, add to "Uncategorized"
+          categoryTotals['Uncategorized'] = (categoryTotals['Uncategorized'] || 0) + amount
+        }
+      }
+    })
+
     return Object.entries(categoryTotals)
       .map(([category, amount]) => ({
         category,
@@ -214,7 +271,7 @@ export default function ExpenseReport() {
         percentage: totalMonthlyIncome > 0 ? (amount / totalMonthlyIncome) * 100 : 0
       }))
       .sort((a, b) => b.amount - a.amount)
-  }, [bills, totalMonthlyIncome])
+  }, [bills, transactions, totalMonthlyIncome])
 
   // Generate burndown chart data
   const burndownData = useMemo(() => {
@@ -279,26 +336,44 @@ export default function ExpenseReport() {
       .filter(cat => cat.amount > 0)
       .map(cat => {
         // Ensure percentage is calculated correctly
-        const percentage = totalMonthlyIncome > 0 
-          ? (cat.amount / totalMonthlyIncome) * 100 
+        const percentage = totalMonthlyIncome > 0
+          ? (cat.amount / totalMonthlyIncome) * 100
           : 0
-        
+
+        // Determine frequency based on bills and transactions in this category
+        let frequency = 'Mixed' // Default when category has both bills and transactions
+
+        // Check if category has bills
+        const billsInCategory = bills.filter(bill => bill.categories?.includes(cat.category))
+
+        // Check if category has transactions
+        const transactionsInCategory = transactions.filter(transaction =>
+          (transaction.categories?.includes(cat.category) || transaction.category === cat.category) &&
+          transaction.transaction_type === 'expense' &&
+          !transaction.exclude_from_spending
+        )
+
+        if (billsInCategory.length > 0 && transactionsInCategory.length === 0) {
+          // Only bills in this category
+          const primaryBill = billsInCategory[0]
+          if (primaryBill.billing_cycle === 'monthly') frequency = 'Monthly'
+          else if (primaryBill.billing_cycle === 'weekly' || primaryBill.billing_cycle === 'biweekly') frequency = 'Frequent'
+          else frequency = 'Periodic'
+        } else if (transactionsInCategory.length > 0 && billsInCategory.length === 0) {
+          // Only transactions in this category
+          frequency = 'Variable'
+        }
+        // else: Mixed (both bills and transactions)
+
         return {
           category: cat.category,
           percentOfIncome: percentage,
           amount: cat.amount,
-          // Add frequency indicator based on typical payment cycles
-          frequency: bills
-            .filter(bill => bill.categories?.includes(cat.category))
-            .reduce((freq, bill) => {
-              if (bill.billing_cycle === 'monthly') return 'Monthly'
-              if (bill.billing_cycle === 'weekly' || bill.billing_cycle === 'biweekly') return 'Frequent'
-              return 'Periodic'
-            }, 'Monthly')
+          frequency: frequency
         }
       })
       .sort((a, b) => b.percentOfIncome - a.percentOfIncome) // Sort by percentage descending
-  }, [categoryData, bills, totalMonthlyIncome])
+  }, [categoryData, bills, transactions, totalMonthlyIncome])
 
   // Spending forecast
   const forecastData = useMemo(() => {
@@ -364,7 +439,7 @@ export default function ExpenseReport() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Expense Report</h2>
-            <p className="text-gray-600 mt-1">Comprehensive analysis of your bills and spending patterns</p>
+            <p className="text-gray-600 mt-1">Comprehensive analysis of your bills, transactions, and spending patterns</p>
           </div>
           
           <div className="flex gap-2">
@@ -409,7 +484,7 @@ export default function ExpenseReport() {
             <ChartBar className="h-5 w-5 mr-2 text-blue-600" />
             Spending by Category
           </h3>
-          <p className="text-sm text-gray-600 mt-1">Total amount spent per category</p>
+          <p className="text-sm text-gray-600 mt-1">Total amount spent per category (bills + transactions)</p>
         </div>
         
         <ResponsiveContainer width="100%" height={300}>
@@ -499,7 +574,7 @@ export default function ExpenseReport() {
             <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
             Percentage of Income by Category
           </h3>
-          <p className="text-sm text-gray-600 mt-1">How much of your income goes to each category</p>
+          <p className="text-sm text-gray-600 mt-1">How much of your income goes to each category (bills + transactions)</p>
         </div>
         
         {frequencyData.length > 0 && totalMonthlyIncome > 0 ? (
@@ -673,12 +748,12 @@ export default function ExpenseReport() {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-          <p className="text-blue-100 text-sm">Total Monthly Bills</p>
+          <p className="text-blue-100 text-sm">Total Monthly Expenses</p>
           <p className="text-3xl font-bold mt-2">
             {formatCurrency(categoryData.reduce((sum, cat) => sum + cat.amount, 0))}
           </p>
           <p className="text-blue-100 text-xs mt-2">
-            Across {categoryData.length} categories
+            Bills + Transactions across {categoryData.length} categories
           </p>
         </div>
         
@@ -703,16 +778,6 @@ export default function ExpenseReport() {
         </div>
       </div>
 
-      {/* Debug Info - Remove in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 p-4 bg-gray-100 rounded text-xs">
-          <p>Debug Info:</p>
-          <p>Income Sources: {incomes.length} total, {incomes.filter(i => i.is_active).length} active</p>
-          <p>Bills: {bills.length} total, {bills.filter(b => b.is_active).length} active</p>
-          <p>Total Monthly Income: {formatCurrency(totalMonthlyIncome)}</p>
-          <p>Categories: {categoryData.map(c => `${c.category}: ${formatCurrency(c.amount)}`).join(', ')}</p>
-        </div>
-      )}
     </div>
   )
 }

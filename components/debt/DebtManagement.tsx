@@ -10,8 +10,13 @@ import { DebtPayoffTimeline } from './DebtPayoffTimeline';
 import { CashFlowImpactChart } from './CashFlowImpactChart';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import DebtPayoffTracker from '@/components/DebtPayoffTracker';
 
-export function DebtManagement() {
+interface DebtManagementProps {
+  userId?: string
+}
+
+export function DebtManagement({ userId }: DebtManagementProps = {}) {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -167,6 +172,11 @@ export function DebtManagement() {
           debts={debts}
           onStrategyGenerated={handleStrategyGeneration}
         />
+      )}
+
+      {/* Debt Payoff Tracker */}
+      {userId && (
+        <DebtPayoffTracker userId={userId} />
       )}
 
       {/* Payoff Timeline */}
