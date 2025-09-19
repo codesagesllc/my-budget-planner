@@ -21,14 +21,14 @@ import ManualBillEntry from '@/components/ManualBillEntry'
 import { RemainingBalanceCard } from '@/components/RemainingBalanceCard'
 import AITransactionAnalyzer from '@/components/AITransactionAnalyzer'
 import AddAccountModal from '@/components/AddAccountModal'
-import { 
-  LogOut, Upload, Brain, DollarSign, Plus, 
-  FileSpreadsheet, Menu, X, Home, Receipt, 
+import {
+  LogOut, Upload, Brain, DollarSign, Plus,
+  FileSpreadsheet, Menu, X, Home, Receipt,
   CreditCard, TrendingUp, PlusCircle, BarChart3,
   Wallet, Settings, ChevronLeft, ChevronRight,
   ArrowUpRight, ArrowDownRight, Target, Calendar,
   AlertCircle, Edit3, PiggyBank, Sparkles, ChartBar,
-  Crown, Shield, Lock, ChevronDown
+  Crown, Shield, Lock, ChevronDown, BookOpen
 } from 'lucide-react'
 import { DebtManagement } from '@/components/debt/DebtManagement'
 import RealTimeAlerts from '@/components/RealTimeAlerts'
@@ -65,7 +65,7 @@ export default function DashboardClient({
   const [transactions, setTransactions] = useState(initialTransactions)
   const [bills, setBills] = useState(initialBills)
   const [incomeSources, setIncomeSources] = useState<IncomeSources[]>(initialIncomeSources)
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts' | 'budgets' | 'admin'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts' | 'budgets' | 'docs' | 'admin'>('overview')
   const [showBillUploader, setShowBillUploader] = useState(false)
   const [showManualBillEntry, setShowManualBillEntry] = useState(false)
   const [showAIAnalyzer, setShowAIAnalyzer] = useState(false)
@@ -767,6 +767,7 @@ export default function DashboardClient({
     { id: 'debts', label: 'Debts', icon: PiggyBank, requiredFeature: 'debt_strategies' },
     { id: 'forecast', label: 'Forecast', icon: BarChart3, requiredFeature: 'budget_forecasting' },
     { id: 'insights', label: 'Insights', icon: Brain, requiredFeature: 'ai_insights' },
+    { id: 'docs', label: 'Documentation', icon: BookOpen, requiredFeature: null },
   ].filter(item => !item.requiredFeature || hasFeature(item.requiredFeature as any))
   
   // Add admin panel if user is admin
@@ -814,7 +815,11 @@ export default function DashboardClient({
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id as any)
+                  if (item.id === 'docs') {
+                    router.push('/dashboard/docs')
+                  } else {
+                    setActiveTab(item.id as any)
+                  }
                   setMobileMenuOpen(false)
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
@@ -885,7 +890,13 @@ export default function DashboardClient({
                 <button
                   key={item.id}
                   data-tab={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
+                  onClick={() => {
+                    if (item.id === 'docs') {
+                      router.push('/dashboard/docs')
+                    } else {
+                      setActiveTab(item.id as any)
+                    }
+                  }}
                   className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-all group relative ${
                     activeTab === item.id
                       ? 'bg-white/20 text-white shadow-lg'
