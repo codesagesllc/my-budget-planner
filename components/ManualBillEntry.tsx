@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, X, Save, Calendar, DollarSign, Tag, RefreshCw, Check } from 'lucide-react'
+import { PLAID_BILL_CATEGORIES, BILL_CATEGORY_GROUPS, getBillCategoryLabel } from '@/lib/constants/bill-categories'
 
 interface ManualBillEntryProps {
   userId: string
@@ -32,6 +33,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
         dueDate,
         billingCycle: billToEdit.billing_cycle || 'monthly',
         categories,
+        is_paid: billToEdit.is_paid || false,
       }
     }
     
@@ -41,6 +43,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
       dueDate: '',
       billingCycle: 'monthly' as 'monthly' | 'quarterly' | 'annual' | 'weekly' | 'biweekly' | 'one-time',
       categories: [] as string[],
+      is_paid: false,
     }
   }
   
@@ -48,53 +51,11 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [customCategory, setCustomCategory] = useState('')
+  const [showCustomInput, setShowCustomInput] = useState(false)
 
-  // Comprehensive categories list with common expense types
-  const availableCategories = [
-    // Bill Types
-    'Subscription',
-    'Utilities',
-    'Insurance',
-    'Loan',
-    'Rent',
-    'Mortgage',
-    
-    // Service Categories
-    'Technology',
-    'Entertainment',
-    'Streaming',
-    'Software',
-    'Cloud Services',
-    'AI Services',
-    
-    // Expense Categories
-    'Housing',
-    'Transportation',
-    'Health',
-    'Medical',
-    'Fitness',
-    'Education',
-    'Food & Dining',
-    'Groceries',
-    'Shopping',
-    'Personal Care',
-    'Pet Care',
-    'Childcare',
-    
-    // Financial Categories
-    'Investment',
-    'Savings',
-    'Credit Card',
-    'Banking',
-    
-    // Other
-    'Business',
-    'Travel',
-    'Charity',
-    'Gifts',
-    'Hobbies',
-    'Other',
-  ].sort()
+  // Use Plaid-compatible categories for better transaction matching
+  const availableCategories = PLAID_BILL_CATEGORIES.map(cat => cat.value)
 
   const toggleCategory = (category: string) => {
     setBill(prev => ({
@@ -103,6 +64,24 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
         ? prev.categories.filter(c => c !== category)
         : [...prev.categories, category]
     }))
+  }
+
+  const addCustomCategory = () => {
+    if (customCategory.trim() && !bill.categories.includes(customCategory.trim())) {
+      setBill(prev => ({
+        ...prev,
+        categories: [...prev.categories, customCategory.trim()]
+      }))
+      setCustomCategory('')
+      setShowCustomInput(false)
+    }
+  }
+
+  const handleCustomCategoryKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addCustomCategory()
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,7 +114,8 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
           bill: {
             ...bill,
             amount: parseFloat(bill.amount),
-            categories: bill.categories, // Send categories array only
+            category: bill.categories[0] || 'other', // Single category for backward compatibility
+            categories: bill.categories, // Array for enhanced functionality
           },
         }),
       })
@@ -153,6 +133,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
         dueDate: '',
         billingCycle: 'monthly',
         categories: [],
+        is_paid: false,
       })
 
       onSuccess?.()
@@ -164,37 +145,58 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
     }
   }
 
-  // Get suggested categories based on bill name
+  // Get suggested categories based on bill name using Plaid categories
   const getSuggestedCategories = (name: string) => {
     const nameLower = name.toLowerCase()
     const suggestions: string[] = []
-    
-    // Technology/Software suggestions
-    if (nameLower.includes('ai') || nameLower.includes('gpt') || nameLower.includes('claude') || nameLower.includes('gemini')) {
-      suggestions.push('AI Services', 'Technology', 'Subscription')
-    }
+
+    // Streaming services
     if (nameLower.includes('netflix') || nameLower.includes('spotify') || nameLower.includes('youtube') || nameLower.includes('disney')) {
-      suggestions.push('Streaming', 'Entertainment', 'Subscription')
+      suggestions.push('streaming', 'subscription')
     }
-    if (nameLower.includes('adobe') || nameLower.includes('microsoft') || nameLower.includes('github')) {
-      suggestions.push('Software', 'Technology', 'Subscription')
+
+    // Software/Tech
+    if (nameLower.includes('adobe') || nameLower.includes('microsoft') || nameLower.includes('github') || nameLower.includes('ai') || nameLower.includes('claude') || nameLower.includes('gemini')) {
+      suggestions.push('software', 'subscription')
     }
-    
+
     // Utilities
-    if (nameLower.includes('electric') || nameLower.includes('gas') || nameLower.includes('water')) {
-      suggestions.push('Utilities', 'Housing')
-    }
-    
+    if (nameLower.includes('electric')) suggestions.push('electric')
+    if (nameLower.includes('gas')) suggestions.push('gas')
+    if (nameLower.includes('water')) suggestions.push('water')
+    if (nameLower.includes('internet') || nameLower.includes('wifi')) suggestions.push('internet')
+    if (nameLower.includes('phone') || nameLower.includes('verizon') || nameLower.includes('att') || nameLower.includes('tmobile')) suggestions.push('phone')
+    if (nameLower.includes('cable') || nameLower.includes('tv')) suggestions.push('cable')
+
+    // Housing
+    if (nameLower.includes('rent')) suggestions.push('rent')
+    if (nameLower.includes('mortgage')) suggestions.push('mortgage')
+    if (nameLower.includes('hoa')) suggestions.push('hoa')
+
     // Insurance
-    if (nameLower.includes('insurance') || nameLower.includes('geico') || nameLower.includes('allstate')) {
-      suggestions.push('Insurance')
+    if (nameLower.includes('insurance')) {
+      if (nameLower.includes('auto') || nameLower.includes('car')) suggestions.push('auto_insurance')
+      else if (nameLower.includes('health')) suggestions.push('health_insurance')
+      else if (nameLower.includes('home')) suggestions.push('home_insurance')
+      else if (nameLower.includes('life')) suggestions.push('life_insurance')
+      else suggestions.push('health_insurance') // default
     }
-    
-    // Fitness
+
+    // Fitness/Health
     if (nameLower.includes('gym') || nameLower.includes('fitness') || nameLower.includes('planet')) {
-      suggestions.push('Fitness', 'Health', 'Subscription')
+      suggestions.push('gym')
     }
-    
+
+    // Transportation
+    if (nameLower.includes('loan') && (nameLower.includes('auto') || nameLower.includes('car'))) {
+      suggestions.push('auto_loan')
+    }
+
+    // Credit cards
+    if (nameLower.includes('credit') || nameLower.includes('visa') || nameLower.includes('mastercard') || nameLower.includes('amex')) {
+      suggestions.push('credit_card')
+    }
+
     return [...new Set(suggestions)] // Remove duplicates
   }
 
@@ -258,10 +260,17 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
             <input
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]+(\.[0-9]{0,2})?"
               value={bill.amount}
-              onChange={(e) => setBill({ ...bill, amount: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value
+                // Allow empty string, numbers, and one decimal point
+                if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                  setBill({ ...bill, amount: value })
+                }
+              }}
               placeholder="0.00"
               className="w-full pl-10 pr-3 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
@@ -327,7 +336,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
                   key={cat}
                   className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                 >
-                  {cat}
+                  {getBillCategoryLabel(cat)}
                   <button
                     type="button"
                     onClick={() => toggleCategory(cat)}
@@ -355,33 +364,65 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
               <Tag className="h-4 w-4 text-blue-400" />
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu - Grouped by Category Type */}
             {showCategoryDropdown && (
               <div className="absolute z-10 mt-1 w-full bg-white border border-blue-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                {availableCategories.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    onClick={() => toggleCategory(category)}
-                    className={`w-full px-3 py-2 text-left hover:bg-blue-50 flex items-center justify-between ${
-                      bill.categories.includes(category) ? 'bg-blue-50' : ''
-                    }`}
-                  >
-                    <span className="text-sm text-gray-800">{category}</span>
-                    {bill.categories.includes(category) && (
-                      <Check className="h-4 w-4 text-blue-600" />
-                    )}
-                  </button>
+                {/* Custom Category Input */}
+                <div className="p-3 border-b bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter custom category..."
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      onKeyPress={handleCustomCategoryKeyPress}
+                      className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomCategory}
+                      disabled={!customCategory.trim()}
+                      className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Press Enter or click Add to create a custom category</p>
+                </div>
+
+                {/* Predefined Categories */}
+                {Object.entries(BILL_CATEGORY_GROUPS).map(([groupName, groupCategories]) => (
+                  <div key={groupName}>
+                    <div className="px-3 py-1 bg-gray-100 text-xs font-medium text-gray-600 sticky top-0">
+                      {groupName}
+                    </div>
+                    {groupCategories.map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => toggleCategory(category)}
+                        className={`w-full px-3 py-2 text-left hover:bg-blue-50 flex items-center justify-between ${
+                          bill.categories.includes(category) ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <span className="text-sm text-gray-800">{getBillCategoryLabel(category)}</span>
+                        {bill.categories.includes(category) && (
+                          <Check className="h-4 w-4 text-blue-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
+
           {/* Quick Select Common Categories */}
           <div className="mt-2">
             <p className="text-xs text-blue-600 mb-1">Quick select:</p>
             <div className="flex flex-wrap gap-1">
-              {['Subscription', 'Technology', 'Entertainment', 'Utilities', 'Health'].map((cat) => (
+              {['subscription', 'streaming', 'electric', 'internet', 'rent'].map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -392,12 +433,32 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
                       : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                   }`}
                 >
-                  {cat}
+                  {getBillCategoryLabel(cat)}
                 </button>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Payment Status - Only show in edit mode */}
+        {editMode && (
+          <div>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={bill.is_paid}
+                onChange={(e) => setBill({ ...bill, is_paid: e.target.checked })}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <span className="text-sm font-medium text-blue-900">
+                Mark as paid
+              </span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1">
+              Check this box if this bill has been paid for the current period
+            </p>
+          </div>
+        )}
 
         {/* Submit Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">

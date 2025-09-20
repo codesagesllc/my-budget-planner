@@ -39,10 +39,10 @@ export async function middleware(request: NextRequest) {
       .select('subscription_tier, email, is_admin, free_trial_start_date, free_trial_end_date')
       .eq('id', user.id)
       .single()
-    
+
     if (userData) {
       userRole = mapSubscriptionToRole(
-        userData.subscription_tier, 
+        userData.subscription_tier,
         userData.email,
         userData.is_admin,
         userData.free_trial_start_date,

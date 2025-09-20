@@ -1,5 +1,5 @@
 -- Set admin user
-UPDATE public.users SET is_admin = true WHERE email = 'carletonj.batten@gmail.com';
+UPDATE public.users SET is_admin = true WHERE email = 'email address here';
 
 -- Set free trial dates for existing users
 UPDATE public.users

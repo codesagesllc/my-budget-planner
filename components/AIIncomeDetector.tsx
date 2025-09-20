@@ -34,7 +34,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
   const detectIncome = async () => {
     setDetecting(true);
     try {
-      const response = await fetch('/api/ai-income-detection', {
+      const response = await fetch('/api/ai/detect-income', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -55,9 +55,13 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
       setSelectedIncome(autoSelected);
 
       if (data.detectedIncome?.length === 0) {
-        toast.info('No new income patterns detected');
+        if (data.incomeTransactionsFound === 0) {
+          toast.info('No income transactions found in your history. Make sure you have synced transactions from your bank account.');
+        } else {
+          toast.info(`Analyzed ${data.incomeTransactionsFound} income transactions but found no recurring patterns.`);
+        }
       } else {
-        toast.success(`Detected ${data.detectedIncome.length} income source(s)`);
+        toast.success(`✨ Detected ${data.detectedIncome.length} recurring income pattern(s) from ${data.incomeTransactionsFound} income transactions!`);
       }
     } catch (error) {
       console.error('Error detecting income:', error);
@@ -116,7 +120,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
         }
       }
 
-      toast.success(`Created ${selectedIncome.size} income source(s)`);
+      toast.success(`🎉 Successfully created ${selectedIncome.size} income source(s)! Your budget calculations will now include these recurring income streams.`);
       onIncomeCreated();
       onClose();
     } catch (error) {
@@ -204,6 +208,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
           <Button
             onClick={detectIncome}
             className="bg-purple-600 hover:bg-purple-700 text-white"
+            title="🔍 AI will analyze your Plaid transaction history to automatically detect recurring income patterns like salary, freelance payments, and other regular deposits. It identifies frequency, amounts, and categorizes income sources for easy setup."
           >
             <Brain className="h-4 w-4 mr-2" />
             Start Analysis
@@ -215,8 +220,33 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
       {detecting && (
         <div className="text-center py-12">
           <Loader2 className="h-12 w-12 text-purple-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Analyzing your transaction patterns...</p>
-          <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+          <div className="space-y-2">
+            <p className="text-gray-700 font-medium">🔍 Analyzing your transaction patterns...</p>
+            <div className="space-y-1 text-sm text-gray-600">
+              <p>• Scanning the last 90 days of transactions</p>
+              <p>• Identifying recurring income deposits</p>
+              <p>• Calculating frequency and amounts</p>
+              <p>• Categorizing income sources</p>
+            </div>
+            <p className="text-sm text-gray-500 mt-3">This usually takes 5-10 seconds</p>
+          </div>
+        </div>
+      )}
+
+      {/* Re-analyze button when income is already detected */}
+      {detectedIncome.length > 0 && !detecting && (
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="text-lg font-semibold text-gray-900">
+            Detected Income Sources ({detectedIncome.length})
+          </h4>
+          <Button
+            onClick={detectIncome}
+            variant="outline"
+            className="text-purple-600 border-purple-300 hover:bg-purple-50"
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            Re-analyze
+          </Button>
         </div>
       )}
 

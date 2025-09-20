@@ -1,6 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import { redis } from '@/lib/redis'
 import { createHash } from 'crypto'
+import type { DatabaseTransaction, DatabaseBill, DatabaseIncomeSource } from '@/lib/types/database'
 
 // Initialize AI client - Only using Claude/Anthropic
 const anthropic = new Anthropic({
@@ -43,7 +44,12 @@ const CACHE_TTL = {
 }
 
 // Helper functions accessible to both classes
-function summarizeTransactions(transactions: any[]): any {
+function summarizeTransactions(transactions: DatabaseTransaction[]): {
+  totalSpending: number
+  avgTransaction: number
+  topCategories: Array<{ category: string; amount: number; count: number }>
+  totalTransactions: number
+} {
   const truncated = transactions.slice(0, 50) // Simple truncation
   const categories = new Map<string, number>()
   let total = 0
@@ -63,13 +69,17 @@ function summarizeTransactions(transactions: any[]): any {
   const topCategories = Array.from(categories.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
-    .map(([cat]) => cat)
+    .map(([cat, count]) => ({
+      category: cat,
+      amount: Math.round((truncated.filter(t => (t.category || 'Other') === cat).reduce((sum, t) => sum + Math.abs(t.amount), 0))),
+      count
+    }))
   
   return {
-    count: truncated.length,
-    total: Math.round(total),
-    income: Math.round(income),
+    totalSpending: Math.round(total),
+    avgTransaction: truncated.length > 0 ? Math.round(total / truncated.length) : 0,
     topCategories,
+    totalTransactions: truncated.length,
   }
 }
 
@@ -96,7 +106,7 @@ function calculateUniqueSpending(transactions: any[], bills: any[]): any {
   
   // Detect income frequency
   let incomeFrequency = 'monthly'
-  let monthlyIncome = txSummary.income
+  let monthlyIncome = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
   
   // Simple frequency detection based on transaction count and amounts
   const incomeTransactions = transactions.filter(t => t.amount > 0)
@@ -107,7 +117,7 @@ function calculateUniqueSpending(transactions: any[], bills: any[]): any {
       const dayDiff = incomeDates[1] - incomeDates[0]
       if (dayDiff >= 12 && dayDiff <= 16) {
         incomeFrequency = 'biweekly'
-        monthlyIncome = txSummary.income * 2.17 // Average biweekly to monthly
+        monthlyIncome = monthlyIncome * 2.17 // Average biweekly to monthly
       }
     }
   }
@@ -281,13 +291,27 @@ Return JSON array: [{"insights": "analysis", "monthlyBudget": {"income": num, "b
   }
 
   private createBatchBillParsingPrompt(dataArray: any[]): string {
-    return `Extract bills from ${dataArray.length} spreadsheets. Return JSON array.
+    return `Extract bills from ${dataArray.length} spreadsheets using EXACT Plaid category values. Return JSON array.
 
 ${dataArray.map((data, i) => `
 Spreadsheet ${i + 1} (${data.content.substring(0, 500)}...)
 `).join('\n')}
 
-Format: [{bills: [{name, amount, billingCycle}], summary: "string"}]`
+Use these EXACT Plaid category values:
+UTILITIES: electric, gas, water, internet, phone, cable, trash
+HOUSING: rent, mortgage, hoa, property_tax, home_insurance
+TRANSPORTATION: auto_loan, auto_insurance, parking, public_transport
+INSURANCE: health_insurance, life_insurance, dental_insurance, vision_insurance
+FINANCIAL: credit_card, personal_loan, student_loan, bank_fees
+HEALTHCARE: medical, dental, vision, pharmacy
+SUBSCRIPTIONS: subscription, streaming, software
+EDUCATION: tuition, daycare
+PERSONAL: gym, salon
+OTHER: charity, tax, dmv, storage, membership, other
+
+Examples: Netflix→streaming, Electric→electric, Rent→rent, Car Insurance→auto_insurance
+
+Format: [{bills: [{name:"string", amount:number, billingCycle:"monthly|weekly|biweekly|quarterly|annual|one-time", category:"exact_plaid_value"}], summary: "string"}]`
   }
 
   private createBatchIncomePrompt(dataArray: any[]): string {
@@ -409,41 +433,95 @@ export class AIService {
     }
   }
 
-  private getInsightsPrompt(data: any): string {
+  private getInsightsPrompt(data: {
+    transactions: DatabaseTransaction[]
+    bills: DatabaseBill[]
+    incomeSources: DatabaseIncomeSource[]
+    goal?: any
+  }): string {
     // Enhanced prompt with better financial analysis
-    const { transactions, bills, goal } = data
+    const { transactions, bills, incomeSources, goal } = data
     const txSummary = summarizeTransactions(transactions)
-    const billsTotal = bills.reduce((sum: number, b: any) => sum + b.amount, 0)
-    
-    // Calculate actual monthly spending (transactions + bills that aren't duplicated)
-    const uniqueSpending = calculateUniqueSpending(transactions, bills)
-    
-    return `Analyze this financial profile and provide actionable insights:
+    const billsTotal = bills.reduce((sum: number, b: DatabaseBill) => sum + b.amount, 0)
 
-Financial Summary:
-- Transactions: ${txSummary.count} (${txSummary.total > 0 ? `$${txSummary.total} spent` : 'no recent spending'})
-- Monthly Bills: ${bills.length} bills totaling $${billsTotal}
-- Total Monthly Obligations: $${uniqueSpending.total}
-- Categories: ${txSummary.topCategories.length > 0 ? txSummary.topCategories.join(', ') : 'No transaction categories'}
-${uniqueSpending.income > 0 ? `- Detected Income: $${uniqueSpending.income}/month (${uniqueSpending.incomeFrequency})` : ''}
-${goal ? `- Savings Goal: $${goal.amount} by ${goal.deadline}` : ''}
+    // Calculate monthly income from income sources
+    const monthlyIncome = incomeSources.reduce((total: number, source: DatabaseIncomeSource) => {
+      if (!source.is_active) return total
+      const multipliers: Record<string, number> = {
+        'weekly': 4.33333,
+        'biweekly': 2.16667,
+        'monthly': 1,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+        'one-time': 0
+      }
+      return total + (source.amount * (multipliers[source.frequency] || 0))
+    }, 0)
 
-Provide a JSON response with:
-1. insights: Clear analysis of spending patterns and financial health
-2. monthlyBudget: Realistic monthly budget breakdown
-3. savingsPlan: Specific savings recommendations
-4. tips: 3-5 actionable tips
+    return `You are a personal finance advisor. Analyze this financial profile and provide comprehensive, actionable insights in a conversational tone.
 
-${uniqueSpending.incomeFrequency === 'biweekly' ? 'Include biweekly paycheck savings strategy.' : ''}
+Financial Data:
+- Recent Transactions: ${txSummary.totalTransactions} transactions, $${txSummary.totalSpending.toFixed(2)} total spending
+- Monthly Bills: ${bills.length} recurring bills, $${billsTotal.toFixed(2)} monthly total
+- Income Sources: ${incomeSources.length} active sources, $${monthlyIncome.toFixed(2)} monthly total
+- Top Spending Categories: ${txSummary.topCategories.length > 0 ? txSummary.topCategories.map(cat => cat.category).join(', ') : 'Mixed categories'}
+${goal ? `- Savings Goal: $${goal.amount} by ${goal.deadline} for ${goal.description || 'personal goal'}` : ''}
 
-Format as JSON: {"insights": "string", "monthlyBudget": {"income": number, "bills": number, "spending": number, "recommended_savings": number}, "savingsPlan": {"per_paycheck": number, "monthly_total": number, "percentage": number}, "tips": ["tip1", "tip2", "tip3"]}`
+Provide a detailed JSON response with comprehensive analysis:
+
+{
+  "insights": "Write 3-4 paragraphs of conversational financial analysis. Include observations about spending patterns, budget health, areas of concern, and positive habits. Be encouraging but honest. Include specific numbers and percentages when relevant.",
+  "monthlyBudget": {
+    "income": ${monthlyIncome || 0},
+    "bills": ${billsTotal},
+    "spending": ${txSummary.totalSpending || 0},
+    "recommended_savings": [calculate 20% of income or a reasonable amount]
+  },
+  "savingsPlan": {
+    "per_paycheck": [divide monthly savings by pay frequency],
+    "monthly_total": [total monthly savings recommendation],
+    "percentage": [percentage of income to save]
+  },
+  "tips": [
+    "Provide 4-5 specific, actionable tips based on their actual spending patterns",
+    "Include concrete suggestions like 'reduce dining out by $X per month'",
+    "Mention specific categories where they're overspending",
+    "Include positive reinforcement for good habits",
+    "Add goal-specific advice if they have a savings goal"
+  ]
+}
+
+Focus on being helpful, specific, and encouraging. Use their actual data to provide personalized recommendations.`
   }
 
   private getBillParsingPrompt(data: any): string {
-    // Compressed bill parsing prompt
-    return `Extract bills from spreadsheet. Find recurring payments.
+    // Enhanced bill parsing prompt with Plaid categories
+    return `Extract bills from spreadsheet content and classify them using EXACT Plaid category values for optimal transaction matching.
+
 Content: ${data.content.substring(0, 3000)}
-Return JSON: {bills:[{name,amount,billingCycle,categories}],summary}`
+
+IMPORTANT: Use these EXACT category values (not the group names):
+
+UTILITIES: electric, gas, water, internet, phone, cable, trash
+HOUSING: rent, mortgage, hoa, property_tax, home_insurance
+TRANSPORTATION: auto_loan, auto_insurance, parking, public_transport
+INSURANCE: health_insurance, life_insurance, dental_insurance, vision_insurance
+FINANCIAL: credit_card, personal_loan, student_loan, bank_fees
+HEALTHCARE: medical, dental, vision, pharmacy
+SUBSCRIPTIONS: subscription, streaming, software
+EDUCATION: tuition, daycare
+PERSONAL: gym, salon
+OTHER: charity, tax, dmv, storage, membership, other
+
+Examples of proper categorization:
+- "Netflix" → streaming
+- "Electric Company" → electric
+- "Mortgage Payment" → mortgage
+- "Car Insurance" → auto_insurance
+- "Planet Fitness" → gym
+- "Student Loan" → student_loan
+
+Return JSON: {bills:[{name:"string",amount:number,billingCycle:"monthly|weekly|biweekly|quarterly|annual|one-time",category:"exact_plaid_value"}],summary:"string"}`
   }
 
   private getIncomePrompt(data: any): string {
@@ -473,8 +551,9 @@ Calculate optimal payment order & timeline. Return JSON.`
   // Main public methods with caching and batching
   async generateInsights(
     userId: string,
-    transactions: any[],
-    bills: any[],
+    transactions: DatabaseTransaction[],
+    bills: DatabaseBill[],
+    incomeSources: DatabaseIncomeSource[] = [],
     goal?: any,
     tier: SubscriptionTier = 'basic'
   ): Promise<string> {
@@ -488,6 +567,7 @@ Calculate optimal payment order & timeline. Return JSON.`
     const data = {
       transactions: this.truncateTransactions(transactions),
       bills,
+      incomeSources,
       goal,
     }
     

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Brain, Zap, CheckCircle, AlertCircle, Loader2, Search, Filter, Calendar, DollarSign, Tag } from 'lucide-react'
+import { Brain, Zap, CheckCircle, AlertCircle, Loader2, Search, Filter, Calendar, DollarSign, Tag, X } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Transaction } from '@/types/financial'
 
 interface DetectedBill {
@@ -22,13 +23,15 @@ interface AITransactionAnalyzerProps {
   transactions: Transaction[]
   onBillsDetected?: (bills: DetectedBill[]) => void
   onCreateBills?: (bills: DetectedBill[]) => void
+  onClose?: () => void
 }
 
-export default function AITransactionAnalyzer({ 
-  userId, 
-  transactions, 
+export default function AITransactionAnalyzer({
+  userId,
+  transactions,
   onBillsDetected,
-  onCreateBills 
+  onCreateBills,
+  onClose
 }: AITransactionAnalyzerProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [detectedBills, setDetectedBills] = useState<DetectedBill[]>([])
@@ -73,6 +76,23 @@ export default function AITransactionAnalyzer({
           }
         })
         setSelectedBills(autoSelected)
+
+        // Show success message with analysis results
+        const recurringCount = result.detectedBills.filter((bill: DetectedBill) => bill.isRecurring).length
+        const highConfidenceCount = result.detectedBills.filter((bill: DetectedBill) => bill.confidence >= 80).length
+
+        if (result.detectedBills.length === 0) {
+          toast.info('No recurring bill patterns found in your transaction history. This is normal if you don\'t have many recurring transactions or if you pay bills irregularly.')
+        } else {
+          toast.success(
+            `✨ Analysis complete! Found ${result.detectedBills.length} potential bill pattern${result.detectedBills.length > 1 ? 's' : ''}:\n\n` +
+            `• ${recurringCount} recurring bill${recurringCount !== 1 ? 's' : ''}\n` +
+            `• ${highConfidenceCount} high-confidence detection${highConfidenceCount !== 1 ? 's' : ''}\n` +
+            `• ${autoSelected.size} automatically selected for creation\n\n` +
+            `Review the results below and create the bills you want to track.`,
+            { duration: 6000 }
+          )
+        }
       }
     } catch (err) {
       console.error('Error analyzing transactions:', err)
@@ -80,6 +100,13 @@ export default function AITransactionAnalyzer({
     } finally {
       setIsAnalyzing(false)
     }
+  }
+
+  const resetAnalysis = () => {
+    setDetectedBills([])
+    setSelectedBills(new Set())
+    setAnalysisComplete(false)
+    setError(null)
   }
 
   const handleCreateSelectedBills = async () => {
@@ -110,14 +137,23 @@ export default function AITransactionAnalyzer({
       }
 
       const result = await response.json()
-      
+
       onCreateBills?.(billsToCreate)
-      
+
+      // Show enhanced success message with details
+      const billNames = billsToCreate.map(bill => bill.name).join(', ')
+      toast.success(
+        `🎉 Successfully created ${billsToCreate.length} bill${billsToCreate.length > 1 ? 's' : ''}!\n\n` +
+        `Bills created: ${billNames}\n\n` +
+        `These bills are now active in your budget and will be included in financial forecasts.`,
+        { duration: 5000 }
+      )
+
       // Reset after successful creation
       setDetectedBills([])
       setSelectedBills(new Set())
       setAnalysisComplete(false)
-      
+
       // Show success message
       setError(null)
     } catch (err) {
@@ -194,8 +230,9 @@ export default function AITransactionAnalyzer({
             <p className="text-sm text-gray-600">Automatically detect recurring bills and payments</p>
           </div>
         </div>
-        
-        {!analysisComplete && (
+
+        <div className="flex items-center gap-2">
+          {/* Always show analyze button */}
           <button
             onClick={analyzeTransactions}
             disabled={isAnalyzing || transactions.length === 0}
@@ -209,21 +246,61 @@ export default function AITransactionAnalyzer({
             ) : (
               <>
                 <Search className="h-4 w-4" />
-                Analyze Transactions
+                {analysisComplete ? 'Re-analyze' : 'Analyze Transactions'}
               </>
             )}
           </button>
-        )}
+
+          {/* Reset button when analysis is complete */}
+          {analysisComplete && (
+            <button
+              onClick={resetAnalysis}
+              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Reset analysis"
+            >
+              <Zap className="h-4 w-4" />
+            </button>
+          )}
+
+
+          {/* Close button */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-2">
-          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
+          {/* Analyzing State */}
+          {isAnalyzing && !analysisComplete && (
+            <div className="text-center py-12">
+              <Loader2 className="h-12 w-12 text-purple-600 animate-spin mx-auto mb-4" />
+              <div className="space-y-2">
+                <p className="text-gray-700 font-medium">🔍 Analyzing your transaction patterns...</p>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p>• Scanning {transactions.length} transactions for recurring patterns</p>
+                  <p>• Identifying merchant names and payment frequencies</p>
+                  <p>• Calculating confidence scores for bill detection</p>
+                  <p>• Categorizing potential recurring expenses</p>
+                </div>
+                <p className="text-sm text-gray-500 mt-3">This usually takes 5-15 seconds</p>
+              </div>
+            </div>
+          )}
 
-      {analysisComplete && detectedBills.length > 0 && (
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {analysisComplete && detectedBills.length > 0 && (
         <>
           {/* Filters */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -293,9 +370,19 @@ export default function AITransactionAnalyzer({
                   onClick={handleCreateSelectedBills}
                   disabled={isAnalyzing}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="💰 Create recurring bills from selected detected patterns. These will be added to your bills list and used for budget forecasting."
                 >
-                  <CheckCircle className="h-4 w-4" />
-                  Create {selectedBills.size} Bill{selectedBills.size > 1 ? 's' : ''}
+                  {isAnalyzing && analysisComplete ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating Bills...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      Create {selectedBills.size} Bill{selectedBills.size > 1 ? 's' : ''}
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -407,24 +494,24 @@ export default function AITransactionAnalyzer({
               <p className="text-sm mt-1">Try adjusting the confidence threshold or filters</p>
             </div>
           )}
-        </>
-      )}
+          </>
+        )}
 
-      {analysisComplete && detectedBills.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <Brain className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-          <p className="text-lg font-medium">No recurring bills detected</p>
-          <p className="text-sm mt-1">The AI couldn't identify any recurring patterns in your transactions</p>
-        </div>
-      )}
+        {analysisComplete && detectedBills.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            <Brain className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <p className="text-lg font-medium">No recurring bills detected</p>
+            <p className="text-sm mt-1">The AI couldn't identify any recurring patterns in your transactions</p>
+          </div>
+        )}
 
-      {!analysisComplete && !isAnalyzing && transactions.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-          <p className="text-lg font-medium">No transactions available</p>
-          <p className="text-sm mt-1">Connect your bank account to analyze transactions</p>
-        </div>
-      )}
+        {!analysisComplete && !isAnalyzing && transactions.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+            <p className="text-lg font-medium">No transactions available</p>
+            <p className="text-sm mt-1">Connect your bank account to analyze transactions</p>
+          </div>
+        )}
     </div>
   )
 }

@@ -210,6 +210,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
         <button
           onClick={() => setShowAIDetector(true)}
           className="flex-1 sm:flex-none bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+          title="🤖 Let AI analyze your transaction history to automatically find and categorize recurring income sources. Detects salary, freelance payments, investments, and other regular deposits with frequency and amount patterns."
         >
           <Brain className="w-5 h-5" />
           AI Detect Income

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "My Budget Planner - AI-Powered Personal Finance",
+  title: "PocketWiseAI - AI-Powered Personal Finance",
   description: "Manage your finances with AI-powered insights, budget tracking, and bill management",
   icons: {
     icon: '/dollar-icon.svg',

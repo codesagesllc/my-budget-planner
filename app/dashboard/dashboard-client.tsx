@@ -18,18 +18,28 @@ import AccountsOverview from '@/components/AccountsOverview'
 import IncomeManagement from '@/components/IncomeManagement'
 import FinancialForecasting from '@/components/FinancialForecasting'
 import ManualBillEntry from '@/components/ManualBillEntry'
+import { RemainingBalanceCard } from '@/components/RemainingBalanceCard'
 import AITransactionAnalyzer from '@/components/AITransactionAnalyzer'
 import AddAccountModal from '@/components/AddAccountModal'
-import { 
-  LogOut, Upload, Brain, DollarSign, Plus, 
-  FileSpreadsheet, Menu, X, Home, Receipt, 
+import {
+  LogOut, Upload, Brain, DollarSign, Plus,
+  FileSpreadsheet, Menu, X, Home, Receipt,
   CreditCard, TrendingUp, PlusCircle, BarChart3,
   Wallet, Settings, ChevronLeft, ChevronRight,
   ArrowUpRight, ArrowDownRight, Target, Calendar,
   AlertCircle, Edit3, PiggyBank, Sparkles, ChartBar,
-  Crown, Shield, Lock
+  Crown, Shield, Lock, ChevronDown, BookOpen
 } from 'lucide-react'
 import { DebtManagement } from '@/components/debt/DebtManagement'
+import RealTimeAlerts from '@/components/RealTimeAlerts'
+import CategoryBudgetTracker from '@/components/CategoryBudgetTracker'
+import CashFlowMeter from '@/components/CashFlowMeter'
+import SavingsGoalsTracker from '@/components/SavingsGoalsTracker'
+import DebtPayoffTracker from '@/components/DebtPayoffTracker'
+import CategorySpendingLimits from '@/components/CategorySpendingLimits'
+import PlaidSyncButton from '@/components/PlaidSyncButton'
+import SpendingLimitNotifications from '@/components/SpendingLimitNotifications'
+import RealtimeDiagnostic from '@/components/RealtimeDiagnostic'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 type Account = Database['public']['Tables']['accounts']['Row']
@@ -55,7 +65,7 @@ export default function DashboardClient({
   const [transactions, setTransactions] = useState(initialTransactions)
   const [bills, setBills] = useState(initialBills)
   const [incomeSources, setIncomeSources] = useState<IncomeSources[]>(initialIncomeSources)
-  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts' | 'admin'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'transactions' | 'bills' | 'income' | 'forecast' | 'insights' | 'debts' | 'budgets' | 'docs' | 'admin'>('overview')
   const [showBillUploader, setShowBillUploader] = useState(false)
   const [showManualBillEntry, setShowManualBillEntry] = useState(false)
   const [showAIAnalyzer, setShowAIAnalyzer] = useState(false)
@@ -64,9 +74,25 @@ export default function DashboardClient({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showUsagePanel, setShowUsagePanel] = useState(false)
+  const [alertsCollapsed, setAlertsCollapsed] = useState(false)
+  const [savingsCollapsed, setSavingsCollapsed] = useState(false)
+  const [quickActionsCollapsed, setQuickActionsCollapsed] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  
+
+  // Auto-collapse real-time components when navigating away from overview
+  useEffect(() => {
+    if (activeTab !== 'overview') {
+      setAlertsCollapsed(true)
+      setSavingsCollapsed(true)
+      setQuickActionsCollapsed(true)
+    } else {
+      setAlertsCollapsed(false)
+      setSavingsCollapsed(false)
+      setQuickActionsCollapsed(false)
+    }
+  }, [activeTab])
+
   // Role-based permissions
   const {
     role,
@@ -96,6 +122,74 @@ export default function DashboardClient({
       fetchIncomeSources()
     }
   }, [user?.id])
+
+  // Real-time subscriptions for dashboard data
+  useEffect(() => {
+    if (!user?.id) return
+
+    console.log('Setting up real-time subscriptions for dashboard')
+
+    const channel = supabase
+      .channel('dashboard-updates')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions' },
+        async (payload) => {
+          console.log('🔄 Transaction change detected in dashboard:', payload)
+          // Refresh transactions
+          const { data: newTransactions } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('date', { ascending: false })
+            .limit(100)
+          if (newTransactions) {
+            setTransactions(newTransactions)
+          }
+        })
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'bills' },
+        async (payload) => {
+          console.log('🔄 Bill change detected in dashboard:', payload)
+          // Refresh bills
+          const { data: newBills } = await supabase
+            .from('bills')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('due_date', { ascending: true })
+          if (newBills) {
+            setBills(newBills)
+          }
+        })
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'accounts' },
+        async (payload) => {
+          console.log('🔄 Account change detected in dashboard:', payload)
+          // Refresh accounts
+          const { data: newAccounts } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('user_id', user.id)
+          if (newAccounts) {
+            setAccounts(newAccounts)
+          }
+        })
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'income_sources' },
+        async (payload) => {
+          console.log('🔄 Income source change detected in dashboard:', payload)
+          // Refresh income sources
+          await fetchIncomeSources()
+        })
+      .subscribe((status) => {
+        console.log('Dashboard realtime subscription status:', status)
+      })
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('Cleaning up dashboard realtime subscriptions')
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id, supabase])
 
   const fetchIncomeSources = async () => {
     try {
@@ -669,9 +763,11 @@ export default function DashboardClient({
     { id: 'income', label: 'Income', icon: TrendingUp, requiredFeature: null },
     { id: 'transactions', label: 'Transactions', icon: CreditCard, requiredFeature: null },
     { id: 'bills', label: 'Bills', icon: Receipt, requiredFeature: null },
+    { id: 'budgets', label: 'Budget Limits', icon: Target, requiredFeature: null },
     { id: 'debts', label: 'Debts', icon: PiggyBank, requiredFeature: 'debt_strategies' },
     { id: 'forecast', label: 'Forecast', icon: BarChart3, requiredFeature: 'budget_forecasting' },
     { id: 'insights', label: 'Insights', icon: Brain, requiredFeature: 'ai_insights' },
+    { id: 'docs', label: 'Documentation', icon: BookOpen, requiredFeature: null },
   ].filter(item => !item.requiredFeature || hasFeature(item.requiredFeature as any))
   
   // Add admin panel if user is admin
@@ -719,7 +815,11 @@ export default function DashboardClient({
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id as any)
+                  if (item.id === 'docs') {
+                    router.push('/dashboard/docs')
+                  } else {
+                    setActiveTab(item.id as any)
+                  }
                   setMobileMenuOpen(false)
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
@@ -751,7 +851,7 @@ export default function DashboardClient({
           <div className="p-6 border-b border-blue-700/50">
             <div className={`${sidebarCollapsed ? 'text-center' : ''}`}>
               <h1 className={`font-bold text-white ${sidebarCollapsed ? 'text-xl' : 'text-2xl'} transition-all`}>
-                {sidebarCollapsed ? 'MBP' : 'My Budget Planner'}
+                {sidebarCollapsed ? 'PWA' : 'PocketWiseAI'}
               </h1>
               {!sidebarCollapsed && (
                 <>
@@ -789,7 +889,14 @@ export default function DashboardClient({
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
+                  data-tab={item.id}
+                  onClick={() => {
+                    if (item.id === 'docs') {
+                      router.push('/dashboard/docs')
+                    } else {
+                      setActiveTab(item.id as any)
+                    }
+                  }}
                   className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-2 transition-all group relative ${
                     activeTab === item.id
                       ? 'bg-white/20 text-white shadow-lg'
@@ -836,7 +943,7 @@ export default function DashboardClient({
               <button onClick={() => setMobileMenuOpen(true)}>
                 <Menu className="w-6 h-6 text-gray-700" />
               </button>
-              <h1 className="text-lg font-bold text-gray-900">Budget Planner</h1>
+              <h1 className="text-lg font-bold text-gray-900">PocketWiseAI</h1>
               <button onClick={handleSignOut}>
                 <LogOut className="w-6 h-6 text-red-600" />
               </button>
@@ -937,6 +1044,8 @@ export default function DashboardClient({
                 </div>
               </div>
 
+              <RemainingBalanceCard />
+
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
@@ -951,76 +1060,143 @@ export default function DashboardClient({
               </div>
             </div>
 
+            {/* Quick Actions - Collapsible */}
+            <div className="mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <button
+                    onClick={() => setQuickActionsCollapsed(!quickActionsCollapsed)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Plus className="h-5 w-5 text-blue-500" />
+                      Quick Actions
+                    </h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${quickActionsCollapsed ? '-rotate-90' : ''}`} />
+                  </button>
+                </div>
+                {!quickActionsCollapsed && (
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                      <button
+                        onClick={() => {
+                          const accountUsage = getFeatureUsage('account_connections')
+                          if (accountUsage.isExhausted) {
+                            showUpgradePrompt('account connections')
+                          } else {
+                            setShowAddAccount(true)
+                          }
+                        }}
+                        className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                          getFeatureUsage('account_connections').isExhausted
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        }`}
+                        disabled={getFeatureUsage('account_connections').isExhausted}
+                      >
+                        <Wallet className="w-5 h-5" />
+                        Add Account
+                        {getFeatureUsage('account_connections').isExhausted && (
+                          <Lock className="w-4 h-4 ml-1" />
+                        )}
+                      </button>
+
+                      {hasFeature('account_connections') && (
+                        <PlaidLinkButton
+                          userId={user.id}
+                          onSuccess={refreshData}
+                        />
+                      )}
+
+                      <button
+                        onClick={() => handleFeatureAccess('bill_parsing', () => setShowBillUploader(true))}
+                        className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                          !hasFeature('bill_parsing')
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
+                        disabled={!hasFeature('bill_parsing')}
+                        title="📄 Upload spreadsheets (CSV, Excel) containing your bills. AI will extract bill names, amounts, billing cycles, and automatically categorize them using Plaid categories for better transaction matching."
+                      >
+                        <Upload className="w-5 h-5" />
+                        Upload Bills
+                        {!hasFeature('bill_parsing') && (
+                          <Lock className="w-4 h-4 ml-1" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => setShowManualBillEntry(true)}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Edit3 className="w-5 h-5" />
+                        Add Bill
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('income')}
+                        className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-5 h-5" />
+                        Add Income
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Real-time Financial Tracking Components */}
+            <div className="space-y-6 mb-8">
+              {/* Real-time Alerts - Collapsible */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <button
+                    onClick={() => setAlertsCollapsed(!alertsCollapsed)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5 text-orange-500" />
+                      Real-time Alerts & Notifications
+                    </h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${alertsCollapsed ? '-rotate-90' : ''}`} />
+                  </button>
+                </div>
+                {!alertsCollapsed && (
+                  <div className="p-6 space-y-6">
+                    <RealTimeAlerts userId={user.id} />
+                    <SpendingLimitNotifications userId={user.id} />
+                  </div>
+                )}
+              </div>
+
+              {/* Savings Goals - Collapsible */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div className="p-4 border-b border-gray-200">
+                  <button
+                    onClick={() => setSavingsCollapsed(!savingsCollapsed)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-green-500" />
+                      Savings Goals Progress
+                    </h3>
+                    <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${savingsCollapsed ? '-rotate-90' : ''}`} />
+                  </button>
+                </div>
+                {!savingsCollapsed && (
+                  <div className="p-6">
+                    <SavingsGoalsTracker userId={user.id} />
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Tab Content */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               {activeTab === 'overview' && (
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-blue-900">Financial Overview</h3>
-                  
-                  {/* Quick Actions with Role-Based Access */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                    <button
-                      onClick={() => {
-                        const accountUsage = getFeatureUsage('account_connections')
-                        if (accountUsage.isExhausted) {
-                          showUpgradePrompt('account connections')
-                        } else {
-                          setShowAddAccount(true)
-                        }
-                      }}
-                      className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                        getFeatureUsage('account_connections').isExhausted
-                          ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      }`}
-                      disabled={getFeatureUsage('account_connections').isExhausted}
-                    >
-                      <Wallet className="w-5 h-5" />
-                      Add Account
-                      {getFeatureUsage('account_connections').isExhausted && (
-                        <Lock className="w-4 h-4 ml-1" />
-                      )}
-                    </button>
-                    
-                    {hasFeature('account_connections') && (
-                      <PlaidLinkButton 
-                        userId={user.id}
-                        onSuccess={refreshData}
-                      />
-                    )}
-                    
-                    <button
-                      onClick={() => handleFeatureAccess('bill_parsing', () => setShowBillUploader(true))}
-                      className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                        !hasFeature('bill_parsing')
-                          ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-green-600 text-white hover:bg-green-700'
-                      }`}
-                      disabled={!hasFeature('bill_parsing')}
-                    >
-                      <Upload className="w-5 h-5" />
-                      Upload Bills
-                      {!hasFeature('bill_parsing') && (
-                        <Lock className="w-4 h-4 ml-1" />
-                      )}
-                    </button>
-                    
-                    <button
-                      onClick={() => setShowManualBillEntry(true)}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Edit3 className="w-5 h-5" />
-                      Add Bill
-                    </button>
-                    
-                    <button
-                      onClick={() => setActiveTab('income')}
-                      className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Plus className="w-5 h-5" />
-                      Add Income
-                    </button>
-                  </div>
 
                   {/* Upcoming One-Time Items */}
                   {upcomingOneTimeItems.length > 0 && (
@@ -1052,83 +1228,8 @@ export default function DashboardClient({
                     </div>
                   )}
 
-                  {/* Monthly Breakdown */}
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4">Monthly Cash Flow Breakdown</h4>
-                    
-                    {/* Income Breakdown */}
-                    <div className="mb-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">Income</span>
-                        <span className="font-semibold text-green-600">{formatCurrency(monthBreakdown.totalIncome)}</span>
-                      </div>
-                      <div className="space-y-1 ml-4">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Recurring</span>
-                          <span className="text-gray-900">{formatCurrency(monthBreakdown.recurringIncome)}</span>
-                        </div>
-                        {monthBreakdown.oneTimeIncome > 0 && (
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-600">One-time</span>
-                            <span className="text-gray-900">{formatCurrency(monthBreakdown.oneTimeIncome)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Expense Breakdown */}
-                    <div className="mb-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">Expenses</span>
-                        <span className="font-semibold text-red-600">{formatCurrency(monthBreakdown.totalExpenses)}</span>
-                      </div>
-                      <div className="space-y-1 ml-4">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Recurring</span>
-                          <span className="text-gray-900">{formatCurrency(monthBreakdown.recurringExpenses)}</span>
-                        </div>
-                        {monthBreakdown.oneTimeExpenses > 0 && (
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-600">One-time</span>
-                            <span className="text-gray-900">{formatCurrency(monthBreakdown.oneTimeExpenses)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Progress Bars */}
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm text-gray-600">Income</span>
-                          <span className="font-semibold text-green-600">{formatCurrency(monthlyIncome)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }} />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm text-gray-600">Expenses</span>
-                          <span className="font-semibold text-red-600">{formatCurrency(monthlyExpenses)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-red-500 h-2 rounded-full" 
-                            style={{ width: `${monthlyIncome > 0 ? Math.min((monthlyExpenses / monthlyIncome) * 100, 100) : 0}%` }} 
-                          />
-                        </div>
-                      </div>
-                      <div className="pt-4 border-t">
-                        <div className="flex justify-between">
-                          <span className="font-semibold text-gray-900">Net Savings</span>
-                          <span className={`font-bold text-lg ${monthlySavings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatCurrency(monthlySavings)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Cash Flow Analysis */}
+                  <CashFlowMeter userId={user.id} />
 
                   {/* Recent Transactions Preview */}
                   <div className="mt-8">
@@ -1169,8 +1270,11 @@ export default function DashboardClient({
 
               {activeTab === 'transactions' && (
                 <div className="p-6">
-                  <TransactionsList 
-                    transactions={transactions} 
+                  <div className="mb-6">
+                    <RealtimeDiagnostic userId={user.id} />
+                  </div>
+                  <TransactionsList
+                    transactions={transactions}
                     userId={user.id}
                     onUpdate={refreshData}
                   />
@@ -1214,6 +1318,7 @@ export default function DashboardClient({
                       <button
                         onClick={() => setShowBillUploader(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        title="📊 Upload CSV or Excel files with your bills. AI automatically extracts and categorizes bills using Plaid-compatible categories for accurate expense tracking and transaction matching."
                       >
                         <Upload className="w-4 h-4" />
                         Upload Bills
@@ -1235,6 +1340,7 @@ export default function DashboardClient({
                           refreshData()
                           setShowAIAnalyzer(false)
                         }}
+                        onClose={() => setShowAIAnalyzer(false)}
                       />
                     </div>
                   )}
@@ -1275,9 +1381,10 @@ export default function DashboardClient({
               {activeTab === 'insights' && (
                 <div className="p-6">
                   {hasFeature('ai_insights') ? (
-                    <FinancialInsights 
+                    <FinancialInsights
                       transactions={transactions}
                       bills={bills}
+                      incomeSources={incomeSources}
                       userId={user.id}
                     />
                   ) : (
@@ -1303,7 +1410,7 @@ export default function DashboardClient({
               {activeTab === 'debts' && (
                 <div className="p-6">
                   {hasFeature('debt_strategies') ? (
-                    <DebtManagement />
+                    <DebtManagement userId={user.id} />
                   ) : (
                     <div className="text-center py-12">
                       <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -1323,18 +1430,31 @@ export default function DashboardClient({
                   )}
                 </div>
               )}
-              
+
+              {activeTab === 'budgets' && (
+                <div className="p-6">
+                  <CategorySpendingLimits userId={user.id} />
+                </div>
+              )}
+
               {activeTab === 'admin' && canAccessUI('accessAdminPanel') && (
                 <div className="p-6">
                   <div className="text-center">
                     <h2 className="text-2xl font-bold mb-4 text-gray-900">Admin Dashboard</h2>
-                    <p className="text-gray-700 mb-6">Redirecting to admin panel...</p>
-                    <button
-                      onClick={() => router.push('/admin')}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-                    >
-                      Go to Admin Panel
-                    </button>
+                    <p className="text-gray-700 mb-6">Access the admin control panel</p>
+                    <div className="space-y-4">
+                      <Shield className="h-16 w-16 text-blue-600 mx-auto" />
+                      <div className="text-sm text-gray-500">
+                        <p>Current Role: <strong>{role}</strong></p>
+                        <p>Admin Access: <strong>{canAccessUI('accessAdminPanel') ? 'Granted' : 'Denied'}</strong></p>
+                      </div>
+                      <button
+                        onClick={() => router.push('/admin')}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-base"
+                      >
+                        Open Admin Dashboard
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

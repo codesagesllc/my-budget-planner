@@ -8,6 +8,7 @@ import { parseCategories } from '@/types/financial'
 interface FinancialInsightsProps {
   transactions: Transaction[]
   bills: Bill[]
+  incomeSources: any[]
   userId: string
 }
 
@@ -20,7 +21,7 @@ interface AIInsight {
   trend?: 'up' | 'down' | 'stable'
 }
 
-export default function FinancialInsights({ transactions, bills, userId }: FinancialInsightsProps) {
+export default function FinancialInsights({ transactions, bills, incomeSources, userId }: FinancialInsightsProps) {
   const [insights, setInsights] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
@@ -30,46 +31,221 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
     description: '',
   })
 
-  // Calculate spending by category
+  // Calculate spending by category (both transactions and bills)
   const calculateCategorySpending = () => {
     const categoryTotals: Record<string, number> = {}
-    
+
+    // Process transactions
     transactions.forEach(transaction => {
-      if (transaction.transaction_type === 'expense' || transaction.amount < 0) {
-        const category = transaction.category || 'Uncategorized'
-        categoryTotals[category] = (categoryTotals[category] || 0) + Math.abs(transaction.amount)
+      if ((transaction.transaction_type === 'expense' || transaction.amount < 0) && !transaction.exclude_from_spending) {
+        const amount = Math.abs(transaction.amount)
+
+        // Handle multiple categories
+        if (transaction.categories && Array.isArray(transaction.categories) && transaction.categories.length > 0) {
+          const amountPerCategory = amount / transaction.categories.length
+          transaction.categories.forEach(category => {
+            categoryTotals[category] = (categoryTotals[category] || 0) + amountPerCategory
+          })
+        } else {
+          const category = transaction.category || 'Uncategorized'
+          categoryTotals[category] = (categoryTotals[category] || 0) + amount
+        }
       }
     })
-    
+
+    // Process bills (convert to monthly amounts)
+    bills.forEach(bill => {
+      if (!bill.is_active) return
+
+      // Convert billing cycle to monthly amount
+      const multipliers: Record<string, number> = {
+        'monthly': 1,
+        'biweekly': 2.16667,
+        'weekly': 4.33333,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+      }
+
+      const monthlyAmount = bill.amount * (multipliers[bill.billing_cycle] || 1)
+
+      if (bill.categories && Array.isArray(bill.categories) && bill.categories.length > 0) {
+        const amountPerCategory = monthlyAmount / bill.categories.length
+        bill.categories.forEach((category: any) => {
+          const categoryName = String(category)
+          categoryTotals[categoryName] = (categoryTotals[categoryName] || 0) + amountPerCategory
+        })
+      } else {
+        categoryTotals['Uncategorized'] = (categoryTotals['Uncategorized'] || 0) + monthlyAmount
+      }
+    })
+
     return categoryTotals
   }
 
-  // Calculate monthly spending trends
-  const calculateMonthlyTrends = () => {
-    const monthlyTotals: Record<string, { income: number; expenses: number }> = {}
-    
+  // Calculate spending by merchant (using transaction description as merchant name)
+  const calculateMerchantSpending = () => {
+    const merchantTotals: Record<string, { total: number; count: number }> = {}
+
     transactions.forEach(transaction => {
-      const date = new Date(transaction.date)
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      
-      if (!monthlyTotals[monthKey]) {
-        monthlyTotals[monthKey] = { income: 0, expenses: 0 }
+      if (transaction.transaction_type === 'expense' || transaction.amount < 0) {
+        // Clean up merchant name from transaction description
+        const merchantName = cleanMerchantName(transaction.description)
+        const amount = Math.abs(transaction.amount)
+
+        if (!merchantTotals[merchantName]) {
+          merchantTotals[merchantName] = { total: 0, count: 0 }
+        }
+
+        merchantTotals[merchantName].total += amount
+        merchantTotals[merchantName].count += 1
       }
-      
-      if (transaction.transaction_type === 'income' || transaction.amount > 0) {
-        monthlyTotals[monthKey].income += Math.abs(transaction.amount)
-      } else {
+    })
+
+    return merchantTotals
+  }
+
+  // Clean merchant name from transaction description
+  const cleanMerchantName = (description: string): string => {
+    const cleaned = description
+      .toLowerCase()
+      .replace(/\b(payment|autopay|recurring|monthly|debit|card|purchase|pos|transaction)\b/g, '')
+      .replace(/\b\d{4,}\b/g, '') // Remove long numbers
+      .replace(/[^\w\s]/g, ' ') // Remove special characters
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .trim()
+      .split(' ')
+      .filter(word => word.length > 2) // Remove short words
+      .slice(0, 3) // Take first 3 meaningful words
+      .join(' ')
+      .trim()
+
+    return cleaned ? toTitleCase(cleaned) : 'Unknown Merchant'
+  }
+
+  // Convert string to Title Case
+  const toTitleCase = (str: string): string => {
+    return str
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return word
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      })
+      .join(' ')
+  }
+
+  // Calculate monthly income from income sources
+  const calculateMonthlyIncome = () => {
+    return incomeSources.reduce((total, source) => {
+      if (!source.is_active) return total
+
+      const multipliers: Record<string, number> = {
+        'weekly': 4.33333,
+        'biweekly': 2.16667,
+        'monthly': 1,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+        'one-time': 0 // Don't include one-time in monthly calculations
+      }
+
+      const monthlyAmount = source.amount * (multipliers[source.frequency] || 0)
+      return total + monthlyAmount
+    }, 0)
+  }
+
+  // Calculate monthly spending trends with proper income sources integration
+  const calculateMonthlyTrends = () => {
+    const monthlyTotals: Record<string, { income: number; expenses: number; isEstimate?: boolean }> = {}
+
+    // Process actual expense transactions only (don't use transactions for income)
+    transactions.forEach(transaction => {
+      if (transaction.transaction_type === 'expense' || transaction.amount < 0) {
+        const date = new Date(transaction.date)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+        if (!monthlyTotals[monthKey]) {
+          monthlyTotals[monthKey] = { income: 0, expenses: 0, isEstimate: false }
+        }
+
         monthlyTotals[monthKey].expenses += Math.abs(transaction.amount)
       }
     })
-    
+
+    // Calculate monthly income from income sources
+    const monthlyIncomeFromSources = calculateMonthlyIncome()
+
+    // Calculate monthly bills total
+    const monthlyBillsTotal = bills.reduce((sum, bill) => {
+      if (!bill.is_active) return sum
+      const multipliers: Record<string, number> = {
+        'monthly': 1,
+        'biweekly': 2.16667,
+        'weekly': 4.33333,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+      }
+      return sum + (bill.amount * (multipliers[bill.billing_cycle] || 1))
+    }, 0)
+
+    // Calculate historical average expenses (from transactions only)
+    const historicalExpenses = Object.values(monthlyTotals)
+    const avgTransactionExpenses = historicalExpenses.length > 0
+      ? historicalExpenses.reduce((sum, data) => sum + data.expenses, 0) / historicalExpenses.length
+      : 0
+
+    // Add income from sources to all months (historical and future)
+    Object.keys(monthlyTotals).forEach(monthKey => {
+      monthlyTotals[monthKey].income = monthlyIncomeFromSources
+    })
+
+    // Get current date and ensure we show the correct current month
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const currentMonth = today.getMonth() + 1 // September = 9
+    const currentMonthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`
+
+    // Add current month if it doesn't exist
+    if (!monthlyTotals[currentMonthKey]) {
+      monthlyTotals[currentMonthKey] = {
+        income: monthlyIncomeFromSources,
+        expenses: avgTransactionExpenses + monthlyBillsTotal,
+        isEstimate: true
+      }
+    } else {
+      // Current month exists with partial data - estimate remaining days
+      const daysInMonth = new Date(currentYear, currentMonth, 0).getDate()
+      const daysPassed = today.getDate()
+      const remainingDays = Math.max(0, daysInMonth - daysPassed)
+
+      if (remainingDays > 0) {
+        const dailyAvgExpenses = avgTransactionExpenses / 30
+        monthlyTotals[currentMonthKey].expenses += dailyAvgExpenses * remainingDays
+        monthlyTotals[currentMonthKey].isEstimate = true
+      }
+
+      // Always add bills to current month
+      monthlyTotals[currentMonthKey].expenses += monthlyBillsTotal
+      monthlyTotals[currentMonthKey].income = monthlyIncomeFromSources
+    }
+
+    // Add next 2 months estimates
+    for (let i = 1; i <= 2; i++) {
+      const futureDate = new Date(currentYear, currentMonth - 1 + i, 1)
+      const futureMonthKey = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}`
+
+      monthlyTotals[futureMonthKey] = {
+        income: monthlyIncomeFromSources,
+        expenses: avgTransactionExpenses + monthlyBillsTotal,
+        isEstimate: true
+      }
+    }
+
     return monthlyTotals
   }
 
-  // Calculate expense categories breakdown from bills
+  // Calculate expense categories breakdown from bills and transactions
   const calculateCategoryBreakdown = () => {
     const categoryTotals: Record<string, number> = {}
-    
+
     // Enhanced color palette
     const categoryColors: Record<string, string> = {
       'Housing': '#ef4444',
@@ -91,10 +267,11 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
       'Medical': '#be123c',
       'Other': '#6b7280'
     }
-    
+
+    // Process bills (convert to monthly amounts)
     bills.forEach(bill => {
       if (!bill.is_active) return
-      
+
       // Convert billing cycle to monthly amount
       const multipliers: Record<string, number> = {
         'monthly': 1,
@@ -103,9 +280,9 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
         'quarterly': 0.33333,
         'annual': 0.08333,
       }
-      
+
       const monthlyAmount = bill.amount * (multipliers[bill.billing_cycle] || 1)
-      
+
       if (bill.categories && Array.isArray(bill.categories) && bill.categories.length > 0) {
         const amountPerCategory = monthlyAmount / bill.categories.length
         bill.categories.forEach((category: any) => {
@@ -116,12 +293,30 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
         categoryTotals['Other'] = (categoryTotals['Other'] || 0) + monthlyAmount
       }
     })
-    
+
+    // Process transactions
+    transactions.forEach(transaction => {
+      if ((transaction.transaction_type === 'expense' || transaction.amount < 0) && !transaction.exclude_from_spending) {
+        const amount = Math.abs(transaction.amount)
+
+        // Handle multiple categories
+        if (transaction.categories && Array.isArray(transaction.categories) && transaction.categories.length > 0) {
+          const amountPerCategory = amount / transaction.categories.length
+          transaction.categories.forEach(category => {
+            categoryTotals[category] = (categoryTotals[category] || 0) + amountPerCategory
+          })
+        } else {
+          const category = transaction.category || 'Other'
+          categoryTotals[category] = (categoryTotals[category] || 0) + amount
+        }
+      }
+    })
+
     // Convert to array and sort
     const sortedCategories = Object.entries(categoryTotals)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6) // Top 6 categories
-    
+
     return sortedCategories.map(([name, value]) => ({
       name,
       value,
@@ -139,6 +334,7 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
           userId,
           transactions: transactions.slice(0, 50),
           bills,
+          incomeSources,
           goal: savingsGoal.amount ? {
             amount: parseFloat(savingsGoal.amount),
             deadline: savingsGoal.deadline,
@@ -150,18 +346,33 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
       if (!response.ok) throw new Error('Failed to generate insights')
       
       const data = await response.json()
-      
-      // Parse insights if it's a string
-      let parsedInsights
-      try {
-        parsedInsights = typeof data.insights === 'string' 
-          ? JSON.parse(data.insights) 
-          : data.insights
-      } catch (e) {
-        parsedInsights = { insights: data.insights }
+
+      // The AI service returns insights as a string that may contain JSON
+      let processedInsights
+      if (typeof data.insights === 'string') {
+        // Try to parse as JSON first in case it's structured
+        try {
+          const parsed = JSON.parse(data.insights)
+          // If it's an array, take the first element
+          if (Array.isArray(parsed)) {
+            processedInsights = parsed[0]
+          } else {
+            processedInsights = parsed
+          }
+        } catch (e) {
+          // It's plain text insights from AI, keep as string
+          processedInsights = data.insights
+        }
+      } else {
+        // It's already an object
+        processedInsights = data.insights
+        // If it's an array, take the first element
+        if (Array.isArray(processedInsights)) {
+          processedInsights = processedInsights[0]
+        }
       }
-      
-      setInsights(parsedInsights)
+
+      setInsights(processedInsights)
       
       // Generate AI insights based on data
       generateAIInsightsFromData()
@@ -177,34 +388,50 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
     const insights: AIInsight[] = []
     const categorySpending = calculateCategorySpending()
     const monthlyTrends = calculateMonthlyTrends()
-    
-    // Calculate average monthly expenses
-    const monthlyExpenses = Object.values(monthlyTrends).map(m => m.expenses)
-    const avgMonthlyExpenses = monthlyExpenses.reduce((a, b) => a + b, 0) / monthlyExpenses.length
-    
-    // Calculate average monthly income
-    const monthlyIncome = Object.values(monthlyTrends).map(m => m.income)
-    const avgMonthlyIncome = monthlyIncome.reduce((a, b) => a + b, 0) / monthlyIncome.length
-    
+    const monthlyIncomeFromSources = calculateMonthlyIncome()
+
+    // Calculate average monthly expenses (exclude estimated future months for accuracy)
+    const historicalExpenses = Object.entries(monthlyTrends)
+      .filter(([_, data]) => !data.isEstimate)
+      .map(([_, data]) => data.expenses)
+
+    const avgMonthlyExpenses = historicalExpenses.length > 0
+      ? historicalExpenses.reduce((a, b) => a + b, 0) / historicalExpenses.length
+      : Object.values(monthlyTrends).reduce((sum, data) => sum + data.expenses, 0) / Object.values(monthlyTrends).length
+
+    // Use income from sources instead of transaction-based income
+    const monthlyIncome = monthlyIncomeFromSources
+
     // Savings rate insight
-    const savingsRate = ((avgMonthlyIncome - avgMonthlyExpenses) / avgMonthlyIncome) * 100
-    if (savingsRate < 20) {
-      insights.push({
-        type: 'warning',
-        title: 'Low Savings Rate',
-        description: `You're saving ${savingsRate.toFixed(1)}% of income. Aim for at least 20%.`,
-        metric: 'Savings Rate',
-        value: savingsRate,
-        trend: 'down'
-      })
+    if (monthlyIncome > 0) {
+      const savingsRate = ((monthlyIncome - avgMonthlyExpenses) / monthlyIncome) * 100
+      if (savingsRate < 20) {
+        insights.push({
+          type: 'warning',
+          title: 'Low Savings Rate',
+          description: `You're saving ${savingsRate.toFixed(1)}% of income. Aim for at least 20%.`,
+          metric: 'Savings Rate',
+          value: savingsRate,
+          trend: 'down'
+        })
+      } else {
+        insights.push({
+          type: 'success',
+          title: 'Healthy Savings Rate',
+          description: `Great! You're saving ${savingsRate.toFixed(1)}% of your income.`,
+          metric: 'Savings Rate',
+          value: savingsRate,
+          trend: 'up'
+        })
+      }
     } else {
       insights.push({
-        type: 'success',
-        title: 'Healthy Savings Rate',
-        description: `Great! You're saving ${savingsRate.toFixed(1)}% of your income.`,
-        metric: 'Savings Rate',
-        value: savingsRate,
-        trend: 'up'
+        type: 'warning',
+        title: 'No Income Sources',
+        description: 'Add your income sources to get better financial insights and tracking.',
+        metric: 'Income Sources',
+        value: incomeSources.length,
+        trend: 'down'
       })
     }
     
@@ -235,13 +462,13 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
       return sum + (bill.amount * (multipliers[bill.billing_cycle] || 1))
     }, 0)
     
-    if (totalBillAmount > avgMonthlyIncome * 0.5) {
+    if (monthlyIncome > 0 && totalBillAmount > monthlyIncome * 0.5) {
       insights.push({
         type: 'warning',
         title: 'High Fixed Costs',
-        description: `Your bills are ${((totalBillAmount / avgMonthlyIncome) * 100).toFixed(1)}% of income. Consider reducing fixed expenses.`,
+        description: `Your bills are ${((totalBillAmount / monthlyIncome) * 100).toFixed(1)}% of income. Consider reducing fixed expenses.`,
         metric: 'Fixed Costs',
-        value: (totalBillAmount / avgMonthlyIncome) * 100,
+        value: (totalBillAmount / monthlyIncome) * 100,
         trend: 'up'
       })
     }
@@ -270,20 +497,31 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
 
   useEffect(() => {
     // Generate initial insights when component mounts
-    if (transactions.length > 0 || bills.length > 0) {
+    if (transactions.length > 0 || bills.length > 0 || incomeSources.length > 0) {
       generateAIInsightsFromData()
     }
-  }, [transactions, bills])
+  }, [transactions, bills, incomeSources])
 
   const categorySpending = calculateCategorySpending()
   const topCategories = Object.entries(categorySpending)
     .sort((a, b) => b[1] - a[1])
+    .slice(0, 8) // Show top 8 categories instead of 5
+
+  const merchantSpending = calculateMerchantSpending()
+  const topMerchants = Object.entries(merchantSpending)
+    .sort((a, b) => b[1].total - a[1].total)
     .slice(0, 5)
-  
+    .map(([merchant, data]) => ({
+      name: merchant,
+      total: data.total,
+      count: data.count,
+      average: data.total / data.count
+    }))
+
   const monthlyTrends = calculateMonthlyTrends()
   const sortedMonths = Object.entries(monthlyTrends)
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .slice(-6) // Last 6 months
+    .slice(-8) // Show more months to include current + 2 future months
 
   return (
     <div className="space-y-6">
@@ -293,6 +531,7 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
           onClick={generateInsights}
           disabled={loading}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors flex items-center gap-2"
+          title="💡 Generate AI-powered financial insights based on your spending patterns, bills, and savings goals. Get personalized recommendations for budgeting, saving strategies, and actionable tips to improve your financial health."
         >
           {loading ? (
             <>
@@ -346,7 +585,7 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Spending Trends */}
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Monthly Spending Trends</h3>
@@ -354,16 +593,31 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
             {sortedMonths.length > 0 ? (
               sortedMonths.map(([month, data]) => {
                 const date = new Date(month + '-01')
+                const currentDate = new Date()
+                const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
                 const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
                 const netFlow = data.income - data.expenses
-                
+                const isCurrentOrFuture = month >= currentMonth
+                const isEstimate = data.isEstimate
+
                 return (
-                  <div key={month} className="flex items-center justify-between">
-                    <span className="text-gray-600">{monthName}</span>
+                  <div key={month} className={`flex items-center justify-between ${isEstimate ? 'opacity-75' : ''}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">{monthName}</span>
+                      {isEstimate && (
+                        <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
+                          est.
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-green-600 text-sm">+{formatCurrency(data.income)}</span>
-                      <span className="text-red-600 text-sm">-{formatCurrency(data.expenses)}</span>
-                      <span className={`font-medium ${netFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-sm ${isEstimate ? 'text-green-500' : 'text-green-600'}`}>
+                        +{formatCurrency(data.income)}
+                      </span>
+                      <span className={`text-sm ${isEstimate ? 'text-red-500' : 'text-red-600'}`}>
+                        -{formatCurrency(data.expenses)}
+                      </span>
+                      <span className={`font-medium ${netFlow >= 0 ? (isEstimate ? 'text-green-500' : 'text-green-600') : (isEstimate ? 'text-red-500' : 'text-red-600')}`}>
                         {formatCurrency(netFlow)}
                       </span>
                     </div>
@@ -429,6 +683,32 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
           </div>
         </div>
 
+        {/* Top Merchants by Spending */}
+        <div className="bg-white rounded-lg border p-6">
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">Top Merchants by Spending</h3>
+          <div className="space-y-3">
+            {topMerchants.length > 0 ? (
+              topMerchants.map((merchant) => (
+                <div key={merchant.name} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-900 font-medium text-sm">{merchant.name}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(merchant.total)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{merchant.count} transaction{merchant.count !== 1 ? 's' : ''}</span>
+                    <span>Avg: {formatCurrency(merchant.average)}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p className="text-sm">No merchant data available</p>
+                <p className="text-xs mt-1">Add expense transactions to see top merchants</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Bill Payment Schedule */}
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Bill Payment Schedule</h3>
@@ -445,31 +725,32 @@ export default function FinancialInsights({ transactions, bills, userId }: Finan
           </div>
         </div>
 
-        {/* Savings Goal */}
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Set a Savings Goal</h3>
-          <div className="space-y-3">
-            <input
-              type="number"
-              placeholder="Goal amount ($)"
-              value={savingsGoal.amount}
-              onChange={(e) => setSavingsGoal({ ...savingsGoal, amount: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="date"
-              value={savingsGoal.deadline}
-              onChange={(e) => setSavingsGoal({ ...savingsGoal, deadline: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="text"
-              placeholder="What's this goal for?"
-              value={savingsGoal.description}
-              onChange={(e) => setSavingsGoal({ ...savingsGoal, description: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+      </div>
+
+      {/* Savings Goal - Full Width */}
+      <div className="bg-white rounded-lg border p-6">
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">Set a Savings Goal</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
+            type="number"
+            placeholder="Goal amount ($)"
+            value={savingsGoal.amount}
+            onChange={(e) => setSavingsGoal({ ...savingsGoal, amount: e.target.value })}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="date"
+            value={savingsGoal.deadline}
+            onChange={(e) => setSavingsGoal({ ...savingsGoal, deadline: e.target.value })}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="What's this goal for?"
+            value={savingsGoal.description}
+            onChange={(e) => setSavingsGoal({ ...savingsGoal, description: e.target.value })}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
       </div>
 

@@ -28,8 +28,8 @@ export const appConfig = {
   
   // App metadata
   app: {
-    name: 'My Budget Planner',
+    name: 'PocketWiseAI',
     description: 'AI-Powered Personal Finance Management',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://my-budget-planner.vercel.app',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://pocketwise-ai.vercel.app',
   }
 }

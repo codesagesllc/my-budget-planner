@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerActionClient } from '@/lib/supabase/server'
 import { aiService } from '@/lib/ai/services/ai-service'
 import type { SubscriptionTier } from '@/lib/ai/services/ai-service'
+import type { DatabaseTransaction, DatabaseBill, DatabaseIncomeSource } from '@/lib/types/database'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, transactions, bills, goal } = await request.json()
+    const { userId, transactions, bills, incomeSources, goal } = await request.json()
     
     if (!userId) {
       return NextResponse.json(

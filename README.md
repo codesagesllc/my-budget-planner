@@ -1,4 +1,4 @@
-# AI-Powered Budget Planner
+# PocketWiseAI
 
 A comprehensive personal finance management application built with Next.js, Supabase, Plaid, and Anthropic AI.
 
@@ -34,7 +34,7 @@ Before you begin, ensure you have:
 
 ```bash
 git clone <your-repo-url>
-cd my-budget-planner
+cd pocketwise-ai
 npm install
 ```
 
@@ -118,7 +118,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 ## Project Structure
 
 ```
-my-budget-planner/
+pocketwise-ai/
 ├── app/                  # Next.js app directory
 │   ├── api/             # API routes
 │   ├── (auth)/          # Authentication pages
