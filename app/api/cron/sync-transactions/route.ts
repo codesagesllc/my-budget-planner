@@ -73,19 +73,19 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const stats = {
       total_active_items: plaidItems?.length || 0,
-      recently_synced: plaidItems?.filter(item => {
+      recently_synced: plaidItems?.filter((item: any) => {
         if (!item.last_sync) return false
         const lastSync = new Date(item.last_sync)
         const diffMinutes = (now.getTime() - lastSync.getTime()) / (1000 * 60)
         return diffMinutes <= 30 // Synced in last 30 minutes
       }).length || 0,
-      needs_sync: plaidItems?.filter(item => {
+      needs_sync: plaidItems?.filter((item: any) => {
         if (!item.last_sync) return true
         const lastSync = new Date(item.last_sync)
         const diffMinutes = (now.getTime() - lastSync.getTime()) / (1000 * 60)
         return diffMinutes > 15 // Hasn't been synced in 15+ minutes
       }).length || 0,
-      has_errors: plaidItems?.filter(item => item.error_code).length || 0,
+      has_errors: plaidItems?.filter((item: any) => item.error_code).length || 0,
     }
 
     return NextResponse.json({

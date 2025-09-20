@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
 
       // Handle specific Plaid errors
       if (plaidError.error_code === 'ITEM_LOGIN_REQUIRED') {
-        // Mark item as requiring re-authentication
+        // Mark item as requiring re-authentication by access_token
         await supabase
           .from('plaid_items')
           .update({ status: 'login_required' })
-          .eq('id', plaidItem.id)
+          .eq('access_token', access_token)
       }
 
       const errorMessage = handlePlaidError(plaidError)
