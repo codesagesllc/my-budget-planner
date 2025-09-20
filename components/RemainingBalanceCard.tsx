@@ -61,7 +61,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
         setIsUpdating(true)
       }
 
-      const response = await fetch('/api/balance/remaining?period=week')
+      const response = await fetch('/api/balance/remaining?period=month')
       const result = await response.json()
 
       if (!response.ok) {

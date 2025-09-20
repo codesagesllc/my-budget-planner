@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { priceId, email, planName, requireSignup } = body
     
-    console.log('Checkout session request:', { priceId, email, planName, requireSignup })
+    console.log('Checkout session request:', { priceId, planName, requireSignup })
     
     if (!priceId || !email) {
       return NextResponse.json(

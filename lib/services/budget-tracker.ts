@@ -134,32 +134,10 @@ export class BudgetTracker {
   private getDefaultBudgetLimits(userId: string): BudgetLimit[] {
     return [
       {
-        id: 'default-1',
+        id: 'example-1',
         user_id: userId,
         category: 'Food and Drink',
-        monthly_limit: 800,
-        current_spending: 0,
-        percentage_used: 0,
-        warning_threshold: 80,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-2',
-        user_id: userId,
-        category: 'Transportation',
-        monthly_limit: 400,
-        current_spending: 0,
-        percentage_used: 0,
-        warning_threshold: 80,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-3',
-        user_id: userId,
-        category: 'Entertainment',
-        monthly_limit: 300,
+        monthly_limit: 600,
         current_spending: 0,
         percentage_used: 0,
         warning_threshold: 80,
@@ -282,17 +260,11 @@ export class BudgetTracker {
 
       if (error) {
         console.error('Error fetching savings goals:', error)
-
-        // Check if it's a table not found error
-        if (error.message?.includes('relation "savings_goals" does not exist')) {
-          console.log('Savings goals table does not exist yet - returning default goals')
-        }
-
-        return this.getDefaultSavingsGoals(userId)
+        return []
       }
 
       if (!data || data.length === 0) {
-        return this.getDefaultSavingsGoals(userId)
+        return []
       }
 
       return (data || []).map(goal => {
@@ -311,28 +283,10 @@ export class BudgetTracker {
       })
     } catch (error) {
       console.error('Error in getSavingsGoals:', error)
-      return this.getDefaultSavingsGoals(userId)
+      return []
     }
   }
 
-  private getDefaultSavingsGoals(userId: string): SavingsGoal[] {
-    const futureDate = new Date()
-    futureDate.setFullYear(futureDate.getFullYear() + 1)
-
-    return [
-      {
-        id: 'default-savings-1',
-        user_id: userId,
-        name: 'Emergency Fund',
-        target_amount: 5000,
-        current_amount: 1200,
-        deadline: futureDate.toISOString(),
-        progress_percentage: 24,
-        monthly_required: 316.67,
-        on_track: true
-      }
-    ]
-  }
 
   async getDebtPayoffs(userId: string): Promise<DebtPayoff[]> {
     try {
