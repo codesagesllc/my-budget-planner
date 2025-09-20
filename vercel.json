@@ -15,14 +15,20 @@
     "app/api/plaid/exchange-token/route.ts": {
       "maxDuration": 30
     },
-    "app/api/plaid/auto-sync/route.ts": {
+    "app/api/plaid/sync-transactions/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/webhooks/plaid/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/cron/sync-transactions/route.ts": {
+      "maxDuration": 30
     }
   },
   "crons": [
     {
-      "path": "/api/plaid/auto-sync",
-      "schedule": "0 */3 * * *"
+      "path": "/api/cron/sync-transactions",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

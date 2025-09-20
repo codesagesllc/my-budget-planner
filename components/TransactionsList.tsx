@@ -677,9 +677,12 @@ export default function TransactionsList({ transactions: initialTransactions, us
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold text-gray-900">Transactions</h3>
+            {/* Realtime connection indicator */}
             {isRealtimeConnected && (
               <div className={`w-2 h-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} title={isUpdating ? 'Updating transactions...' : 'Real-time updates active'} />
             )}
+            {/* TODO: Add RealtimeDiagnostic component for debugging */}
+            {/* <RealtimeDiagnostic isConnected={isRealtimeConnected} isUpdating={isUpdating} /> */}
           </div>
           <p className="text-sm text-gray-600 mt-1">
             Manage and categorize your transactions. Convert them to expenses or recurring bills.

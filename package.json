@@ -14,8 +14,10 @@
     "test:ci": "jest --ci",
     "workers": "node scripts/start-workers.js",
     "workers:dev": "nodemon scripts/start-workers.js",
+    "workers:prod": "node scripts/start-workers-production.js",
     "queue:status": "curl -s http://localhost:3000/api/queue/status | json_pp",
-    "queue:test": "curl -s -X POST -H 'Content-Type: application/json' -d '{\"action\":\"test-redis\"}' http://localhost:3000/api/queue/test | json_pp"
+    "queue:test": "curl -s -X POST -H 'Content-Type: application/json' -d '{\"action\":\"test-redis\"}' http://localhost:3000/api/queue/test | json_pp",
+    "test:sync": "node scripts/test-sync.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",

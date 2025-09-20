@@ -372,9 +372,9 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
         <Card>
           <CardContent className="text-center py-8">
             <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 mb-2">No Savings Goals Yet</h4>
+            <h4 className="text-lg font-medium text-gray-600 mb-2">No Savings Goals for User Entered</h4>
             <p className="text-gray-500 mb-4">
-              Set savings goals to track your progress and get real-time updates.
+              Create savings goals to track your progress and get real-time updates.
             </p>
             <Button onClick={() => setShowAddGoalPopup(true)}>
               <Plus className="h-4 w-4 mr-1" />

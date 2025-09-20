@@ -203,7 +203,6 @@ export default function DashboardClient({
         console.error('Error fetching income sources:', error)
         setIncomeSources([])
       } else {
-        console.log('Fetched income sources:', data)
         setIncomeSources(data || [])
       }
     } catch (err) {
@@ -244,80 +243,64 @@ export default function DashboardClient({
     const monthStart = new Date(currentYear, currentMonth, 1)
     const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999)
     
-    console.log('Calculating monthly income:', {
-      currentMonth,
-      currentYear,
-      monthStart: monthStart.toISOString(),
-      monthEnd: monthEnd.toISOString(),
-      incomeSources: incomeSources.length,
-      sources: incomeSources
-    })
     
     return incomeSources.reduce((sum, income) => {
       if (!income.is_active) {
-        console.log(`Skipping inactive: ${income.name}`)
         return sum
       }
 
-      // Handle one-time income with proper date range logic - EXACTLY like debug endpoint
+      // Handle one-time income with proper date range logic
       if (income.frequency === 'one-time') {
         if (!income.start_date) {
-          console.log(`No start date for: ${income.name}`)
           return sum
         }
-        
+
         const startDate = new Date(income.start_date)
-        
+
         if (income.end_date) {
           const endDate = new Date(income.end_date)
-          
+
           // Check if this income period overlaps with current month
           if (startDate <= monthEnd && endDate >= monthStart) {
             // Calculate the overlap period
             const effectiveStart = startDate > monthStart ? startDate : monthStart
             const effectiveEnd = endDate < monthEnd ? endDate : monthEnd
-            
+
             // Calculate the number of days in the total period
             const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-            
+
             // Calculate the number of days in the current month
             const monthDays = Math.ceil((effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)) + 1
-            
+
             // Prorate the amount based on days in month vs total days
             const proratedAmount = (Number(income.amount) * monthDays) / totalDays
-            
-            console.log(`Prorating ${income.name}: ${monthDays}/${totalDays} days = $${proratedAmount.toFixed(2)}`)
+
             return sum + proratedAmount
-          } else {
-            console.log(`Outside current month: ${income.name}`)
           }
         } else {
           // If no end date, check if start date is in current month
           if (startDate >= monthStart && startDate <= monthEnd) {
-            console.log(`One-time income ${income.name}: $${income.amount}`)
             return sum + Number(income.amount)
           }
         }
         return sum
       }
-      
+
       // Handle recurring income with start/end date checks
       if (income.start_date) {
         const startDate = new Date(income.start_date)
         if (startDate > monthEnd) {
-          console.log(`Not started yet: ${income.name}`)
           return sum // Hasn't started yet
         }
-        
+
         if (income.end_date) {
           const endDate = new Date(income.end_date)
           if (endDate < monthStart) {
-            console.log(`Already ended: ${income.name}`)
             return sum // Already ended
           }
         }
       }
-      
+
       // Frequency multipliers for recurring income
       const multipliers: Record<string, number> = {
         'monthly': 1,
@@ -326,40 +309,35 @@ export default function DashboardClient({
         'quarterly': 0.33333, // 4 payments per year / 12
         'annual': 0.08333,    // 1 payment per year / 12
       }
-      
+
       // Special handling for quarterly income
       if (income.frequency === 'quarterly' && income.start_date) {
         const startDate = new Date(income.start_date)
         const monthsDiff = (currentYear - startDate.getFullYear()) * 12 + (currentMonth - startDate.getMonth())
-        
+
         // Check if this is a quarter payment month (every 3 months from start)
         if (monthsDiff >= 0 && monthsDiff % 3 === 0) {
-          console.log(`Quarterly income ${income.name}: $${income.amount}`)
           return sum + Number(income.amount)
         }
         return sum
       }
-      
+
       // Special handling for annual income
       if (income.frequency === 'annual' && income.start_date) {
         const startDate = new Date(income.start_date)
-        
+
         // Check if this month matches the anniversary month
         if (startDate.getMonth() === currentMonth) {
           const yearsDiff = currentYear - startDate.getFullYear()
           if (yearsDiff >= 0) {
-            console.log(`Annual income ${income.name}: $${income.amount}`)
             return sum + Number(income.amount)
           }
         }
         return sum
       }
-      
+
       // Regular recurring income (monthly, biweekly, weekly)
       const monthlyAmount = Number(income.amount) * (multipliers[income.frequency] || 0)
-      if (monthlyAmount > 0) {
-        console.log(`Recurring ${income.frequency} income ${income.name}: $${monthlyAmount.toFixed(2)}`)
-      }
       return sum + monthlyAmount
     }, 0)
   }
@@ -527,13 +505,6 @@ export default function DashboardClient({
         reconciledIncome.fromManualSources += unmatchedExpected
       }
       
-      console.log(`Income Source: ${incomeSource.name}`, {
-        frequency: incomeSource.frequency,
-        expectedPayments,
-        matchedCount,
-        matchedTotal,
-        unmatchedExpected
-      })
     })
     
     // Add any unmatched transactions as unexpected income
@@ -545,12 +516,6 @@ export default function DashboardClient({
       }
     })
 
-    console.log('Income Reconciliation Summary:', {
-      totalMatched: reconciledIncome.matched,
-      unmatchedTransactions: reconciledIncome.unmatched,
-      expectedButNotReceived: reconciledIncome.fromManualSources,
-      totalIncome: reconciledIncome.matched + reconciledIncome.unmatched + reconciledIncome.fromManualSources
-    })
 
     return reconciledIncome
   }
@@ -593,19 +558,6 @@ export default function DashboardClient({
     ? accountsBalance + totalIncomeFromTransactions + totalExpectedIncome - totalExpensesFromTransactions
     : accountsBalance + (calculateMonthlyIncome() - calculateMonthlyExpenses())
   
-  // Log for debugging
-  console.log('Balance Calculation:', {
-    accountsBalance,
-    totalIncomeFromTransactions,
-    totalExpectedIncome,
-    totalExpensesFromTransactions,
-    expectedMonthlyIncome: calculateMonthlyIncome(),
-    expectedMonthlyExpenses: calculateMonthlyExpenses(),
-    reconciledIncome,
-    totalBalance,
-    hasTransactions,
-    transactionCount: transactions.length
-  })
 
   // Helper function to get upcoming one-time items
   const getUpcomingOneTimeItems = () => {
@@ -731,22 +683,13 @@ export default function DashboardClient({
     }
   }
 
-  const monthlyIncome = calculateMonthlyIncome()
-  const monthlyExpenses = calculateMonthlyExpenses()
+  const monthlyIncome = React.useMemo(() => calculateMonthlyIncome(), [incomeSources])
+  const monthlyExpenses = React.useMemo(() => calculateMonthlyExpenses(), [bills])
   const monthlySavings = monthlyIncome - monthlyExpenses
   const savingsRate = monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0
-  const monthBreakdown = getCurrentMonthBreakdown()
-  const upcomingOneTimeItems = getUpcomingOneTimeItems()
+  const monthBreakdown = React.useMemo(() => getCurrentMonthBreakdown(), [incomeSources, bills])
+  const upcomingOneTimeItems = React.useMemo(() => getUpcomingOneTimeItems(), [incomeSources, bills])
 
-  // Log for debugging
-  useEffect(() => {
-    console.log('Dashboard Income Calculation:', {
-      incomeSources: incomeSources.length,
-      monthlyIncome,
-      monthBreakdown,
-      currentMonth: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    })
-  }, [incomeSources, monthlyIncome])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

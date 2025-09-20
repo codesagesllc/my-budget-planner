@@ -72,8 +72,6 @@ function SignupForm() {
     setLoading(true)
 
     try {
-      console.log('Attempting signup for:', email)
-      
       // If coming from payment, don't check free trial
       if (!paymentSuccess && selectedPlan?.planId === 'free_trial') {
         const { data: existingUser } = await supabase

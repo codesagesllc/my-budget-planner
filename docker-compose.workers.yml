@@ -1,0 +1,71 @@
+# docker-compose.workers.yml
+# Docker Compose configuration for running BullMQ workers in production
+
+version: '3.8'
+
+services:
+  # Transaction Sync Workers
+  transaction-sync-worker:
+    build: .
+    command: node scripts/start-workers.js
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - PLAID_CLIENT_ID=${PLAID_CLIENT_ID}
+      - PLAID_SECRET=${PLAID_SECRET}
+      - PLAID_ENV=${PLAID_ENV}
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    depends_on:
+      - redis
+    networks:
+      - budget-planner-network
+
+  # Redis for queue management
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - budget-planner-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # BullMQ Dashboard (optional - for monitoring)
+  bullmq-dashboard:
+    image: deadly0/bull-board
+    ports:
+      - "3001:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    depends_on:
+      - redis
+    networks:
+      - budget-planner-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  budget-planner-network:
+    driver: bridge

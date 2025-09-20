@@ -300,22 +300,6 @@ export async function GET(request: NextRequest) {
     const unpaidBillsAmount = periodBillAmount - paidBillsAmount
     const remainingBalance = expectedIncome - unpaidBillsAmount - totalSpending
 
-    // Debug logging
-    console.log(`Remaining Balance Debug (${period}):`)
-    console.log(`- Period: ${periodLabel}`)
-    console.log(`- Income sources found: ${incomeSources.length}`)
-    if (incomeSources.length > 0) {
-      incomeSources.forEach((source: DatabaseIncomeSource, index: number) => {
-        console.log(`  Income ${index + 1}: ${source.name} - $${source.amount} (${source.frequency})`)
-      })
-    }
-    console.log(`- Expected income: $${expectedIncome}`)
-    console.log(`- Total bills for period: $${periodBillAmount}`)
-    console.log(`- Paid bills: $${paidBillsAmount}`)
-    console.log(`- Unpaid bills: $${unpaidBillsAmount}`)
-    console.log(`- Spending transactions: ${transactions.length}`)
-    console.log(`- Total spending: $${totalSpending}`)
-    console.log(`- Remaining balance: $${remainingBalance}`)
 
     // Calculate percentages
     const spendingPercentage = expectedIncome > 0 ? (totalSpending / expectedIncome) * 100 : 0
