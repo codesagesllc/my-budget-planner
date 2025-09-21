@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { plaidSyncService } from '@/lib/services/plaid-sync'
 
+interface PlaidItem {
+  id: string
+  item_id: string
+  status: string
+  last_sync: string | null
+  error_code: string | null
+}
+
 // This endpoint should be called by a cron service (Vercel Cron, external cron, etc.)
 // to trigger automatic transaction syncing every 15 minutes
 export async function POST(request: NextRequest) {
@@ -73,19 +81,19 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const stats = {
       total_active_items: plaidItems?.length || 0,
-      recently_synced: plaidItems?.filter((item: any) => {
+      recently_synced: plaidItems?.filter((item: PlaidItem) => {
         if (!item.last_sync) return false
         const lastSync = new Date(item.last_sync)
         const diffMinutes = (now.getTime() - lastSync.getTime()) / (1000 * 60)
         return diffMinutes <= 30 // Synced in last 30 minutes
       }).length || 0,
-      needs_sync: plaidItems?.filter((item: any) => {
+      needs_sync: plaidItems?.filter((item: PlaidItem) => {
         if (!item.last_sync) return true
         const lastSync = new Date(item.last_sync)
         const diffMinutes = (now.getTime() - lastSync.getTime()) / (1000 * 60)
         return diffMinutes > 15 // Hasn't been synced in 15+ minutes
       }).length || 0,
-      has_errors: plaidItems?.filter((item: any) => item.error_code).length || 0,
+      has_errors: plaidItems?.filter((item: PlaidItem) => item.error_code).length || 0,
     }
 
     return NextResponse.json({

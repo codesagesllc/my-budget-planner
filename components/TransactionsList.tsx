@@ -11,7 +11,7 @@ import {
   FileText, Clock, Link, TrendingUp
 } from 'lucide-react'
 import { BILL_CATEGORY_GROUPS, getBillCategoryLabel } from '@/lib/constants/bill-categories'
-import PlaidSyncButton from '@/components/PlaidSyncButton'
+import PlaidLinkButton from '@/components/PlaidLinkButton'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 type BillInsert = Database['public']['Tables']['bills']['Insert']
@@ -87,9 +87,10 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
   // Categories for transactions
   const categories = [
-    'all',
+    'All',
     'Food & Dining',
     'Transportation',
+    'Bar',
     'Shopping',
     'Entertainment',
     'Bills & Utilities',
@@ -681,8 +682,6 @@ export default function TransactionsList({ transactions: initialTransactions, us
             {isRealtimeConnected && (
               <div className={`w-2 h-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} title={isUpdating ? 'Updating transactions...' : 'Real-time updates active'} />
             )}
-            {/* TODO: Add RealtimeDiagnostic component for debugging */}
-            {/* <RealtimeDiagnostic isConnected={isRealtimeConnected} isUpdating={isUpdating} /> */}
           </div>
           <p className="text-sm text-gray-600 mt-1">
             Manage and categorize your transactions. Convert them to expenses or recurring bills.
@@ -695,10 +694,24 @@ export default function TransactionsList({ transactions: initialTransactions, us
               <span>Updating...</span>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Connected Banks Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-blue-500" />
+            Connected Banks
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage your connected bank accounts and sync transactions
+          </p>
+        </div>
+        <div className="p-6">
           {userId && (
-            <PlaidSyncButton
-              userId={userId}
-              onSyncComplete={() => {
+            <PlaidLinkButton
+              onSuccess={() => {
                 if (onUpdate) onUpdate()
               }}
             />
