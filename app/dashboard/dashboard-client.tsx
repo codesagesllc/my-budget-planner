@@ -1044,12 +1044,6 @@ export default function DashboardClient({
                         )}
                       </button>
 
-                      {hasFeature('account_connections') && (
-                        <PlaidLinkButton
-                          userId={user.id}
-                          onSuccess={refreshData}
-                        />
-                      )}
 
                       <button
                         onClick={() => handleFeatureAccess('bill_parsing', () => setShowBillUploader(true))}
@@ -1213,9 +1207,6 @@ export default function DashboardClient({
 
               {activeTab === 'transactions' && (
                 <div className="p-6">
-                  <div className="mb-6">
-                    <RealtimeDiagnostic userId={user.id} />
-                  </div>
                   <TransactionsList
                     transactions={transactions}
                     userId={user.id}
