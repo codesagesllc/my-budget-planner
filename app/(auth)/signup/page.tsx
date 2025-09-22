@@ -87,11 +87,9 @@ function SignupForm() {
         }
       }
       
-      // Use the configured redirect URL with origin parameter
+      // Use the current window origin for email redirect
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-      const redirectUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
-        : '/auth/callback'
+      const redirectUrl = `${currentOrigin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -225,7 +223,7 @@ function SignupForm() {
       if (selectedPlan) {
         localStorage.setItem('oauth_selected_plan', JSON.stringify(selectedPlan))
       }
-      
+
       // Store payment success info if coming from payment
       if (paymentSuccess && sessionId) {
         localStorage.setItem('oauth_payment_success', JSON.stringify({
@@ -234,12 +232,10 @@ function SignupForm() {
           priceId: selectedPlan?.priceId
         }))
       }
-      
-      // Use the configured redirect URL with origin parameter
+
+      // Use the current window origin for OAuth redirect
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-      const redirectUrl = typeof window !== 'undefined'
-        ? `${window.location.origin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
-        : '/auth/callback'
+      const redirectUrl = `${currentOrigin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

@@ -9,14 +9,23 @@ interface AuthResult {
 
 function getRedirectUrl(path: string = '/auth/callback'): string {
   if (typeof window !== 'undefined') {
+    // Client-side: always use current origin
     return `${window.location.origin}${path}`
   }
-  
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-                  'http://localhost:3000'
-  
-  return `${baseUrl}${path}`
+
+  // Server-side: auto-detect environment
+  if (process.env.VERCEL_URL) {
+    // Running on Vercel
+    return `https://${process.env.VERCEL_URL}${path}`
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    // Production but not Vercel - likely custom domain
+    return `https://www.pocketwiseai.com${path}`
+  }
+
+  // Development - localhost
+  return `http://localhost:3000${path}`
 }
 
 export function useAuth() {
