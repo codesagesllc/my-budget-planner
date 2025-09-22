@@ -20,14 +20,19 @@ export const appConfig = {
       return `${window.location.origin}${path}`
     }
 
-    // Server-side - prioritize custom domain, then app URL, then Vercel URL, then localhost
-    const customDomain = process.env.NEXT_PUBLIC_CUSTOM_DOMAIN
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-    const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
+    // Server-side: auto-detect environment
+    if (process.env.VERCEL_URL) {
+      // Running on Vercel
+      return `https://${process.env.VERCEL_URL}${path}`
+    }
 
-    const baseUrl = customDomain || appUrl || vercelUrl || 'http://localhost:3000'
+    if (process.env.NODE_ENV === 'production') {
+      // Production but not Vercel - likely custom domain
+      return `https://www.pocketwiseai.com${path}`
+    }
 
-    return `${baseUrl}${path}`
+    // Development - localhost
+    return `http://localhost:3000${path}`
   },
 
   // Validate if a domain is allowed for OAuth redirects
