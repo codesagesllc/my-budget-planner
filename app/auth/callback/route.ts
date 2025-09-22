@@ -1,6 +1,7 @@
 import { createServerComponentClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { appConfig } from '@/lib/config/app'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -8,11 +9,29 @@ export async function GET(request: Request) {
   const error = requestUrl.searchParams.get('error')
   const error_description = requestUrl.searchParams.get('error_description')
 
+  // Get the redirect origin - validate it's an allowed domain
+  const getValidatedOrigin = () => {
+    const originParam = requestUrl.searchParams.get('origin')
+    const currentOrigin = requestUrl.origin
+
+    if (originParam && appConfig.isAllowedDomain(originParam)) {
+      return originParam
+    }
+
+    if (appConfig.isAllowedDomain(currentOrigin)) {
+      return currentOrigin
+    }
+
+    // Fallback to configured app URL or localhost
+    return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  }
+
+  const validatedOrigin = getValidatedOrigin()
+
   if (error) {
     console.error('OAuth error:', error, error_description)
-    const originalOrigin = requestUrl.searchParams.get('origin') || requestUrl.origin
     return NextResponse.redirect(
-      `${originalOrigin}/login?error=${encodeURIComponent(error_description || error)}`
+      `${validatedOrigin}/login?error=${encodeURIComponent(error_description || error)}`
     )
   }
 
@@ -24,9 +43,8 @@ export async function GET(request: Request) {
 
       if (exchangeError) {
         console.error('Error exchanging code for session:', exchangeError)
-        const originalOrigin = requestUrl.searchParams.get('origin') || requestUrl.origin
         return NextResponse.redirect(
-          `${originalOrigin}/login?error=${encodeURIComponent('Failed to authenticate')}`
+          `${validatedOrigin}/login?error=${encodeURIComponent('Failed to authenticate')}`
         )
       }
 
@@ -43,25 +61,20 @@ export async function GET(request: Request) {
 
         if (isNewUser) {
           // This is a new user from OAuth signup - redirect to login to require explicit sign-in
-          const originalOrigin = requestUrl.searchParams.get('origin') || requestUrl.origin
           return NextResponse.redirect(
-            `${originalOrigin}/login?message=${encodeURIComponent('Account created successfully! Please sign in to continue.')}`
+            `${validatedOrigin}/login?message=${encodeURIComponent('Account created successfully! Please sign in to continue.')}`
           )
         }
       }
 
     } catch (error) {
       console.error('Error exchanging code for session:', error)
-      const originalOrigin = requestUrl.searchParams.get('origin') || requestUrl.origin
       return NextResponse.redirect(
-        `${originalOrigin}/login?error=${encodeURIComponent('Failed to authenticate')}`
+        `${validatedOrigin}/login?error=${encodeURIComponent('Failed to authenticate')}`
       )
     }
   }
 
-  // Get the original domain from query params or use current origin
-  const originalOrigin = requestUrl.searchParams.get('origin') || requestUrl.origin
-
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(`${originalOrigin}/dashboard`)
+  return NextResponse.redirect(`${validatedOrigin}/dashboard`)
 }

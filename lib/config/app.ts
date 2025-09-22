@@ -1,18 +1,40 @@
 // App configuration
 export const appConfig = {
+  // Allowed domains for OAuth redirects
+  allowedDomains: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    'http://localhost:3005',
+    'https://my-budget-planner-seven.vercel.app',
+    'https://www.pocketwiseai.com',
+    'https://pocketwiseai.com'
+  ],
+
   // Get the correct redirect URL based on environment
   getAuthRedirectUrl: (path: string = '/auth/callback') => {
     if (typeof window !== 'undefined') {
-      // Client-side
+      // Client-side - use current origin
       return `${window.location.origin}${path}`
     }
-    
-    // Server-side
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
-                    'http://localhost:3000'
-    
+
+    // Server-side - prioritize custom domain, then app URL, then Vercel URL, then localhost
+    const customDomain = process.env.NEXT_PUBLIC_CUSTOM_DOMAIN
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
+
+    const baseUrl = customDomain || appUrl || vercelUrl || 'http://localhost:3000'
+
     return `${baseUrl}${path}`
+  },
+
+  // Validate if a domain is allowed for OAuth redirects
+  isAllowedDomain: (domain: string): boolean => {
+    return appConfig.allowedDomains.includes(domain) ||
+           domain.startsWith('http://localhost:') ||
+           domain.includes('vercel.app')
   },
   
   // Stripe configuration
