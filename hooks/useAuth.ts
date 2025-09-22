@@ -8,24 +8,17 @@ interface AuthResult {
 }
 
 function getRedirectUrl(path: string = '/auth/callback'): string {
-  if (typeof window !== 'undefined') {
-    // Client-side: always use current origin
-    return `${window.location.origin}${path}`
-  }
+  // Always use pocketwiseai.com for OAuth redirects to maintain consistent Supabase config
+  return `https://www.pocketwiseai.com${path}`
 
-  // Server-side: auto-detect environment
+  // Check if running on Vercel
   if (process.env.VERCEL_URL) {
     // Running on Vercel
     return `https://${process.env.VERCEL_URL}${path}`
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    // Production but not Vercel - likely custom domain
-    return `https://www.pocketwiseai.com${path}`
-  }
-
-  // Development - localhost
-  return `http://localhost:3000${path}`
+  // Production with custom domain
+  return `https://www.pocketwiseai.com${path}`
 }
 
 export function useAuth() {

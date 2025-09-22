@@ -311,21 +311,21 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-900">
           <Target className="h-5 w-5 text-blue-500" />
           Category Spending Limits
           <div className="flex items-center gap-1">
             <Zap className="h-4 w-4 text-orange-500" />
-            <span className="text-xs text-gray-500">Live</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500">Live</span>
           </div>
         </h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleManage}>
-            <Settings className="h-4 w-4 mr-1" />
+          <Button variant="outline" size="sm" onClick={handleManage} className="text-gray-900 dark:text-gray-900 border-gray-300 dark:border-gray-300 bg-white dark:bg-white hover:bg-gray-50 dark:hover:bg-gray-50">
+            <Settings className="h-4 w-4 mr-1 text-gray-700 dark:text-gray-700" />
             Manage
           </Button>
-          <Button variant="outline" size="sm" onClick={handleAddLimit}>
-            <Plus className="h-4 w-4 mr-1" />
+          <Button variant="outline" size="sm" onClick={handleAddLimit} className="text-gray-900 dark:text-gray-900 border-gray-300 dark:border-gray-300 bg-white dark:bg-white hover:bg-gray-50 dark:hover:bg-gray-50">
+            <Plus className="h-4 w-4 mr-1 text-gray-700 dark:text-gray-700" />
             Add Limit
           </Button>
         </div>
