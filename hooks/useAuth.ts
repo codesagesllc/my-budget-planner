@@ -8,16 +8,10 @@ interface AuthResult {
 }
 
 function getRedirectUrl(path: string = '/auth/callback'): string {
-  // Always use pocketwiseai.com for OAuth redirects to maintain consistent Supabase config
-  return `https://www.pocketwiseai.com${path}`
-
-  // Check if running on Vercel
-  if (process.env.VERCEL_URL) {
-    // Running on Vercel
-    return `https://${process.env.VERCEL_URL}${path}`
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}${path}`
   }
-
-  // Production with custom domain
+  // Fallback for server-side
   return `https://www.pocketwiseai.com${path}`
 }
 
@@ -45,13 +39,10 @@ export function useAuth() {
     provider: Provider
   ): Promise<AuthResult> => {
     try {
-      // Get current origin to include in callback
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${getRedirectUrl('/auth/callback')}?origin=${encodeURIComponent(currentOrigin)}`,
+          redirectTo: getRedirectUrl('/auth/callback'),
         },
       })
 
@@ -67,14 +58,11 @@ export function useAuth() {
     password: string
   ): Promise<AuthResult> => {
     try {
-      // Get current origin to include in callback
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${getRedirectUrl('/auth/callback')}?origin=${encodeURIComponent(currentOrigin)}`,
+          emailRedirectTo: getRedirectUrl('/auth/callback'),
         },
       })
       
