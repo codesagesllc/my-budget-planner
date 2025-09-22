@@ -241,27 +241,89 @@ export default function PlaidLinkButton({
     setError(null)
 
     try {
-      const response = await fetch('/api/plaid/manual-sync', {
-        method: 'POST',
-      })
+      // First, get the plaid items with access tokens
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Sync failed')
+      const { data: items, error: itemsError } = await supabase
+        .from('plaid_items')
+        .select('access_token, item_id, institution_name, status')
+        .eq('user_id', user?.id)
+        .eq('status', 'good')
+
+      if (itemsError) {
+        throw new Error(`Failed to fetch bank connections: ${itemsError.message}`)
       }
 
-      const data = await response.json()
+      if (!items || items.length === 0) {
+        throw new Error('No active bank connections found. Please connect a bank account first.')
+      }
 
-      if (data.totalTransactionsSynced > 0) {
-        toast.success(`Successfully synced ${data.totalTransactionsSynced} transactions`)
+      let totalSynced = 0
+      const errors: string[] = []
+
+      // Sync transactions for each connected account
+      for (const item of items) {
+        try {
+          const response = await fetch('/api/plaid/sync-transactions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              access_token: item.access_token,
+              user_id: user?.id,
+              days: 30, // Sync last 30 days
+            }),
+          })
+
+          // Get response as text first to handle empty responses
+          const responseText = await response.text()
+
+          if (!response.ok) {
+            let errorMessage = `HTTP ${response.status}`
+            try {
+              const errorData = responseText ? JSON.parse(responseText) : {}
+              errorMessage = errorData.error || errorMessage
+            } catch {
+              errorMessage = responseText || errorMessage
+            }
+            throw new Error(errorMessage)
+          }
+
+          // Parse JSON response safely
+          let data
+          try {
+            data = responseText ? JSON.parse(responseText) : {}
+          } catch {
+            throw new Error('Invalid response format from server')
+          }
+
+          totalSynced += data.synced || 0
+
+        } catch (itemError: any) {
+          console.error(`Error syncing ${item.institution_name}:`, itemError)
+          errors.push(`${item.institution_name}: ${itemError.message}`)
+        }
+      }
+
+      if (totalSynced > 0) {
+        toast.success(`Successfully synced ${totalSynced} transactions`)
         // Refresh plaid items to update last_sync timestamps
         await fetchPlaidItems()
         // Call onSuccess to refresh the dashboard
         if (onSuccess) {
-          onSuccess(data)
+          onSuccess({ totalTransactionsSynced: totalSynced })
         }
-      } else {
+      } else if (errors.length === 0) {
         toast.info('No new transactions found')
+      }
+
+      if (errors.length > 0) {
+        const errorMessage = errors.length === items.length
+          ? `All accounts failed to sync: ${errors[0]}`
+          : `Some accounts failed: ${errors.join(', ')}`
+        throw new Error(errorMessage)
       }
 
     } catch (error: any) {
@@ -271,7 +333,7 @@ export default function PlaidLinkButton({
     } finally {
       setSyncing(false)
     }
-  }, [onSuccess, fetchPlaidItems])
+  }, [onSuccess, fetchPlaidItems, user?.id])
 
 
   const { open, ready } = usePlaidLink({

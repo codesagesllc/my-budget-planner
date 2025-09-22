@@ -213,7 +213,25 @@ export default function DashboardClient({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push('/login')
+
+    // Determine the correct login URL based on environment
+    const currentHost = window.location.hostname
+    let loginUrl = '/login' // fallback
+
+    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+      // Development environment
+      loginUrl = '/login'
+      router.push(loginUrl)
+    } else if (currentHost === 'www.pocketwiseai.com' || currentHost === 'pocketwiseai.com') {
+      // Production domain
+      window.location.href = 'https://www.pocketwiseai.com/login'
+    } else if (currentHost.includes('vercel.app')) {
+      // Vercel deployment
+      window.location.href = 'https://my-budget-planner-seven.vercel.app/login'
+    } else {
+      // Unknown environment, use relative path
+      router.push(loginUrl)
+    }
   }
 
   const refreshData = async () => {
@@ -1507,7 +1525,7 @@ export default function DashboardClient({
                     Unlock {role === 'free_trial' ? 'More' : 'Unlimited'} Features
                   </h4>
                   <p className="text-sm text-gray-600 mb-4">
-                    Upgrade to {role === 'free_trial' ? 'Basic for $9.99/mo' : 'Premium for $29.99/mo'} and get {role === 'free_trial' ? 'increased limits' : 'unlimited access'}.
+                    Upgrade to {role === 'free_trial' ? 'Basic for $15/mo' : 'Premium for $30/mo'} and get {role === 'free_trial' ? 'increased limits' : 'unlimited access'}.
                   </p>
                   <button
                     onClick={() => {

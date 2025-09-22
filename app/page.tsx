@@ -15,10 +15,22 @@ export default function Home() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        router.push('/dashboard')
+        // Check if user was recently created (within last 2 minutes)
+        const userCreatedAt = new Date(user.created_at)
+        const now = new Date()
+        const timeDiff = now.getTime() - userCreatedAt.getTime()
+        const isNewUser = timeDiff < 120000 // Less than 2 minutes ago
+
+        if (isNewUser) {
+          // New user - redirect to login for explicit sign-in
+          router.push('/login?message=' + encodeURIComponent('Please sign in to complete your account setup.'))
+        } else {
+          // Existing user - go to dashboard
+          router.push('/dashboard')
+        }
       }
     }
-    
+
     checkAuth()
   }, [router, supabase])
 

@@ -1,6 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import { redis } from '@/lib/redis'
 import { createHash } from 'crypto'
+import { AI_LIMITS } from '@/lib/constants/ai-limits'
 import type { DatabaseTransaction, DatabaseBill, DatabaseIncomeSource } from '@/lib/types/database'
 
 // Initialize AI client - Only using Claude/Anthropic
@@ -8,30 +9,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 })
 
-// Subscription tier limits
-export const AI_LIMITS = {
-  free_trial: {
-    monthly_insights: 3,
-    bill_parsing: 5,
-    income_detection: 3,
-    debt_strategies: 1,
-    description: 'Limited AI features',
-  },
-  basic: {
-    monthly_insights: 20,
-    bill_parsing: 20,
-    income_detection: 10,
-    debt_strategies: 5,
-    description: 'Standard AI analysis',
-  },
-  premium: {
-    monthly_insights: -1, // Unlimited
-    bill_parsing: -1,
-    income_detection: -1,
-    debt_strategies: -1,
-    description: 'Unlimited AI features with priority processing',
-  },
-} as const
+// Export AI_LIMITS for compatibility
+export { AI_LIMITS }
 
 export type SubscriptionTier = keyof typeof AI_LIMITS
 

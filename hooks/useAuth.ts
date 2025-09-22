@@ -43,13 +43,16 @@ export function useAuth() {
     provider: Provider
   ): Promise<AuthResult> => {
     try {
+      // Get current origin to include in callback
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: getRedirectUrl('/auth/callback'),
+          redirectTo: `${getRedirectUrl('/auth/callback')}?origin=${encodeURIComponent(currentOrigin)}`,
         },
       })
-      
+
       if (error) return { error: error.message }
       return { error: null, data }
     } catch (err) {
@@ -62,11 +65,14 @@ export function useAuth() {
     password: string
   ): Promise<AuthResult> => {
     try {
+      // Get current origin to include in callback
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: getRedirectUrl('/auth/callback'),
+          emailRedirectTo: `${getRedirectUrl('/auth/callback')}?origin=${encodeURIComponent(currentOrigin)}`,
         },
       })
       

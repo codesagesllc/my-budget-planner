@@ -87,12 +87,17 @@ function SignupForm() {
         }
       }
       
-      // Use the configured redirect URL
+      // Use the configured redirect URL with origin parameter
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
+        : '/auth/callback'
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
+          emailRedirectTo: redirectUrl,
           data: {
             selected_plan: selectedPlan?.planId,
             price_id: selectedPlan?.priceId,
@@ -230,11 +235,16 @@ function SignupForm() {
         }))
       }
       
-      // Use the configured redirect URL
+      // Use the configured redirect URL with origin parameter
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/auth/callback?origin=${encodeURIComponent(currentOrigin)}`
+        : '/auth/callback'
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback',
+          redirectTo: redirectUrl,
         },
       })
 

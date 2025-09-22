@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, X, Loader2, Star, Brain, Zap, Shield } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { AI_LIMITS } from '@/lib/ai/services/ai-service'
+import { AI_LIMITS } from '@/lib/constants/ai-limits'
 
 interface PricingPlan {
   id: string
@@ -150,33 +150,42 @@ export default function PricingComponent() {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('Checking auth status...')
       // Check if user is logged in
       const { data: { user: authUser } } = await supabase.auth.getUser()
-      
+      console.log('Auth user:', authUser ? 'Found' : 'Not found')
+
       if (authUser) {
         setUser(authUser)
-        
+        console.log('User set:', authUser.email)
+
         // Check if user has used free trial
         const { data, error } = await supabase
           .from('users')
           .select('free_trial_used, subscription_status, subscription_tier, stripe_customer_id')
           .eq('id', authUser.id)
           .single()
-        
+
+        console.log('User data from DB:', data)
+
         if (data?.free_trial_used) {
           setHasUsedFreeTrial(true)
+          console.log('User has used free trial')
         }
-        
+
         // If user already has an active subscription, show current plan
         if (data?.subscription_status === 'active' || data?.subscription_status === 'trialing') {
           // User already has a subscription, they might want to upgrade/downgrade
           console.log('User has active subscription:', data.subscription_tier)
         }
+      } else {
+        console.log('No authenticated user found')
       }
     } catch (error) {
       console.error('Error checking auth status:', error)
     } finally {
       setCheckingAuth(false)
+      console.log('Auth check completed')
     }
   }
 
@@ -189,41 +198,48 @@ export default function PricingComponent() {
       // Check if user is trying to select free trial but has already used it
       if (plan.id === 'free_trial' && hasUsedFreeTrial) {
         alert('You have already used your free trial. Please select a paid plan.')
-        setLoading(false)
         return
       }
 
       if (user) {
         // User is logged in
+        console.log('User is logged in, processing plan:', plan.id)
         if (plan.id === 'free_trial') {
           // Activate free trial immediately
+          console.log('Activating free trial for user:', user.id)
           await activateFreeTrial(user.id)
         } else {
           // Create Stripe checkout session for logged-in user
+          console.log('Creating checkout session for logged-in user:', plan.id)
           await createCheckoutSession(plan, user.email!)
         }
       } else {
         // User not logged in
+        console.log('User not logged in, processing plan:', plan.id)
         if (plan.id === 'free_trial') {
           // For free trial, redirect to signup
-      localStorage.setItem('selectedPlan', JSON.stringify({
-        planId: plan.id,
-        priceId: plan.priceId,
-        productId: plan.productId,
-        name: plan.name,
-        price: plan.price
-      }))
+          console.log('Redirecting to signup for free trial')
+          localStorage.setItem('selectedPlan', JSON.stringify({
+            planId: plan.id,
+            priceId: plan.priceId,
+            productId: plan.productId,
+            name: plan.name,
+            price: plan.price
+          }))
           router.push('/signup?plan=' + plan.id)
         } else {
           // For paid plans, show email prompt to create checkout session
+          console.log('Showing email prompt for paid plan')
           setShowEmailPrompt(true)
-          setLoading(false)
         }
       }
     } catch (error) {
       console.error('Error selecting plan:', error)
       alert('An error occurred. Please try again.')
+    } finally {
+      // Always reset loading state
       setLoading(false)
+      setSelectedPlan(null)
     }
   }
 
@@ -441,15 +457,27 @@ export default function PricingComponent() {
                   </div>
 
                   <button
-                    onClick={() => handlePlanSelection(plan)}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      console.log('Button clicked for plan:', plan.id, 'Loading:', loading, 'Disabled:', isDisabled)
+                      if (!loading && !isDisabled) {
+                        handlePlanSelection(plan)
+                      } else {
+                        console.log('Button click blocked - Loading:', loading, 'Disabled:', isDisabled)
+                      }
+                    }}
                     disabled={loading || isDisabled}
-                    className={`w-full py-3 px-4 rounded-lg font-semibold transition duration-200 ${
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition duration-200 relative z-10 ${
                       plan.recommended
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
                         : isDisabled
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
                         : 'bg-gray-900 text-white hover:bg-gray-800'
-                    } ${loading && selectedPlan === plan.id ? 'opacity-50 cursor-wait' : ''}`}
+                    } ${loading && selectedPlan === plan.id ? 'opacity-50 cursor-wait' : ''} ${
+                      !loading && !isDisabled ? 'cursor-pointer hover:scale-105' : ''
+                    }`}
                   >
                     {loading && selectedPlan === plan.id ? (
                       <span className="flex items-center justify-center">
