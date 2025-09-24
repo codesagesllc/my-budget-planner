@@ -14,6 +14,7 @@ import { budgetTracker } from '@/lib/services/budget-tracker'
 interface SpendingLimitNotificationsProps {
   userId: string
   className?: string
+  onNavigateToBudgets?: () => void
 }
 
 interface SpendingAlert {
@@ -26,7 +27,7 @@ interface SpendingAlert {
   message: string
 }
 
-export default function SpendingLimitNotifications({ userId, className }: SpendingLimitNotificationsProps) {
+export default function SpendingLimitNotifications({ userId, className, onNavigateToBudgets }: SpendingLimitNotificationsProps) {
   const [alerts, setAlerts] = useState<SpendingAlert[]>([])
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
@@ -121,11 +122,7 @@ export default function SpendingLimitNotifications({ userId, className }: Spendi
                 Create spending limits in the Budget Limits tab to get real-time alerts when you're approaching your monthly budgets.
               </p>
               <button
-                onClick={() => {
-                  // Navigate to budget limits tab
-                  const dashboard = document.querySelector('button[data-tab="budgets"]') as HTMLButtonElement
-                  if (dashboard) dashboard.click()
-                }}
+                onClick={() => onNavigateToBudgets?.()}
                 className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 Set up budget limits →
@@ -199,7 +196,7 @@ export default function SpendingLimitNotifications({ userId, className }: Spendi
                   <span>Spent: ${alert.currentSpending.toFixed(2)}</span>
                   <span>Budget: ${alert.limit.toFixed(2)}</span>
                   <button
-                    onClick={() => window.location.hash = '#budgets'}
+                    onClick={() => onNavigateToBudgets?.()}
                     className="text-blue-600 hover:text-blue-700 font-medium"
                   >
                     View Details →

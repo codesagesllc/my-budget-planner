@@ -97,7 +97,7 @@ export default function PlaidSyncButton({ userId, onSyncComplete, className }: P
         <Button
           onClick={handleManualSync}
           disabled={isLoading}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-black"
           variant="outline"
         >
           <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />

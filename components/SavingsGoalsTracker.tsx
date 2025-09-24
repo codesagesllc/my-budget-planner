@@ -171,12 +171,12 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
 
   const getStatusColor = (status: EnhancedSavingsGoal['status']) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-50 border-green-200'
-      case 'ahead': return 'text-blue-600 bg-blue-50 border-blue-200'
-      case 'on-track': return 'text-emerald-600 bg-emerald-50 border-emerald-200'
-      case 'behind': return 'text-orange-600 bg-orange-50 border-orange-200'
-      case 'at-risk': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'completed': return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
+      case 'ahead': return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+      case 'on-track': return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700'
+      case 'behind': return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700'
+      case 'at-risk': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
+      default: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600'
     }
   }
 
@@ -276,7 +276,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-black">
           <Target className="h-5 w-5 text-blue-500" />
           Savings Goals Progress
         </h3>
@@ -285,6 +285,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
             variant="outline"
             size="sm"
             onClick={() => setShowAddGoalPopup(!showAddGoalPopup)}
+            className="text-black"
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Goal
@@ -292,14 +293,15 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
 
           {/* Add Goal Popup */}
           {showAddGoalPopup && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
               <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium text-gray-900">Add Savings Goal</h3>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Add Savings Goal</h3>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAddGoalPopup(false)}
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -307,7 +309,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Goal Name
                     </label>
                     <input
@@ -315,12 +317,12 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                       value={goalForm.name}
                       onChange={(e) => setGoalForm(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="e.g., Emergency Fund"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Target Amount
                     </label>
                     <input
@@ -328,19 +330,19 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                       value={goalForm.targetAmount}
                       onChange={(e) => setGoalForm(prev => ({ ...prev, targetAmount: e.target.value }))}
                       placeholder="1000"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Target Date
                     </label>
                     <input
                       type="date"
                       value={goalForm.deadline}
                       onChange={(e) => setGoalForm(prev => ({ ...prev, deadline: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -358,6 +360,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                   <Button
                     variant="outline"
                     onClick={() => setShowAddGoalPopup(false)}
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                   >
                     Cancel
                   </Button>
@@ -371,9 +374,9 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
       {savingsGoals.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 mb-2">No Savings Goals for User Entered</h4>
-            <p className="text-gray-500 mb-4">
+            <Target className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">No Savings Goals for User Entered</h4>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               Create savings goals to track your progress and get real-time updates.
             </p>
             <Button onClick={() => setShowAddGoalPopup(true)}>
@@ -404,7 +407,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
                       <Zap className="h-3 w-3 text-orange-500" />
-                      <span className="text-xs text-gray-500">Live</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Live</span>
                     </div>
                     <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(goal.status)}`}>
                       {getStatusIcon(goal.status)}
@@ -425,7 +428,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                     value={Math.min(100, goal.progress_percentage)}
                     className="h-4"
                   />
-                  <div className="flex justify-between text-xs text-gray-600 mt-1">
+                  <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300 mt-1">
                     <span>{goal.progress_percentage.toFixed(1)}% complete</span>
                     <span>${(goal.target_amount - goal.current_amount).toFixed(2)} remaining</span>
                   </div>
@@ -438,13 +441,13 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
                         milestone.reached
                           ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                          : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                       }`}>
                         {milestone.reached ? <CheckCircle className="h-3 w-3" /> : milestone.percentage}
                       </div>
-                      <span className="text-xs text-gray-600 mt-1">{milestone.percentage}%</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-300 mt-1">{milestone.percentage}%</span>
                       {index < goal.milestones.length - 1 && (
-                        <ArrowRight className="h-3 w-3 text-gray-400 absolute transform translate-x-6" />
+                        <ArrowRight className="h-3 w-3 text-gray-400 dark:text-gray-500 absolute transform translate-x-6" />
                       )}
                     </div>
                   ))}
@@ -462,13 +465,13 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Deadline:</span>
+                      <span className="text-gray-600 dark:text-gray-300">Deadline:</span>
                       <span className={`font-medium ${goal.isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
                         {new Date(goal.deadline).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Days Left:</span>
+                      <span className="text-gray-600 dark:text-gray-300">Days Left:</span>
                       <span className={`font-medium flex items-center gap-1 ${
                         goal.daysRemaining === 0 ? 'text-red-600' : 'text-gray-900'
                       }`}>
@@ -479,7 +482,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Need/Day:</span>
+                      <span className="text-gray-600 dark:text-gray-300">Need/Day:</span>
                       <span className="font-medium">${goal.velocityNeeded.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
@@ -539,6 +542,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                                   setShowAddFundsPopup(false)
                                   setSelectedGoal(null)
                                 }}
+                                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
@@ -589,6 +593,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                                   setSelectedGoal(null)
                                   setFundsAmount('')
                                 }}
+                                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                               >
                                 Cancel
                               </Button>
@@ -629,6 +634,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                                   setShowAdjustTargetPopup(false)
                                   setSelectedGoal(null)
                                 }}
+                                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
@@ -689,6 +695,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
                                   setSelectedGoal(null)
                                   setTargetForm({ newTarget: '', newDeadline: '' })
                                 }}
+                                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                               >
                                 Cancel
                               </Button>

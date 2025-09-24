@@ -1120,7 +1120,10 @@ export default function DashboardClient({
                 {!alertsCollapsed && (
                   <div className="p-6 space-y-6">
                     <RealTimeAlerts userId={user.id} />
-                    <SpendingLimitNotifications userId={user.id} />
+                    <SpendingLimitNotifications
+                      userId={user.id}
+                      onNavigateToBudgets={() => setActiveTab('budgets')}
+                    />
                   </div>
                 )}
               </div>

@@ -161,7 +161,7 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
     <div className={`space-y-4 ${className}`}>
       {/* Alert Toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-black">
           <Zap className="h-5 w-5 text-orange-500" />
           Real-Time Alerts
         </h3>
@@ -169,7 +169,7 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
           variant="ghost"
           size="sm"
           onClick={() => setIsAlertsEnabled(!isAlertsEnabled)}
-          className="text-sm"
+          className="text-sm text-black"
         >
           {isAlertsEnabled ? (
             <>
