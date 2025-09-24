@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Brain, TrendingUp, PiggyBank, AlertCircle, Loader2, DollarSign, Activity, Zap, Lightbulb } from 'lucide-react'
 import type { Transaction, Bill } from '@/types/financial'
 import { parseCategories } from '@/types/financial'
+import AIAnalysisCard from '@/components/AIAnalysisCard'
 
 interface FinancialInsightsProps {
   transactions: Transaction[]
@@ -25,11 +26,6 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
   const [insights, setInsights] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
-  const [savingsGoal, setSavingsGoal] = useState({
-    amount: '',
-    deadline: '',
-    description: '',
-  })
 
   // Calculate spending by category (both transactions and bills)
   const calculateCategorySpending = () => {
@@ -335,11 +331,6 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
           transactions: transactions.slice(0, 50),
           bills,
           incomeSources,
-          goal: savingsGoal.amount ? {
-            amount: parseFloat(savingsGoal.amount),
-            deadline: savingsGoal.deadline,
-            description: savingsGoal.description,
-          } : null,
         }),
       })
 
@@ -491,7 +482,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       case 'success': return <Zap className="w-5 h-5 text-green-500" />
       case 'info': return <Activity className="w-5 h-5 text-blue-500" />
       case 'tip': return <Lightbulb className="w-5 h-5 text-purple-500" />
-      default: return <Brain className="w-5 h-5 text-gray-500" />
+      default: return <Brain className="w-5 h-5 text-gray-500 dark:text-gray-400" />
     }
   }
 
@@ -551,16 +542,16 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       {aiInsights.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {aiInsights.map((insight, index) => (
-            <div key={index} className="bg-white rounded-lg border p-4">
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-start gap-3">
                 {getInsightIcon(insight.type)}
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">{insight.title}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{insight.title}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{insight.description}</p>
                   {insight.metric && (
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs text-gray-500">{insight.metric}:</span>
-                      <span className="text-sm font-semibold">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{insight.metric}:</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {typeof insight.value === 'number' 
                           ? insight.value > 100 
                             ? formatCurrency(insight.value)
@@ -571,7 +562,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                         <span className={`text-xs ${
                           insight.trend === 'up' ? 'text-green-600' : 
                           insight.trend === 'down' ? 'text-red-600' : 
-                          'text-gray-600'
+                          'text-gray-600 dark:text-gray-300'
                         }`}>
                           {insight.trend === 'up' ? '↑' : insight.trend === 'down' ? '↓' : '→'}
                         </span>
@@ -587,7 +578,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Spending Trends */}
-        <div className="bg-white rounded-lg border p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Monthly Spending Trends</h3>
           <div className="space-y-3">
             {sortedMonths.length > 0 ? (
@@ -603,9 +594,9 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                 return (
                   <div key={month} className={`flex items-center justify-between ${isEstimate ? 'opacity-75' : ''}`}>
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-600">{monthName}</span>
+                      <span className="text-gray-600 dark:text-gray-300">{monthName}</span>
                       {isEstimate && (
-                        <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                           est.
                         </span>
                       )}
@@ -627,10 +618,10 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
             ) : (
               // Show estimated monthly bills when no transaction data
               <div>
-                <div className="text-sm text-gray-500 mb-3">Based on your bills:</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">Based on your bills:</div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Monthly Bills Total</span>
+                    <span className="text-gray-600 dark:text-gray-300">Monthly Bills Total</span>
                     <span className="font-medium text-red-600">
                       -{formatCurrency(bills.reduce((sum, bill) => {
                         if (!bill.is_active) return sum
@@ -645,7 +636,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                       }, 0))}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500 mt-2">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Add transactions to see detailed spending trends
                   </div>
                 </div>
@@ -655,14 +646,14 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Top Spending Categories */}
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Top Spending Categories</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">Top Spending Categories</h3>
           <div className="space-y-3">
             {topCategories.length > 0 ? (
               topCategories.map(([category, amount]) => (
                 <div key={category} className="flex items-center justify-between">
-                  <span className="text-gray-600">{category}</span>
-                  <span className="font-medium">{formatCurrency(amount)}</span>
+                  <span className="text-gray-600 dark:text-gray-300">{category}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(amount)}</span>
                 </div>
               ))
             ) : (
@@ -674,9 +665,9 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: cat.color }}
                     />
-                    <span className="text-gray-600">{cat.name}</span>
+                    <span className="text-gray-600 dark:text-gray-300">{cat.name}</span>
                   </div>
-                  <span className="font-medium">{formatCurrency(cat.value)}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(cat.value)}</span>
                 </div>
               ))
             )}
@@ -684,24 +675,24 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Top Merchants by Spending */}
-        <div className="bg-white rounded-lg border p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-4">Top Merchants by Spending</h3>
           <div className="space-y-3">
             {topMerchants.length > 0 ? (
               topMerchants.map((merchant) => (
                 <div key={merchant.name} className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-900 font-medium text-sm">{merchant.name}</span>
-                    <span className="font-semibold text-gray-900">{formatCurrency(merchant.total)}</span>
+                    <span className="text-gray-900 dark:text-gray-100 font-medium text-sm">{merchant.name}</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(merchant.total)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{merchant.count} transaction{merchant.count !== 1 ? 's' : ''}</span>
                     <span>Avg: {formatCurrency(merchant.average)}</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                 <p className="text-sm">No merchant data available</p>
                 <p className="text-xs mt-1">Add expense transactions to see top merchants</p>
               </div>
@@ -710,16 +701,16 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Bill Payment Schedule */}
-        <div className="bg-white rounded-lg border p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Bill Payment Schedule</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">Bill Payment Schedule</h3>
           <div className="space-y-2">
             {bills.filter(b => b.is_active).slice(0, 5).map(bill => (
               <div key={bill.id} className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{bill.name}</p>
-                  <p className="text-xs text-gray-500">{bill.billing_cycle}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{bill.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{bill.billing_cycle}</p>
                 </div>
-                <span className="font-medium text-gray-900">{formatCurrency(bill.amount)}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(bill.amount)}</span>
               </div>
             ))}
           </div>
@@ -727,119 +718,12 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
 
       </div>
 
-      {/* Savings Goal - Full Width */}
-      <div className="bg-white rounded-lg border p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">Set a Savings Goal</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="number"
-            placeholder="Goal amount ($)"
-            value={savingsGoal.amount}
-            onChange={(e) => setSavingsGoal({ ...savingsGoal, amount: e.target.value })}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="date"
-            value={savingsGoal.deadline}
-            onChange={(e) => setSavingsGoal({ ...savingsGoal, deadline: e.target.value })}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            placeholder="What's this goal for?"
-            value={savingsGoal.description}
-            onChange={(e) => setSavingsGoal({ ...savingsGoal, description: e.target.value })}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      </div>
 
-      {/* AI Generated Insights Text */}
+      {/* AI Generated Insights */}
       {insights && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Brain className="w-5 h-5 text-blue-600" />
-            <h3 className="font-semibold text-blue-900">AI Analysis</h3>
-          </div>
-          <div className="space-y-4">
-            {/* Main insights text */}
-            <div className="prose prose-sm text-gray-700 whitespace-pre-wrap">
-              {typeof insights === 'string' ? insights : insights.insights}
-            </div>
-            
-            {/* Monthly Budget Breakdown */}
-            {insights.monthlyBudget && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-blue-200">
-                <div className="text-center">
-                  <p className="text-xs text-blue-600">Income</p>
-                  <p className="text-lg font-semibold text-blue-900">
-                    {formatCurrency(insights.monthlyBudget.income || 0)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-blue-600">Bills</p>
-                  <p className="text-lg font-semibold text-blue-900">
-                    {formatCurrency(insights.monthlyBudget.bills || 0)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-blue-600">Spending</p>
-                  <p className="text-lg font-semibold text-blue-900">
-                    {formatCurrency(insights.monthlyBudget.spending || 0)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-blue-600">Save</p>
-                  <p className="text-lg font-semibold text-green-600">
-                    {formatCurrency(insights.monthlyBudget.recommended_savings || 0)}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {/* Savings Plan */}
-            {insights.savingsPlan && (
-              <div className="bg-green-50 rounded-lg p-3 mt-3">
-                <h4 className="text-sm font-semibold text-green-900 mb-2">Recommended Savings Plan</h4>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <p className="text-xs text-green-600">Per Paycheck</p>
-                    <p className="font-semibold text-green-800">
-                      {formatCurrency(insights.savingsPlan.per_paycheck || 0)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-green-600">Monthly Total</p>
-                    <p className="font-semibold text-green-800">
-                      {formatCurrency(insights.savingsPlan.monthly_total || 0)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-green-600">% of Income</p>
-                    <p className="font-semibold text-green-800">
-                      {insights.savingsPlan.percentage || 0}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Action Tips */}
-            {insights.tips && insights.tips.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-2">Action Items</h4>
-                <ul className="space-y-1">
-                  {insights.tips.map((tip: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-0.5">•</span>
-                      <span className="text-sm text-gray-700">{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+        <AIAnalysisCard
+          analysisText={typeof insights === 'string' ? insights : JSON.stringify(insights)}
+        />
       )}
     </div>
   )

@@ -52,6 +52,17 @@ export default function TransactionsList({ transactions: initialTransactions, us
     showCustomInput: false
   })
   const [bulkActionMode, setBulkActionMode] = useState(false)
+  const [bulkCategoryModal, setBulkCategoryModal] = useState<{
+    isOpen: boolean
+    selectedCategory: string
+    customCategory: string
+    showCustomInput: boolean
+  }>({
+    isOpen: false,
+    selectedCategory: '',
+    customCategory: '',
+    showCustomInput: false
+  })
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [billLinkModal, setBillLinkModal] = useState<{
@@ -351,6 +362,51 @@ export default function TransactionsList({ transactions: initialTransactions, us
           showCustomInput: false
         })
       }
+    }
+  }
+
+  const handleBulkCategorize = async () => {
+    if (selectedTransactions.size === 0 || !bulkCategoryModal.selectedCategory) return
+
+    try {
+      const ids = Array.from(selectedTransactions)
+      const category = bulkCategoryModal.selectedCategory === 'custom'
+        ? bulkCategoryModal.customCategory
+        : bulkCategoryModal.selectedCategory
+
+      const { error } = await supabase
+        .from('transactions')
+        .update({ category })
+        .in('id', ids)
+
+      if (error) {
+        throw error
+      }
+
+      // Update local state
+      setTransactions(prev =>
+        prev.map(t =>
+          selectedTransactions.has(t.id)
+            ? { ...t, category }
+            : t
+        )
+      )
+
+      // Reset state
+      setSelectedTransactions(new Set())
+      setBulkActionMode(false)
+      setBulkCategoryModal({
+        isOpen: false,
+        selectedCategory: '',
+        customCategory: '',
+        showCustomInput: false
+      })
+
+      alert(`Successfully categorized ${ids.length} transactions as "${category}"`)
+
+    } catch (error) {
+      console.error('Error bulk categorizing transactions:', error)
+      alert('Failed to categorize transactions. Please try again.')
     }
   }
 
@@ -813,6 +869,13 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 <RefreshCw className="w-4 h-4" />
                 Convert to Bill ({selectedTransactions.size})
               </button>
+              <button
+                onClick={() => setBulkCategoryModal(prev => ({ ...prev, isOpen: true }))}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <Tag className="w-4 h-4" />
+                Categorize ({selectedTransactions.size})
+              </button>
             </>
           )}
         </div>
@@ -1000,9 +1063,9 @@ export default function TransactionsList({ transactions: initialTransactions, us
           <div className="bg-white rounded-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">
-                  {conversionModal.type === 'expense' 
-                    ? 'Convert to One-time Expense' 
+                <h2 className="text-xl font-semibold text-black">
+                  {conversionModal.type === 'expense'
+                    ? 'Convert to One-time Expense'
                     : 'Convert to Recurring Bill'}
                 </h2>
                 <button
@@ -1511,6 +1574,98 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Categorization Modal */}
+      {bulkCategoryModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-black">
+                  Categorize {selectedTransactions.size} Transactions
+                </h2>
+                <button
+                  onClick={() => setBulkCategoryModal(prev => ({ ...prev, isOpen: false }))}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-2">
+                    Select Category
+                  </label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {Object.entries(BILL_CATEGORY_GROUPS).map(([groupName, categories]) => (
+                      <div key={groupName}>
+                        <h4 className="text-sm font-medium text-gray-700 mb-1">{groupName}</h4>
+                        <div className="space-y-1 ml-3">
+                          {categories.map(category => (
+                            <label key={category} className="flex items-center">
+                              <input
+                                type="radio"
+                                name="bulkCategory"
+                                value={category}
+                                checked={bulkCategoryModal.selectedCategory === category}
+                                onChange={(e) => setBulkCategoryModal(prev => ({ ...prev, selectedCategory: e.target.value, showCustomInput: false }))}
+                                className="mr-2"
+                              />
+                              <span className="text-sm text-black">{getBillCategoryLabel(category)}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Custom Category Option */}
+                    <div className="mt-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="bulkCategory"
+                          value="custom"
+                          checked={bulkCategoryModal.selectedCategory === 'custom'}
+                          onChange={() => setBulkCategoryModal(prev => ({ ...prev, selectedCategory: 'custom', showCustomInput: true }))}
+                          className="mr-2"
+                        />
+                        <span className="text-sm font-medium text-black">Custom Category</span>
+                      </label>
+                      {bulkCategoryModal.showCustomInput && (
+                        <input
+                          type="text"
+                          value={bulkCategoryModal.customCategory}
+                          onChange={(e) => setBulkCategoryModal(prev => ({ ...prev, customCategory: e.target.value }))}
+                          placeholder="Enter custom category"
+                          className="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setBulkCategoryModal(prev => ({ ...prev, isOpen: false }))}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleBulkCategorize}
+                    disabled={!bulkCategoryModal.selectedCategory || (bulkCategoryModal.selectedCategory === 'custom' && !bulkCategoryModal.customCategory)}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    Categorize
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

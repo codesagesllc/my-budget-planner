@@ -107,8 +107,14 @@ export default function PlaidLinkButton({
     setError(null)
 
     try {
-      const response = await fetch('/api/plaid/link-token', {
+      const response = await fetch('/api/plaid/create-link-token', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+        }),
       })
 
       if (!response.ok) {
@@ -249,14 +255,21 @@ export default function PlaidLinkButton({
         .from('plaid_items')
         .select('access_token, item_id, institution_name, status')
         .eq('user_id', user?.id)
-        .eq('status', 'good')
+        .in('status', ['good', 'active', 'connected'])
 
       if (itemsError) {
         throw new Error(`Failed to fetch bank connections: ${itemsError.message}`)
       }
 
       if (!items || items.length === 0) {
-        throw new Error('No active bank connections found. Please connect a bank account first.')
+        // Check if there are any items at all for debugging
+        const { data: allItems } = await supabase
+          .from('plaid_items')
+          .select('status')
+          .eq('user_id', user?.id)
+
+        const statusList = allItems?.map(item => item.status).join(', ') || 'none'
+        throw new Error(`No active bank connections found. Available statuses: ${statusList}. Please ensure your bank connection is active.`)
       }
 
       let totalSynced = 0
@@ -441,7 +454,7 @@ export default function PlaidLinkButton({
               onClick={handleManualSync}
               disabled={syncing}
               variant="outline"
-              className="w-full"
+              className="w-full text-black"
             >
               {syncing ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -457,7 +470,7 @@ export default function PlaidLinkButton({
                 onClick={handleConnect}
                 disabled={loading}
                 variant="outline"
-                className="w-full"
+                className="w-full text-black"
               >
                 {loading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
