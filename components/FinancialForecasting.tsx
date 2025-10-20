@@ -893,7 +893,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       case 'success': return <Zap className="w-5 h-5 text-green-500" />
       case 'info': return <Activity className="w-5 h-5 text-blue-500" />
       case 'tip': return <Lightbulb className="w-5 h-5 text-purple-500" />
-      default: return <Brain className="w-5 h-5 text-gray-500" />
+      default: return <Brain className="w-5 h-5 text-black dark:text-white" />
     }
   }
 
@@ -948,7 +948,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
     }
     
     // Dynamic color generator for categories not in the predefined list
-    const dynamicColors = [
+    const baseColors = [
       '#e11d48', '#db2777', '#c026d3', '#9333ea', '#7c3aed',
       '#6366f1', '#4f46e5', '#3b82f6', '#2563eb', '#0284c7',
       '#0891b2', '#0e7490', '#06b6d4', '#14b8a6', '#059669',
@@ -956,7 +956,18 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       '#eab308', '#facc15', '#f59e0b', '#fb923c', '#f97316',
       '#ea580c', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d'
     ]
-    
+
+    // Shuffle colors randomly on each page refresh using Fisher-Yates algorithm
+    const shuffleArray = (array: string[]) => {
+      const shuffled = [...array]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+      return shuffled
+    }
+
+    const dynamicColors = shuffleArray(baseColors)
     let colorIndex = 0
     
     // Calculate monthly amounts for each category
@@ -1058,7 +1069,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
   return (
     <div className="space-y-6">
       {/* Settings and Method Selector */}
-      <div className="bg-white rounded-xl p-4 border border-gray-200">
+      <div className="bg-card rounded-xl p-4 border border-gray-200">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <button
@@ -1159,18 +1170,18 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       {/* AI Insights Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {aiInsights.map((insight, index) => (
-          <div key={index} className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
+          <div key={index} className="bg-card rounded-xl p-4 border border-gray-200 hover:shadow-md transition-shadow">
             <div className="flex items-start gap-3">
               {getInsightIcon(insight.type)}
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 text-sm">{insight.title}</h3>
-                <p className="text-xs text-gray-600 mt-1">{insight.description}</p>
+                <h3 className="font-semibold text-card-foreground text-sm">{insight.title}</h3>
+                <p className="text-xs text-black dark:text-white mt-1">{insight.description}</p>
                 {insight.value !== undefined && (
                   <div className="flex items-center gap-2 mt-2">
                     {insight.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
                     {insight.trend === 'down' && <TrendingDown className="w-4 h-4 text-red-500" />}
                     {insight.metric && (
-                      <span className="text-xs font-medium text-gray-700">
+                      <span className="text-xs font-medium text-card-foreground">
                         {insight.metric}: {
                           typeof insight.value === 'number' && insight.value > 100 
                             ? formatCurrency(insight.value)
@@ -1187,8 +1198,8 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       </div>
 
       {/* Main Forecast Chart */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4">12-Month Financial Forecast</h3>
+      <div className="bg-card rounded-xl p-6 border border-gray-200">
+        <h3 className="text-lg font-semibold text-card-foreground mb-4">12-Month Financial Forecast</h3>
         <ResponsiveContainer width="100%" height={350}>
           <AreaChart data={forecastData.map(d => ({
             ...d,
@@ -1204,18 +1215,18 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                 if (active && payload && payload.length) {
                   const data = payload[0].payload
                   return (
-                    <div className="bg-white p-3 border rounded-lg shadow-lg">
-                      <p className="font-semibold">{label}</p>
+                    <div className="bg-card p-3 border rounded-lg shadow-lg">
+                      <p className="font-semibold text-card-foreground">{label}</p>
                       <p className="text-green-600">Income: {formatCurrency(data.predictedIncome)}</p>
                       {data.incomeBreakdown && (
-                        <div className="ml-2 text-xs text-gray-600">
+                        <div className="ml-2 text-xs text-card-foreground">
                           <p>Recurring: {formatCurrency(data.incomeBreakdown.recurring)}</p>
                           <p>One-time: {formatCurrency(data.incomeBreakdown.oneTime)}</p>
                         </div>
                       )}
                       <p className="text-red-600">Expenses: {formatCurrency(data.predictedExpenses)}</p>
                       {data.expenseBreakdown && (
-                        <div className="ml-2 text-xs text-gray-600">
+                        <div className="ml-2 text-xs text-card-foreground">
                           <p>Recurring: {formatCurrency(data.expenseBreakdown.recurring)}</p>
                           <p>One-time: {formatCurrency(data.expenseBreakdown.oneTime)}</p>
                           {data.expenseBreakdown.transactionSpending && (
@@ -1303,8 +1314,8 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
 
       {/* Expense Breakdown Pie Chart */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Bill Categories Breakdown</h3>
+        <div className="bg-card rounded-xl p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Bill Categories Breakdown</h3>
           <ResponsiveContainer width="100%" height={300}>
             <RePieChart>
               <Pie
@@ -1363,8 +1374,8 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                   if (active && payload && payload.length) {
                     const data = payload[0].payload
                     return (
-                      <div className="bg-white p-2 border rounded shadow-lg">
-                        <p className="font-semibold text-black">{data.name}</p>
+                      <div className="bg-card p-2 border rounded shadow-lg">
+                        <p className="font-semibold text-card-foreground">{data.name}</p>
                         <p className="text-sm text-green-600 font-medium">{formatCurrency(data.value)}</p>
                         <p className="text-xs text-blue-600">{data.percentage?.toFixed(1)}%</p>
                       </div>
@@ -1384,7 +1395,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                   className="w-3 h-3 rounded-sm flex-shrink-0" 
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="truncate text-black">
+                <span className="truncate text-card-foreground">
                   {entry.name}: {formatCurrency(entry.value)} ({entry.percentage?.toFixed(1)}%)
                 </span>
               </div>
@@ -1393,12 +1404,12 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
         </div>
 
         {/* Savings Progress */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Savings Goals Progress</h3>
+        <div className="bg-card rounded-xl p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Savings Goals Progress</h3>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Emergency Fund</span>
+                <span className="text-card-foreground">Emergency Fund</span>
                 <span className="font-semibold">
                   {formatCurrency(emergencyFund)} / {formatCurrency(forecastData[0]?.predictedExpenses * 6 || 0)}
                 </span>
@@ -1415,7 +1426,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
 
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Current Savings Rate</span>
+                <span className="text-card-foreground">Current Savings Rate</span>
                 <span className="font-semibold">
                   {((forecastData[0]?.predictedSavings || 0) / (forecastData[0]?.predictedIncome || 1) * 100).toFixed(1)}% / {targetSavingsRate}%
                 </span>
@@ -1443,8 +1454,8 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       </div>
 
       {/* Monthly Forecast Table */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200 overflow-x-auto">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">Detailed Monthly Forecast</h3>
+      <div className="bg-card rounded-xl p-6 border border-gray-200 overflow-x-auto">
+        <h3 className="text-lg font-semibold text-card-foreground mb-4">Detailed Monthly Forecast</h3>
         <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b bg-blue-50">
@@ -1464,7 +1475,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                 : null // Changed from 0 to null when no income
               return (
                 <tr key={index} className="border-b hover:bg-blue-50 transition-colors">
-                  <td className="py-3 px-2 text-sm font-medium text-blue-900">
+                  <td className="py-3 px-2 text-sm font-medium text-card-foreground">
                     {getMonthName(month.month)}
                   </td>
                   <td className="py-3 px-2 text-sm text-right font-semibold text-green-600">
@@ -1523,7 +1534,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                           )}
                         </>
                       ) : (
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-card-foreground border border-gray-200">
                           N/A
                         </span>
                       )}
@@ -1574,7 +1585,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
       {/* Financial Goals Modal */}
       {showGoalsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-card rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <FinancialGoals 
               userId={userId} 
               monthlyIncome={forecastData[0]?.predictedIncome || 0}

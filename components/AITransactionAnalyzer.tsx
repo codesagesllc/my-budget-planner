@@ -227,7 +227,7 @@ export default function AITransactionAnalyzer({
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">AI Transaction Analyzer</h2>
-            <p className="text-sm text-gray-600">Automatically detect recurring bills and payments</p>
+            <p className="text-sm text-black dark:text-white">Automatically detect recurring bills and payments</p>
           </div>
         </div>
 
@@ -255,7 +255,7 @@ export default function AITransactionAnalyzer({
           {analysisComplete && (
             <button
               onClick={resetAnalysis}
-              className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-3 py-2 text-black dark:text-white hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               title="Reset analysis"
             >
               <Zap className="h-4 w-4" />
@@ -267,7 +267,7 @@ export default function AITransactionAnalyzer({
           {onClose && (
             <button
               onClick={onClose}
-              className="px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="px-3 py-2 text-black dark:text-white hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Close"
             >
               <X className="h-4 w-4" />
@@ -282,13 +282,13 @@ export default function AITransactionAnalyzer({
               <Loader2 className="h-12 w-12 text-purple-600 animate-spin mx-auto mb-4" />
               <div className="space-y-2">
                 <p className="text-gray-700 font-medium">🔍 Analyzing your transaction patterns...</p>
-                <div className="space-y-1 text-sm text-gray-600">
+                <div className="space-y-1 text-sm text-black dark:text-white">
                   <p>• Scanning {transactions.length} transactions for recurring patterns</p>
                   <p>• Identifying merchant names and payment frequencies</p>
                   <p>• Calculating confidence scores for bill detection</p>
                   <p>• Categorizing potential recurring expenses</p>
                 </div>
-                <p className="text-sm text-gray-500 mt-3">This usually takes 5-15 seconds</p>
+                <p className="text-sm text-black dark:text-white mt-3">This usually takes 5-15 seconds</p>
               </div>
             </div>
           )}
@@ -306,7 +306,7 @@ export default function AITransactionAnalyzer({
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-600" />
+                <Filter className="h-4 w-4 text-black dark:text-white" />
                 <span className="text-sm font-medium text-gray-700">Filters:</span>
               </div>
               
@@ -341,7 +341,7 @@ export default function AITransactionAnalyzer({
                 >
                   Select All
                 </button>
-                <span className="text-gray-400">|</span>
+                <span className="text-black dark:text-white">|</span>
                 <button
                   onClick={deselectAll}
                   className="text-sm text-purple-600 hover:text-purple-800"
@@ -431,7 +431,7 @@ export default function AITransactionAnalyzer({
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-black dark:text-white">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Last: {new Date(bill.lastDate).toLocaleDateString()}
@@ -469,13 +469,13 @@ export default function AITransactionAnalyzer({
                       </summary>
                       <div className="mt-2 space-y-1 pl-4 border-l-2 border-purple-200">
                         {bill.transactions.slice(0, 5).map((transaction, tIndex) => (
-                          <div key={tIndex} className="text-xs text-gray-600 flex justify-between">
+                          <div key={tIndex} className="text-xs text-black dark:text-white flex justify-between">
                             <span>{new Date(transaction.date).toLocaleDateString()}</span>
                             <span className="font-medium">{formatCurrency(transaction.amount)}</span>
                           </div>
                         ))}
                         {bill.transactions.length > 5 && (
-                          <p className="text-xs text-gray-500 italic">
+                          <p className="text-xs text-black dark:text-white italic">
                             +{bill.transactions.length - 5} more transactions
                           </p>
                         )}
@@ -488,7 +488,7 @@ export default function AITransactionAnalyzer({
           </div>
 
           {filteredBills.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-black dark:text-white">
               <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p>No bills match your current filters</p>
               <p className="text-sm mt-1">Try adjusting the confidence threshold or filters</p>
@@ -498,7 +498,7 @@ export default function AITransactionAnalyzer({
         )}
 
         {analysisComplete && detectedBills.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-black dark:text-white">
             <Brain className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="text-lg font-medium">No recurring bills detected</p>
             <p className="text-sm mt-1">The AI couldn't identify any recurring patterns in your transactions</p>
@@ -506,7 +506,7 @@ export default function AITransactionAnalyzer({
         )}
 
         {!analysisComplete && !isAnalyzing && transactions.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-black dark:text-white">
             <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="text-lg font-medium">No transactions available</p>
             <p className="text-sm mt-1">Connect your bank account to analyze transactions</p>

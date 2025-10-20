@@ -135,17 +135,17 @@ export default function WhatIfScenarios({ userId, className }: WhatIfScenariosPr
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Current Monthly Cash Flow</p>
+                <p className="text-sm text-black dark:text-white">Current Monthly Cash Flow</p>
                 <p className={`text-2xl font-bold ${currentCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   ${currentCashFlow.toFixed(2)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Available for New Bills</p>
+                <p className="text-sm text-black dark:text-white">Available for New Bills</p>
                 <p className="text-lg font-semibold text-blue-600">
                   ${Math.max(0, currentCashFlow * 0.7).toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-500">70% of cash flow (recommended)</p>
+                <p className="text-xs text-black dark:text-white">70% of cash flow (recommended)</p>
               </div>
             </div>
           </CardContent>
@@ -155,9 +155,9 @@ export default function WhatIfScenarios({ userId, className }: WhatIfScenariosPr
       {scenarios.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <Calculator className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 mb-2">No Scenarios Created</h4>
-            <p className="text-gray-500 mb-4">
+            <Calculator className="h-12 w-12 text-black dark:text-white mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-black dark:text-white mb-2">No Scenarios Created</h4>
+            <p className="text-black dark:text-white mb-4">
               Create "what-if" scenarios to see how new bills would impact your budget.
             </p>
             <Button onClick={() => setShowNewBillForm(true)}>
@@ -205,7 +205,7 @@ function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
       case 'tight': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'concerning': return 'text-orange-600 bg-orange-50 border-orange-200'
       case 'not_affordable': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      default: return 'text-black dark:text-white bg-gray-50 border-gray-200'
     }
   }
 
@@ -259,11 +259,11 @@ function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         <div className="bg-gray-50 rounded-lg p-3">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-600">Bill Amount</p>
+              <p className="text-black dark:text-white">Bill Amount</p>
               <p className="font-semibold">${changes.amount}/month</p>
             </div>
             <div>
-              <p className="text-gray-600">Category</p>
+              <p className="text-black dark:text-white">Category</p>
               <p className="font-semibold capitalize">{changes.category}</p>
             </div>
           </div>
@@ -273,11 +273,11 @@ function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-600">Current Cash Flow:</span>
+              <span className="text-black dark:text-white">Current Cash Flow:</span>
               <span className="font-medium">${results.current_cash_flow.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">After New Bill:</span>
+              <span className="text-black dark:text-white">After New Bill:</span>
               <span className={`font-medium ${results.projected_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 ${results.projected_cash_flow.toFixed(2)}
               </span>
@@ -285,11 +285,11 @@ function ScenarioCard({ scenario, onDelete }: ScenarioCardProps) {
           </div>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-600">Monthly Impact:</span>
+              <span className="text-black dark:text-white">Monthly Impact:</span>
               <span className="font-medium text-red-600">-${results.monthly_impact.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">% of Income:</span>
+              <span className="text-black dark:text-white">% of Income:</span>
               <span className="font-medium">{results.impact_percentage.toFixed(1)}%</span>
             </div>
           </div>
@@ -464,7 +464,7 @@ function NewBillScenarioForm({ userId, onSuccess, onCancel }: NewBillScenarioFor
           <div>
             <label className="block text-sm font-medium mb-1">Amount *</label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-black dark:text-white" />
               <input
                 type="number"
                 step="0.01"
@@ -547,7 +547,7 @@ function ScenarioResultDisplay({ result }: ScenarioResultDisplayProps) {
       case 'tight': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'concerning': return 'text-orange-600 bg-orange-50 border-orange-200'
       case 'not_affordable': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      default: return 'text-black dark:text-white bg-gray-50 border-gray-200'
     }
   }
 
@@ -562,11 +562,11 @@ function ScenarioResultDisplay({ result }: ScenarioResultDisplayProps) {
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <p className="text-gray-600">Current Cash Flow</p>
+          <p className="text-black dark:text-white">Current Cash Flow</p>
           <p className="font-semibold">${result.current_cash_flow.toFixed(2)}</p>
         </div>
         <div>
-          <p className="text-gray-600">After This Bill</p>
+          <p className="text-black dark:text-white">After This Bill</p>
           <p className={`font-semibold ${result.projected_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             ${result.projected_cash_flow.toFixed(2)}
           </p>

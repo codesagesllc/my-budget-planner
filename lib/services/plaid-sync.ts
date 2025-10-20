@@ -3,7 +3,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { plaidClient } from '@/lib/plaid/config'
-import { TransactionsSyncRequest, TransactionsGetRequest } from 'plaid'
+import { TransactionsSyncRequest } from 'plaid'
 
 export interface PlaidSyncOptions {
   userId?: string // For user-specific sync
@@ -271,46 +271,85 @@ export class PlaidSyncService {
       let nextCursor = options.cursor || plaidItem.sync_cursor
       let totalSynced = 0
 
-      while (hasMore) {
-        let newTransactions: any[] = []
+      let batchCount = 0
+      const MAX_BATCHES = 50 // Increased limit since we're handling errors better
 
-        if (options.days && !nextCursor) {
-          // Historical sync using transactions/get
-          const endDate = new Date()
-          const startDate = new Date()
-          startDate.setDate(startDate.getDate() - options.days)
+      console.log(`Starting sync for item ${plaidItem.item_id} with cursor: ${nextCursor || 'initial (first sync)'}`)
 
-          const transactionsRequest: TransactionsGetRequest = {
-            access_token: plaidItem.access_token,
-            start_date: startDate.toISOString().split('T')[0],
-            end_date: endDate.toISOString().split('T')[0],
-          }
+      while (hasMore && batchCount < MAX_BATCHES) {
+        batchCount++
 
-          const response = await plaidClient.transactionsGet(transactionsRequest)
-          newTransactions = response.data.transactions
-          hasMore = false
-        } else {
-          // Incremental sync using transactions/sync
-          const syncRequest: TransactionsSyncRequest = {
-            access_token: plaidItem.access_token,
-            cursor: nextCursor,
-          }
+        const syncRequest: TransactionsSyncRequest = {
+          access_token: plaidItem.access_token,
+          cursor: nextCursor,
+        }
 
+        try {
+          console.log(`Syncing batch ${batchCount} for item ${plaidItem.item_id}`)
           const syncResponse = await plaidClient.transactionsSync(syncRequest)
-          newTransactions = syncResponse.data.added.concat(syncResponse.data.modified)
+
+          const newTransactions = syncResponse.data.added.concat(syncResponse.data.modified)
           hasMore = syncResponse.data.has_more
           nextCursor = syncResponse.data.next_cursor
+
+          console.log(`Retrieved ${newTransactions.length} new/modified transactions. Has more: ${hasMore}`)
 
           // Handle removed transactions
           if (syncResponse.data.removed.length > 0) {
             await this.handleRemovedTransactions(syncResponse.data.removed, plaidItem.user_id)
+            console.log(`Removed ${syncResponse.data.removed.length} transactions`)
+          }
+
+          // Process and store new transactions
+          if (newTransactions.length > 0) {
+            const synced = await this.processAndStoreTransactions(newTransactions, plaidItem)
+            totalSynced += synced
+            console.log(`Processed ${synced} transactions (${totalSynced} total)`)
+          }
+
+          // Rate limit protection: add a small delay between batches
+          if (hasMore) {
+            await this.delay(500) // 500ms delay between all batches
+          }
+
+        } catch (syncError: any) {
+          // Handle rate limit and server errors gracefully
+          if (syncError.status === 500 || syncError.status === 429) {
+            console.warn(`Rate limit or server error for item ${plaidItem.item_id} (batch ${batchCount}).`)
+            console.warn(`Successfully synced ${totalSynced} transactions before error.`)
+
+            // Save progress and break
+            if (nextCursor) {
+              await supabase
+                .from('plaid_items')
+                .update({
+                  sync_cursor: nextCursor,
+                  last_sync: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', plaidItem.id)
+              console.log(`Progress saved. Resume later with cursor: ${nextCursor}`)
+            }
+
+            hasMore = false
+            break
+          } else {
+            console.error(`TransactionsSync failed for item ${plaidItem.item_id}:`, {
+              error_code: syncError.error_code,
+              error_message: syncError.error_message,
+              status: syncError.status,
+              cursor: nextCursor,
+              batch: batchCount
+            })
+            throw syncError
           }
         }
+      }
 
-        if (newTransactions.length > 0) {
-          const synced = await this.processAndStoreTransactions(newTransactions, plaidItem)
-          totalSynced += synced
-        }
+      // Check if we hit the batch limit
+      if (batchCount >= MAX_BATCHES) {
+        console.warn(`Reached maximum batch limit (${MAX_BATCHES}) for item ${plaidItem.item_id}`)
+        console.warn(`Synced ${totalSynced} transactions. Continue sync later.`)
       }
 
       // Update sync cursor and timestamp
@@ -327,7 +366,7 @@ export class PlaidSyncService {
           .eq('id', plaidItem.id)
       }
 
-      console.log(`Synced ${totalSynced} transactions for item ${plaidItem.item_id}`)
+      console.log(`Completed sync for item ${plaidItem.item_id}: ${totalSynced} transactions in ${batchCount} batches`)
 
       return {
         itemId: plaidItem.item_id,

@@ -98,7 +98,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
       case 'high': return 'text-orange-600 bg-orange-50 border-orange-200'
       case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'low': return 'text-blue-600 bg-blue-50 border-blue-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      default: return 'text-black dark:text-white bg-gray-50 border-gray-200'
     }
   }
 
@@ -108,7 +108,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
       case 'high': return <Zap className="h-4 w-4 text-orange-600" />
       case 'medium': return <Clock className="h-4 w-4 text-yellow-600" />
       case 'low': return <Target className="h-4 w-4 text-blue-600" />
-      default: return <Clock className="h-4 w-4 text-gray-600" />
+      default: return <Clock className="h-4 w-4 text-black dark:text-white" />
     }
   }
 
@@ -124,7 +124,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
       <Card className={className}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Payment Priority</CardTitle>
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Calendar className="h-4 w-4 text-black dark:text-white" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -189,7 +189,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
           ) : (
             <AlertTriangle className="h-4 w-4 text-red-600" />
           )}
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Calendar className="h-4 w-4 text-black dark:text-white" />
         </div>
       </CardHeader>
       <CardContent>
@@ -197,7 +197,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
           {/* Balance Overview */}
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Available Balance</span>
+              <span className="text-sm text-black dark:text-white">Available Balance</span>
               <span className={`font-bold text-lg ${
                 data.availableBalance >= data.totalUpcoming ? 'text-green-600' : 'text-red-600'
               }`}>
@@ -206,11 +206,11 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
             </div>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-muted-foreground block">Upcoming Bills</span>
+                <span className="text-black dark:text-white block">Upcoming Bills</span>
                 <span className="font-medium">{formatCurrency(data.totalUpcoming)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block">Can Afford</span>
+                <span className="text-black dark:text-white block">Can Afford</span>
                 <span className="font-medium text-green-600">{formatCurrency(data.totalAffordable)}</span>
               </div>
             </div>
@@ -240,7 +240,7 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
                 >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center space-x-2 flex-1">
-                      <span className="text-xs font-medium text-gray-500 bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="text-xs font-medium text-black dark:text-white bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center">
                         {index + 1}
                       </span>
                       <span className={`text-sm font-medium truncate ${
@@ -265,11 +265,11 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-1">
                       {getPriorityIcon(bill.priorityLevel)}
-                      <span className="text-muted-foreground">{bill.priorityReason}</span>
+                      <span className="text-black dark:text-white">{bill.priorityReason}</span>
                     </div>
                     <div className={`${
                       bill.daysUntilDue < 0 ? 'text-red-600' :
-                      bill.daysUntilDue <= 3 ? 'text-yellow-600' : 'text-gray-600'
+                      bill.daysUntilDue <= 3 ? 'text-yellow-600' : 'text-black dark:text-white'
                     }`}>
                       {formatDaysUntilDue(bill.daysUntilDue)}
                     </div>
@@ -289,11 +289,11 @@ export function BillPrioritizationCard({ className }: BillPrioritizationCardProp
           <div className="border-t pt-3">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-muted-foreground block">Critical</span>
+                <span className="text-black dark:text-white block">Critical</span>
                 <span className="font-medium text-red-600">{data.paymentStrategy.totalCritical}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block">High Priority</span>
+                <span className="text-black dark:text-white block">High Priority</span>
                 <span className="font-medium text-orange-600">{data.paymentStrategy.totalHigh}</span>
               </div>
             </div>

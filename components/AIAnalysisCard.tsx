@@ -123,7 +123,7 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
   return (
     <Card className={`${className} bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700`}>
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <Brain className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           AI Financial Analysis
         </CardTitle>
@@ -132,11 +132,11 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
       <CardContent className="space-y-6">
         {/* Main Insights */}
         <div className="space-y-3">
-          <h4 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <h4 className="font-medium text-black dark:text-white flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-amber-500" />
             Key Insights
           </h4>
-          <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          <div className="text-sm text-black dark:text-white leading-relaxed">
             {analysis.insights}
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
         {/* Budget Overview */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <h4 className="font-medium text-black dark:text-white flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
               Monthly Budget
             </h4>
@@ -159,26 +159,26 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Income</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-xs text-black dark:text-white dark:text-black dark:text-white mb-1">Income</p>
+              <p className="text-lg font-semibold text-black dark:text-white">
                 {formatCurrency(analysis.monthlyBudget.income)}
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Bills</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-xs text-black dark:text-white dark:text-black dark:text-white mb-1">Bills</p>
+              <p className="text-lg font-semibold text-black dark:text-white">
                 {formatCurrency(analysis.monthlyBudget.bills)}
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Spending</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-xs text-black dark:text-white dark:text-black dark:text-white mb-1">Spending</p>
+              <p className="text-lg font-semibold text-black dark:text-white">
                 {formatCurrency(analysis.monthlyBudget.spending)}
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Savings</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-xs text-black dark:text-white dark:text-black dark:text-white mb-1">Savings</p>
+              <p className="text-lg font-semibold text-black dark:text-white">
                 {formatCurrency(analysis.monthlyBudget.recommended_savings)}
               </p>
             </div>
@@ -188,7 +188,7 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
         {/* Savings Plan */}
         {analysis.savingsPlan.monthly_total > 0 && (
           <div className="space-y-3">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <h4 className="font-medium text-black dark:text-white flex items-center gap-2">
               <PiggyBank className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               Recommended Savings Plan
             </h4>
@@ -219,7 +219,7 @@ export default function AIAnalysisCard({ analysisText, className }: AIAnalysisCa
 
         {/* Tips */}
         <div className="space-y-3">
-          <h4 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <h4 className="font-medium text-black dark:text-white flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
             Action Items ({analysis.tips.length})
           </h4>

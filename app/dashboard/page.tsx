@@ -49,14 +49,6 @@ export default async function DashboardPage() {
     bills = billsResult.data || []
     incomeSources = incomeResult.data || []
     
-    // Log for debugging
-    console.log('Initial data fetch:', {
-      accounts: accounts.length,
-      transactions: transactions.length,
-      bills: bills.length,
-      incomeSources: incomeSources.length,
-      incomeData: incomeSources
-    })
   } catch (error) {
     console.error('Error fetching initial data:', error)
   }

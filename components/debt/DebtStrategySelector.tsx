@@ -115,10 +115,10 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
 
   if (!showForm) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-card rounded-lg shadow-md p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Payoff Strategy</h2>
-          <p className="text-gray-600">
+          <h2 className="text-2xl font-bold text-card-foreground mb-2">Choose Your Payoff Strategy</h2>
+          <p className="text-card-foreground">
             Select a strategy that aligns with your financial goals and personality
           </p>
         </div>
@@ -148,8 +148,8 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
                   <Icon className="h-6 w-6" />
                 </div>
                 
-                <h3 className="font-semibold text-gray-900 mb-1">{strategy.name}</h3>
-                <p className="text-xs text-gray-600">{strategy.description}</p>
+                <h3 className="font-semibold text-card-foreground mb-1">{strategy.name}</h3>
+                <p className="text-xs text-card-foreground">{strategy.description}</p>
               </button>
             );
           })}
@@ -168,10 +168,10 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-card rounded-lg shadow-md p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Financial Information</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-card-foreground mb-2">Financial Information</h2>
+        <p className="text-card-foreground">
           Enter your financial details to generate an optimized strategy
         </p>
       </div>
@@ -194,11 +194,11 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
         {/* Financial Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-card-foreground mb-1">
               Monthly Income *
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-card-foreground" />
               <Input
                 type="number"
                 value={financialInfo.monthlyIncome}
@@ -210,18 +210,18 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
               />
             </div>
             {financialInfo.monthlyIncome && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-card-foreground mt-1">
                 {formatCurrency(financialInfo.monthlyIncome)}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-card-foreground mb-1">
               Monthly Expenses *
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-card-foreground" />
               <Input
                 type="number"
                 value={financialInfo.monthlyExpenses}
@@ -233,18 +233,18 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
               />
             </div>
             {financialInfo.monthlyExpenses && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-card-foreground mt-1">
                 {formatCurrency(financialInfo.monthlyExpenses)}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-card-foreground mb-1">
               Emergency Fund
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-card-foreground" />
               <Input
                 type="number"
                 value={financialInfo.emergencyFund}
@@ -256,7 +256,7 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
               />
             </div>
             {financialInfo.emergencyFund && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-card-foreground mt-1">
                 {formatCurrency(financialInfo.emergencyFund)}
               </p>
             )}
@@ -286,6 +286,7 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
             variant="outline"
             onClick={() => setShowForm(false)}
             disabled={loading}
+            className="text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             Back
           </Button>
@@ -295,6 +296,7 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
               variant="outline"
               onClick={() => setSelectedStrategy('ai_optimized' as StrategyType)}
               disabled={loading}
+              className="text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Change Strategy
             </Button>

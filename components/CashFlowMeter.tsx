@@ -175,8 +175,8 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
     return (
       <Card className={className}>
         <CardContent className="text-center py-8">
-          <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Unable to load cash flow data</p>
+          <AlertTriangle className="h-12 w-12 text-black dark:text-white mx-auto mb-4" />
+          <p className="text-black dark:text-white">Unable to load cash flow data</p>
         </CardContent>
       </Card>
     )
@@ -194,7 +194,7 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
               <span>Cash Flow Meter</span>
               <div className="flex items-center gap-1">
                 <Zap className="h-4 w-4 text-orange-500" />
-                <span className="text-xs text-gray-500">Live</span>
+                <span className="text-xs text-black dark:text-white">Live</span>
               </div>
             </div>
             <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${getHealthColor(healthScore)}`}>
@@ -223,13 +223,13 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Monthly Income</p>
+                <p className="text-sm text-black dark:text-white mb-1">Monthly Income</p>
                 <p className="text-lg font-semibold text-green-600">
                   ${current.totalIncome.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Spending</p>
+                <p className="text-sm text-black dark:text-white mb-1">Total Spending</p>
                 <p className="text-lg font-semibold text-red-600">
                   ${current.totalSpending.toFixed(2)}
                 </p>
@@ -237,13 +237,13 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
             </div>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Current Balance</p>
+                <p className="text-sm text-black dark:text-white mb-1">Current Balance</p>
                 <p className={`text-lg font-semibold ${current.remainingBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   ${current.remainingBalance.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Daily Burn Rate</p>
+                <p className="text-sm text-black dark:text-white mb-1">Daily Burn Rate</p>
                 <p className="text-lg font-semibold text-orange-600">
                   ${current.dailyBurnRate.toFixed(2)}
                 </p>
@@ -283,13 +283,13 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
             </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-gray-600">Projected Balance:</p>
+                <p className="text-black dark:text-white">Projected Balance:</p>
                 <p className={`font-semibold ${projectedEndOfMonth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   ${projectedEndOfMonth.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">Days Until Empty:</p>
+                <p className="text-black dark:text-white">Days Until Empty:</p>
                 <p className="font-semibold text-orange-600">
                   {current.daysUntilEmpty === Infinity ? '∞' : current.daysUntilEmpty}
                 </p>
@@ -310,7 +310,7 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
           )}
 
           {/* Velocity Indicators */}
-          <div className="flex justify-between items-center text-xs text-gray-500">
+          <div className="flex justify-between items-center text-xs text-black dark:text-white">
             <div className="flex items-center gap-2">
               <Clock className="h-3 w-3" />
               <span>Last updated: {lastUpdate.toLocaleTimeString()}</span>

@@ -202,7 +202,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
       <div className="flex gap-3">
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex-1 sm:flex-none bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+          className="flex-1 sm:flex-none bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Add Income Source
@@ -220,12 +220,12 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
       {/* Income Sources List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading income sources...</div>
+          <div className="text-center py-8 text-black">Loading income sources...</div>
         ) : incomeSources.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <DollarSign className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No income sources added yet</p>
-            <p className="text-gray-500 text-sm mt-1">Click the button above to add your first income source</p>
+          <div className="text-center py-8 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <DollarSign className="w-12 h-12 text-black mx-auto mb-3" />
+            <p className="text-black">No income sources added yet</p>
+            <p className="text-black text-sm mt-1">Click the button above to add your first income source</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -234,15 +234,15 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
               const monthlyEquivalent = getMonthlyEquivalent(income.amount, income.frequency)
               
               return (
-                <div key={income.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div key={income.id} className="bg-card border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-green-100 rounded-full p-2">
                         <CategoryIcon className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{income.name}</h3>
-                        <p className="text-sm text-gray-500 capitalize">{income.category}</p>
+                        <h3 className="font-semibold text-card-foreground">{income.name}</h3>
+                        <p className="text-sm text-card-foreground capitalize">{income.category}</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -250,7 +250,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                         onClick={() => setEditingIncome(income)}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
-                        <Edit2 className="w-4 h-4 text-gray-500" />
+                        <Edit2 className="w-4 h-4 text-card-foreground" />
                       </button>
                       <button
                         onClick={() => handleDelete(income.id)}
@@ -263,23 +263,23 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                   
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Amount:</span>
-                      <span className="font-semibold text-gray-900">{formatCurrency(income.amount)}</span>
+                      <span className="text-sm text-card-foreground">Amount:</span>
+                      <span className="font-semibold text-card-foreground">{formatCurrency(income.amount)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Frequency:</span>
-                      <span className="text-sm capitalize text-gray-900">{income.frequency}</span>
+                      <span className="text-sm text-card-foreground">Frequency:</span>
+                      <span className="text-sm capitalize text-card-foreground">{income.frequency}</span>
                     </div>
                     {income.frequency !== 'monthly' && (
                       <div className="flex justify-between pt-2 border-t">
-                        <span className="text-sm text-gray-600">Monthly:</span>
+                        <span className="text-sm text-card-foreground">Monthly:</span>
                         <span className="font-semibold text-green-600">
                           {formatCurrency(monthlyEquivalent)}
                         </span>
                       </div>
                     )}
                     {income.notes && (
-                      <p className="text-xs text-gray-500 pt-2 border-t">{income.notes}</p>
+                      <p className="text-xs text-card-foreground pt-2 border-t">{income.notes}</p>
                     )}
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Income Name
                   </label>
                   <input
@@ -336,13 +336,13 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                     name="name"
                     defaultValue={editingIncome?.name}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="e.g., Monthly Salary, Freelance Project"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Amount
                   </label>
                   <input
@@ -352,19 +352,19 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                     required
                     step="0.01"
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Frequency
                   </label>
                   <select
                     name="frequency"
                     defaultValue={editingIncome?.frequency || 'monthly'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     {frequencies.map(freq => (
                       <option key={freq.value} value={freq.value}>
@@ -375,13 +375,13 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Category
                   </label>
                   <select
                     name="category"
                     defaultValue={editingIncome?.category || 'salary'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     {incomeCategories.map(cat => (
                       <option key={cat.value} value={cat.value}>
@@ -393,38 +393,38 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       Start Date (Optional)
                     </label>
                     <input
                       type="date"
                       name="start_date"
                       defaultValue={editingIncome?.start_date || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       End Date (Optional)
                     </label>
                     <input
                       type="date"
                       name="end_date"
                       defaultValue={editingIncome?.end_date || ''}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Notes (Optional)
                   </label>
                   <textarea
                     name="notes"
                     defaultValue={editingIncome?.notes || ''}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Additional notes about this income source..."
                   />
                 </div>
@@ -436,13 +436,13 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
                       setShowAddModal(false)
                       setEditingIncome(null)
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-input text-black rounded-lg hover:bg-gray-100 "
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
                   >
                     {editingIncome ? 'Update' : 'Add'} Income
                   </button>

@@ -192,7 +192,7 @@ export default function SpendingLimitNotifications({ userId, className, onNaviga
                 <p className="text-sm text-gray-700">
                   {alert.message}
                 </p>
-                <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+                <div className="mt-2 flex items-center gap-4 text-xs text-black dark:text-white">
                   <span>Spent: ${alert.currentSpending.toFixed(2)}</span>
                   <span>Budget: ${alert.limit.toFixed(2)}</span>
                   <button
@@ -206,7 +206,7 @@ export default function SpendingLimitNotifications({ userId, className, onNaviga
             </div>
             <button
               onClick={() => dismissAlert(alert.id)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-black dark:text-white hover:text-black dark:text-white transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -218,7 +218,7 @@ export default function SpendingLimitNotifications({ userId, className, onNaviga
         <div className="text-center">
           <button
             onClick={() => setDismissedAlerts(new Set(alerts.map(a => a.id)))}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-black dark:text-white hover:text-gray-700"
           >
             Dismiss all alerts
           </button>

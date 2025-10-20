@@ -403,10 +403,10 @@ export default function PlaidLinkButton({
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
+                  <Building2 className="h-5 w-5 text-black dark:text-white" />
                   <div>
                     <p className="font-medium">{item.institution_name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-black dark:text-white">
                       Last sync: {item.last_sync ? new Date(item.last_sync).toLocaleDateString() : 'Never'}
                     </p>
                   </div>
@@ -517,11 +517,11 @@ export default function PlaidLinkButton({
 
           {/* Security Features */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-black dark:text-white">
               <Shield className="h-4 w-4" />
               <span>Bank-level security with 256-bit encryption</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-black dark:text-white">
               <Zap className="h-4 w-4" />
               <span>Automatic transaction categorization and sync</span>
             </div>
@@ -583,12 +583,12 @@ export default function PlaidLinkButton({
             {loading ? 'Connecting...' : 'Connect Bank Account'}
           </Button>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-black dark:text-white">
             <Shield className="h-4 w-4" />
             <span>Bank-level security with 256-bit encryption</span>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-black dark:text-white">
             <Zap className="h-4 w-4" />
             <span>Automatic transaction categorization and sync</span>
           </div>

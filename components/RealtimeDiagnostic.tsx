@@ -139,7 +139,7 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
         </h4>
         <button
           onClick={runDiagnostic}
-          className="p-1 text-gray-500 hover:text-gray-700"
+          className="p-1 text-black dark:text-white hover:text-gray-700"
         >
           <RefreshCw className="h-4 w-4" />
         </button>
@@ -148,7 +148,7 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
       <div className="space-y-3 text-sm">
         {/* Connection Status */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Realtime Connection:</span>
+          <span className="text-black dark:text-white">Realtime Connection:</span>
           <div className="flex items-center gap-2">
             {getStatusIcon(diagnostic.realtimeStatus)}
             <span className="capitalize">{diagnostic.realtimeStatus}</span>
@@ -157,13 +157,13 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
 
         {/* Transaction Stats */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Total Transactions:</span>
+          <span className="text-black dark:text-white">Total Transactions:</span>
           <span className="font-medium">{diagnostic.transactionCount}</span>
         </div>
 
         {/* Last Transaction */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Last Transaction:</span>
+          <span className="text-black dark:text-white">Last Transaction:</span>
           <span className="font-medium">
             {diagnostic.lastTransaction
               ? timeSince(diagnostic.lastTransaction.created_at)
@@ -173,7 +173,7 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
 
         {/* Last Sync */}
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Last Plaid Sync:</span>
+          <span className="text-black dark:text-white">Last Plaid Sync:</span>
           <span className="font-medium">
             {diagnostic.lastSync
               ? timeSince(diagnostic.lastSync)
@@ -183,9 +183,9 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
 
         {/* Plaid Items Status */}
         <div className="border-t pt-2">
-          <span className="text-gray-600 text-xs">Plaid Accounts:</span>
+          <span className="text-black dark:text-white text-xs">Plaid Accounts:</span>
           {diagnostic.plaidItemsStatus.length === 0 ? (
-            <p className="text-xs text-gray-500 mt-1">No Plaid accounts connected</p>
+            <p className="text-xs text-black dark:text-white mt-1">No Plaid accounts connected</p>
           ) : (
             <div className="mt-1 space-y-1">
               {diagnostic.plaidItemsStatus.map((item, index) => (
@@ -205,16 +205,16 @@ export default function RealtimeDiagnostic({ userId, className }: RealtimeDiagno
         {/* Recent Events */}
         {realtimeEvents.length > 0 && (
           <div className="border-t pt-2">
-            <span className="text-gray-600 text-xs">Recent Events:</span>
+            <span className="text-black dark:text-white text-xs">Recent Events:</span>
             <div className="mt-1 space-y-1">
               {realtimeEvents.map((event, index) => (
-                <p key={index} className="text-xs text-gray-500">{event}</p>
+                <p key={index} className="text-xs text-black dark:text-white">{event}</p>
               ))}
             </div>
           </div>
         )}
 
-        <div className="text-xs text-gray-500 pt-2 border-t">
+        <div className="text-xs text-black dark:text-white pt-2 border-t">
           Last checked: {lastUpdate.toLocaleTimeString()}
         </div>
       </div>

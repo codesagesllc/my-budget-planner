@@ -177,7 +177,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
       case 'on-track': return 'text-emerald-600 bg-emerald-50 border-emerald-200'
       case 'slow': return 'text-orange-600 bg-orange-50 border-orange-200'
       case 'behind': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      default: return 'text-black bg-gray-50 border-gray-200'
     }
   }
 
@@ -213,7 +213,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
     if (rank === 1) return 'bg-red-100 text-red-700 border-red-200'
     if (rank === 2) return 'bg-orange-100 text-orange-700 border-orange-200'
     if (rank === 3) return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-    return 'bg-gray-100 text-gray-600 border-gray-200'
+    return 'bg-gray-100 text-black border-gray-200'
   }
 
   if (isLoading) {
@@ -231,29 +231,31 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-black">
           <CreditCard className="h-5 w-5 text-red-500" />
           Debt Payoff Tracker
         </h3>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-sm">
-            <span className="text-gray-600">Strategy:</span>
+            <span className="text-black">Strategy:</span>
             <Button
-              variant={strategy === 'snowball' ? 'primary' : 'outline'}
+              variant={strategy === 'snowball' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStrategy('snowball')}
+              className={strategy === 'snowball' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-black border-input hover:bg-gray-100'}
             >
               Snowball
             </Button>
             <Button
-              variant={strategy === 'avalanche' ? 'primary' : 'outline'}
+              variant={strategy === 'avalanche' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setStrategy('avalanche')}
+              className={strategy === 'avalanche' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-black border-input hover:bg-gray-100'}
             >
               Avalanche
             </Button>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="text-black border-input hover:bg-gray-100">
             <Plus className="h-4 w-4 mr-1" />
             Add Debt
           </Button>
@@ -263,12 +265,12 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
       {debtPayoffs.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 mb-2">No Debts to Track</h4>
-            <p className="text-gray-500 mb-4">
+            <CreditCard className="h-12 w-12 text-card-foreground mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-card-foreground mb-2">No Debts to Track</h4>
+            <p className="text-card-foreground mb-4">
               Add your debts to track payoff progress and get optimization recommendations.
             </p>
-            <Button>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="h-4 w-4 mr-1" />
               Add Your First Debt
             </Button>
@@ -287,7 +289,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
+                  <CardTitle className="text-base flex items-center gap-2 text-card-foreground">
                     {debt.status === 'completed' ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
                     ) : (
@@ -301,7 +303,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
                     </div>
                     <div className="flex items-center gap-1">
                       <Zap className="h-3 w-3 text-orange-500" />
-                      <span className="text-xs text-gray-500">Live</span>
+                      <span className="text-xs text-black">Live</span>
                     </div>
                     <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(debt.status)}`}>
                       {getStatusIcon(debt.status)}
@@ -314,7 +316,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
               <CardContent className="space-y-4">
                 {/* Progress Visualization */}
                 <div>
-                  <div className="flex justify-between text-sm mb-2">
+                  <div className="flex justify-between text-sm mb-2 text-card-foreground">
                     <span>Paid: ${((debt.original_amount || 0) - (debt.current_balance || 0)).toFixed(2)}</span>
                     <span>Remaining: ${(debt.current_balance || 0).toFixed(2)}</span>
                   </div>
@@ -322,9 +324,11 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
                     value={Math.min(100, debt.progress_percentage || 0)}
                     className="h-4"
                   />
-                  <div className="flex justify-between text-xs text-gray-600 mt-1">
-                    <span>{(debt.progress_percentage || 0).toFixed(1)}% paid off</span>
-                    <span>Total: ${(debt.original_amount || 0).toFixed(2)}</span>
+                  <div className="flex justify-between text-xs mt-1">
+                    <span className={`${(debt.progress_percentage || 0) >= 60 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {(debt.progress_percentage || 0).toFixed(1)}% paid off
+                    </span>
+                    <span className="text-card-foreground">Total: ${(debt.original_amount || 0).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -340,40 +344,40 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Interest Rate:</span>
-                      <span className="font-medium flex items-center gap-1">
+                      <span className="text-card-foreground">Interest Rate:</span>
+                      <span className="font-medium flex items-center gap-1 text-card-foreground">
                         <Percent className="h-3 w-3" />
                         {(debt.interest_rate || 0).toFixed(2)}%
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Min Payment:</span>
-                      <span className="font-medium">${(debt.minimum_payment || 0).toFixed(2)}</span>
+                      <span className="text-card-foreground">Min Payment:</span>
+                      <span className="font-medium text-card-foreground">${(debt.minimum_payment || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Payoff Date:</span>
-                      <span className="font-medium">
+                      <span className="text-card-foreground">Payoff Date:</span>
+                      <span className="font-medium text-card-foreground">
                         {new Date(debt.payoff_date).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Daily Interest:</span>
-                      <span className="font-medium text-red-600">
+                      <span className="text-card-foreground">Daily Interest:</span>
+                      <span className="font-medium text-red-600 dark:text-red-400">
                         ${(debt.dailyInterestAccrual || 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Months Left:</span>
-                      <span className="font-medium flex items-center gap-1">
+                      <span className="text-card-foreground">Months Left:</span>
+                      <span className="font-medium flex items-center gap-1 text-card-foreground">
                         <Clock className="h-3 w-3" />
                         {debt.months_remaining}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Recent Payments:</span>
-                      <span className="font-medium text-green-600">
+                      <span className="text-card-foreground">Recent Payments:</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">
                         ${(debt.recentPayments || 0).toFixed(2)}
                       </span>
                     </div>
@@ -381,18 +385,18 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
                 </div>
 
                 {/* Interest vs Principal Breakdown */}
-                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                  <h4 className="font-medium text-sm">This Month's Breakdown</h4>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2">
+                  <h4 className="font-medium text-sm text-card-foreground">This Month's Breakdown</h4>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-gray-600">Interest Paid:</p>
-                      <p className="font-semibold text-red-600">
+                      <p className="text-card-foreground">Interest Paid:</p>
+                      <p className="font-semibold text-red-600 dark:text-red-400">
                         ${(debt.interestPaidThisMonth || 0).toFixed(2)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-600">Principal Paid:</p>
-                      <p className="font-semibold text-green-600">
+                      <p className="text-card-foreground">Principal Paid:</p>
+                      <p className="font-semibold text-green-600 dark:text-green-400">
                         ${(debt.principalPaidThisMonth || 0).toFixed(2)}
                       </p>
                     </div>
@@ -416,11 +420,11 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
                 {/* Quick Actions */}
                 {debt.status !== 'completed' && (
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1 text-black border-input hover:bg-gray-100">
                       <DollarSign className="h-4 w-4 mr-1" />
                       Make Payment
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1 text-black border-input hover:bg-gray-100">
                       <Activity className="h-4 w-4 mr-1" />
                       View Strategy
                     </Button>
@@ -451,7 +455,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
         </div>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-black text-center">
         Last updated: {lastUpdate.toLocaleTimeString()} • Updates as payments are made
       </p>
     </div>

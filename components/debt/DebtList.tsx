@@ -79,7 +79,7 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-card rounded-lg shadow-md p-6">
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 bg-gray-200 rounded"></div>
@@ -91,11 +91,11 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
 
   if (debts.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-12 text-center">
+      <div className="bg-card rounded-lg shadow-md p-12 text-center">
         <div className="max-w-md mx-auto">
-          <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Debts Added</h3>
-          <p className="text-gray-600">
+          <CreditCard className="h-12 w-12 text-card-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-card-foreground mb-2">No Debts Added</h3>
+          <p className="text-card-foreground">
             Start by adding your debts to track payments and optimize your payoff strategy.
           </p>
         </div>
@@ -104,10 +104,10 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md">
+    <div className="bg-card rounded-lg shadow-md">
       <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Your Debts</h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <h2 className="text-xl font-semibold text-card-foreground">Your Debts</h2>
+        <p className="text-sm text-card-foreground mt-1">
           {debts.length} active {debts.length === 1 ? 'debt' : 'debts'}
         </p>
       </div>
@@ -124,32 +124,32 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 flex-1">
                   <div className={`p-3 rounded-lg bg-gray-100`}>
-                    <Icon className="h-6 w-6 text-gray-600" />
+                    <Icon className="h-6 w-6 text-card-foreground" />
                   </div>
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{debt.creditor_name}</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="font-semibold text-card-foreground">{debt.creditor_name}</h3>
+                    <p className="text-sm text-card-foreground">
                       {debt.debt_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </p>
                   </div>
 
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{formatCurrency(debt.current_balance)}</p>
+                    <p className="font-semibold text-card-foreground">{formatCurrency(debt.current_balance)}</p>
                     {debt.interest_rate && (
-                      <p className="text-sm text-gray-600">{debt.interest_rate}% APR</p>
+                      <p className="text-sm text-card-foreground">{debt.interest_rate}% APR</p>
                     )}
                   </div>
 
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Min Payment</p>
-                    <p className="font-semibold text-gray-900">{formatCurrency(debt.minimum_payment || 0)}</p>
+                    <p className="text-sm text-card-foreground">Min Payment</p>
+                    <p className="font-semibold text-card-foreground">{formatCurrency(debt.minimum_payment || 0)}</p>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <Button
                       size="sm"
-                      className="bg-gray-900 text-white hover:bg-gray-800"
+                      className="bg-black text-white hover:bg-gray-800"
                       onClick={() => handleQuickPayment(debt)}
                     >
                       Record Payment
@@ -160,7 +160,7 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
                       variant="outline"
                       onClick={() => setHistoryDebt(debt)}
                       title="View payment history"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-input"
                     >
                       <History className="h-4 w-4" />
                     </Button>
@@ -170,9 +170,9 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
                       className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                        <ChevronUp className="h-5 w-5 text-card-foreground" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                        <ChevronDown className="h-5 w-5 text-card-foreground" />
                       )}
                     </button>
                   </div>
@@ -182,7 +182,7 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
               {/* Progress Bar */}
               {debt.original_amount && (
                 <div className="mt-4">
-                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                  <div className="flex justify-between text-sm text-card-foreground mb-1">
                     <span>Progress</span>
                     <span>{progress.toFixed(1)}% paid</span>
                   </div>
@@ -192,7 +192,7 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between text-xs text-card-foreground mt-1">
                     <span>Original: {formatCurrency(debt.original_amount)}</span>
                     <span>Remaining: {formatCurrency(debt.current_balance)}</span>
                   </div>
@@ -205,9 +205,9 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {debt.credit_limit && (
                       <div>
-                        <p className="text-sm text-gray-600">Credit Limit</p>
-                        <p className="font-semibold text-gray-900">{formatCurrency(debt.credit_limit)}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm text-card-foreground">Credit Limit</p>
+                        <p className="font-semibold text-card-foreground">{formatCurrency(debt.credit_limit)}</p>
+                        <p className="text-xs text-card-foreground">
                           {((debt.current_balance / debt.credit_limit) * 100).toFixed(1)}% utilized
                         </p>
                       </div>
@@ -215,21 +215,21 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
                     
                     {debt.due_date && (
                       <div>
-                        <p className="text-sm text-gray-600">Due Date</p>
-                        <p className="font-semibold text-gray-900">Day {debt.due_date} of month</p>
+                        <p className="text-sm text-card-foreground">Due Date</p>
+                        <p className="font-semibold text-card-foreground">Day {debt.due_date} of month</p>
                       </div>
                     )}
                     
                     {debt.loan_term_months && (
                       <div>
-                        <p className="text-sm text-gray-600">Loan Term</p>
-                        <p className="font-semibold text-gray-900">{debt.loan_term_months} months</p>
+                        <p className="text-sm text-card-foreground">Loan Term</p>
+                        <p className="font-semibold text-card-foreground">{debt.loan_term_months} months</p>
                       </div>
                     )}
                     
                     <div>
-                      <p className="text-sm text-gray-600">Added</p>
-                      <p className="font-semibold text-gray-900">
+                      <p className="text-sm text-card-foreground">Added</p>
+                      <p className="font-semibold text-card-foreground">
                         {new Date(debt.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -237,8 +237,8 @@ export function DebtList({ debts, loading, onUpdate, onDelete }: DebtListProps) 
 
                   {debt.notes && (
                     <div className="mt-4">
-                      <p className="text-sm text-gray-600">Notes</p>
-                      <p className="text-gray-900 mt-1">{debt.notes}</p>
+                      <p className="text-sm text-card-foreground">Notes</p>
+                      <p className="text-card-foreground mt-1">{debt.notes}</p>
                     </div>
                   )}
 

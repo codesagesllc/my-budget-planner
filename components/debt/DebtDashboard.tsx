@@ -139,7 +139,7 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-6">
+          <div key={index} className="bg-card rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between mb-4">
               <div className={`${card.color} text-white p-3 rounded-lg`}>
                 <card.icon className="h-6 w-6" />
@@ -148,17 +148,17 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
                 <TrendingDown className="h-5 w-5 text-green-500" />
               )}
             </div>
-            <h3 className="text-sm font-medium text-gray-600">{card.title}</h3>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
-            <p className="text-xs text-gray-500 mt-1">{card.description}</p>
+            <h3 className="text-sm font-medium text-card-foreground">{card.title}</h3>
+            <p className="text-2xl font-bold text-card-foreground mt-1">{card.value}</p>
+            <p className="text-xs text-card-foreground mt-1">{card.description}</p>
           </div>
         ))}
       </div>
 
       {/* Key Insights */}
       {insights.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-card rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4 flex items-center">
             <AlertCircle className="h-5 w-5 mr-2" />
             Key Insights
           </h3>
@@ -184,9 +184,9 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
 
       {/* Financial Health - Editable */}
       {financialSnapshot && (
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Financial Health</h3>
+            <h3 className="text-lg font-semibold text-card-foreground">Financial Health</h3>
             {!isEditingSnapshot ? (
               <button
                 onClick={handleEditSnapshot}
@@ -217,7 +217,7 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-gray-600">Monthly Income</p>
+              <p className="text-sm text-card-foreground">Monthly Income</p>
               {isEditingSnapshot && editedSnapshot ? (
                 <input
                   type="number"
@@ -233,7 +233,7 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
             </div>
             
             <div>
-              <p className="text-sm text-gray-600">Monthly Expenses</p>
+              <p className="text-sm text-card-foreground">Monthly Expenses</p>
               {isEditingSnapshot && editedSnapshot ? (
                 <input
                   type="number"
@@ -249,7 +249,7 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
             </div>
             
             <div>
-              <p className="text-sm text-gray-600">Available for Debt</p>
+              <p className="text-sm text-card-foreground">Available for Debt</p>
               {isEditingSnapshot && editedSnapshot ? (
                 <p className="text-lg font-semibold text-green-600">
                   {formatCurrency(editedSnapshot.available_for_debt)}
@@ -262,7 +262,7 @@ export function DebtDashboard({ summary, financialSnapshot, onUpdateSnapshot }: 
             </div>
             
             <div>
-              <p className="text-sm text-gray-600">Emergency Fund</p>
+              <p className="text-sm text-card-foreground">Emergency Fund</p>
               {isEditingSnapshot && editedSnapshot ? (
                 <input
                   type="number"

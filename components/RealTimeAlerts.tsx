@@ -201,7 +201,7 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
                   variant="ghost"
                   size="sm"
                   onClick={() => dismissAlert(alert.id)}
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                  className="h-6 w-6 p-0 text-black dark:text-white hover:text-black dark:text-white"
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -225,13 +225,13 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-600">Income</p>
+                <p className="text-black dark:text-white">Income</p>
                 <p className="font-semibold text-green-600">
                   ${cashFlow.totalIncome.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">Spending</p>
+                <p className="text-black dark:text-white">Spending</p>
                 <p className="font-semibold text-red-600">
                   ${cashFlow.totalSpending.toFixed(2)}
                 </p>
@@ -251,7 +251,7 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
               />
             </div>
 
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-black dark:text-white">
               <p>Daily burn rate: ${cashFlow.dailyBurnRate.toFixed(2)}</p>
               {cashFlow.daysUntilEmpty < Infinity && (
                 <p>Days until empty: {cashFlow.daysUntilEmpty}</p>
@@ -279,12 +279,12 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
                     {goal.on_track ? 'On track' : 'Behind'}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-600">
+                <div className="flex justify-between text-xs text-black dark:text-white">
                   <span>${goal.current_amount.toFixed(2)} / ${goal.target_amount.toFixed(2)}</span>
                   <span>{goal.progress_percentage.toFixed(1)}%</span>
                 </div>
                 <Progress value={goal.progress_percentage} className="h-2" />
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-black dark:text-white">
                   Need ${goal.monthly_required.toFixed(2)}/month to reach goal
                 </p>
               </div>
@@ -307,16 +307,16 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
               <div key={debt.id} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium">{debt.creditor_name}</span>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-black dark:text-white">
                     {debt.months_remaining} months left
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-600">
+                <div className="flex justify-between text-xs text-black dark:text-white">
                   <span>Paid: ${(debt.original_amount - debt.current_balance).toFixed(2)}</span>
                   <span>Remaining: ${debt.current_balance.toFixed(2)}</span>
                 </div>
                 <Progress value={debt.progress_percentage} className="h-2" />
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-black dark:text-white">
                   {debt.progress_percentage.toFixed(1)}% paid off
                 </p>
               </div>
@@ -326,7 +326,7 @@ export default function RealTimeAlerts({ userId, className }: RealTimeAlertsProp
       )}
 
       {/* Last Updated */}
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-black dark:text-white text-center">
         Last updated: {lastUpdate.toLocaleTimeString()}
       </p>
     </div>

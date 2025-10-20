@@ -146,14 +146,14 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Financial Goals</h2>
-          <p className="text-gray-600 mt-1">Track your progress towards financial milestones</p>
+          <p className="text-black dark:text-white mt-1">Track your progress towards financial milestones</p>
         </div>
         {onClose && (
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-black dark:text-white" />
           </button>
         )}
       </div>
@@ -203,12 +203,12 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
       {/* Goals List */}
       <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading goals...</div>
+          <div className="text-center py-8 text-black dark:text-white">Loading goals...</div>
         ) : goals.length === 0 ? (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-600">No financial goals set yet</p>
-            <p className="text-gray-500 text-sm mt-1">Click the button above to add your first goal</p>
+            <Target className="w-12 h-12 text-black dark:text-white mx-auto mb-3" />
+            <p className="text-black dark:text-white">No financial goals set yet</p>
+            <p className="text-black dark:text-white text-sm mt-1">Click the button above to add your first goal</p>
           </div>
         ) : (
           goals.map((goal) => {
@@ -226,7 +226,7 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 text-lg">{goal.name}</h3>
-                      <p className="text-sm text-gray-500 capitalize">{goal.category}</p>
+                      <p className="text-sm text-black dark:text-white capitalize">{goal.category}</p>
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -234,7 +234,7 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
                       onClick={() => setEditingGoal(goal)}
                       className="p-1 hover:bg-gray-100 rounded"
                     >
-                      <Edit2 className="w-4 h-4 text-gray-500" />
+                      <Edit2 className="w-4 h-4 text-black dark:text-white" />
                     </button>
                     <button
                       onClick={() => handleDelete(goal.id)}
@@ -248,7 +248,7 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
                 {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600">Progress</span>
+                    <span className="text-black dark:text-white">Progress</span>
                     <span className="font-semibold">{formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
@@ -259,7 +259,7 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between text-xs text-black dark:text-white mt-1">
                     <span>{progress.toFixed(1)}% complete</span>
                     {progress >= 100 ? (
                       <span className="text-green-600 font-semibold flex items-center gap-1">
@@ -277,12 +277,12 @@ export default function FinancialGoals({ userId, monthlyIncome = 0, monthlySavin
                 {/* Goal Details */}
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {goal.target_date && (
-                    <div className="flex items-center gap-2 text-gray-600">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Calendar className="w-4 h-4" />
                       <span>Target: {new Date(goal.target_date).toLocaleDateString()}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-black dark:text-white">
                     <DollarSign className="w-4 h-4" />
                     <span>Remaining: {formatCurrency(goal.target_amount - goal.current_amount)}</span>
                   </div>

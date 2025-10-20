@@ -51,7 +51,7 @@ export function DebtPayoffTimeline({ strategy, debts }: DebtPayoffTimelineProps)
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Debt Payoff Timeline</h2>
-        <p className="text-gray-600">
+        <p className="text-black dark:text-white">
           Visualize your journey to becoming debt-free with {strategy.strategy_name}
         </p>
       </div>
@@ -101,7 +101,7 @@ export function DebtPayoffTimeline({ strategy, debts }: DebtPayoffTimelineProps)
 
       {/* Timeline Visualization */}
       <div className="space-y-4">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <div className="flex justify-between text-sm text-black dark:text-white mb-2">
           <span>Today</span>
           <span>{maxMonths} months</span>
         </div>
@@ -119,7 +119,7 @@ export function DebtPayoffTimeline({ strategy, debts }: DebtPayoffTimelineProps)
                       <span className="font-semibold text-gray-900">
                         {item.debt.creditor_name}
                       </span>
-                      <span className="ml-2 text-sm text-gray-600">
+                      <span className="ml-2 text-sm text-black dark:text-white">
                         Priority #{item.priority.priority}
                       </span>
                     </div>
@@ -164,7 +164,7 @@ export function DebtPayoffTimeline({ strategy, debts }: DebtPayoffTimelineProps)
                     </div>
                   </div>
                   
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between text-xs text-black dark:text-white mt-1">
                     <span>{item.priority.reasoning}</span>
                     <span>Payoff: {formatDate(item.payoffDate.toISOString())}</span>
                   </div>
@@ -178,7 +178,7 @@ export function DebtPayoffTimeline({ strategy, debts }: DebtPayoffTimelineProps)
       {/* Methodology Explanation */}
       <div className="mt-8 p-4 bg-gray-50 rounded-lg">
         <h3 className="font-semibold text-gray-900 mb-2">Strategy Methodology</h3>
-        <p className="text-sm text-gray-600">{strategy.methodology}</p>
+        <p className="text-sm text-black dark:text-white">{strategy.methodology}</p>
       </div>
 
       {/* Recommendations */}
