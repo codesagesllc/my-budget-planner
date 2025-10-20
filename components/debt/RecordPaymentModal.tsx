@@ -101,19 +101,19 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Record Payment</h2>
-              <p className="text-sm text-gray-600 mt-1">{debt.creditor_name}</p>
+              <h2 className="text-xl font-semibold text-card-foreground">Record Payment</h2>
+              <p className="text-sm text-card-foreground mt-1">{debt.creditor_name}</p>
             </div>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-card-foreground" />
             </button>
           </div>
 
@@ -121,21 +121,21 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-600">Current Balance</p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm text-card-foreground">Current Balance</p>
+                <p className="text-lg font-semibold text-card-foreground">
                   {formatCurrency(debt.current_balance)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Minimum Payment</p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm text-card-foreground">Minimum Payment</p>
+                <p className="text-lg font-semibold text-card-foreground">
                   {formatCurrency(debt.minimum_payment || 0)}
                 </p>
               </div>
             </div>
             {debt.interest_rate && (
               <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-sm text-gray-600">Interest Rate: {debt.interest_rate}% APR</p>
+                <p className="text-sm text-card-foreground">Interest Rate: {debt.interest_rate}% APR</p>
               </div>
             )}
           </div>
@@ -144,11 +144,11 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Payment Amount */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-card-foreground mb-2">
                 Payment Amount
               </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-card-foreground" />
                 <input
                   type="number"
                   value={paymentAmount}
@@ -193,11 +193,11 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
 
             {/* Payment Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-card-foreground mb-2">
                 Payment Date
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-card-foreground" />
                 <input
                   type="date"
                   value={paymentDate}
@@ -217,14 +217,14 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                 onChange={(e) => setIsExtraPayment(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="extraPayment" className="text-sm text-gray-700">
+              <label htmlFor="extraPayment" className="text-sm text-card-foreground">
                 This is an extra payment (above minimum)
               </label>
             </div>
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-card-foreground mb-2">
                 Notes (Optional)
               </label>
               <textarea
@@ -291,7 +291,7 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1"
+                className="flex-1 text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Cancel
               </Button>

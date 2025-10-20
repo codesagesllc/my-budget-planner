@@ -62,7 +62,7 @@ export default function AddAccountModal({ onClose, onSuccess }: AddAccountModalP
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-black dark:text-white" />
             </button>
           </div>
 
@@ -112,7 +112,7 @@ export default function AddAccountModal({ onClose, onSuccess }: AddAccountModalP
                 Current Balance
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black dark:text-white">
                   $
                 </span>
                 <input

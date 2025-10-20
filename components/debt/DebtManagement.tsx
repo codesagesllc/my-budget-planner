@@ -147,8 +147,8 @@ export function DebtManagement({ userId }: DebtManagementProps = {}) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Debt Management</h1>
-          <p className="text-gray-600 mt-1">Track, manage, and eliminate your debts strategically</p>
+          <h1 className="text-3xl font-bold text-black">Debt Management</h1>
+          <p className="text-black mt-1">Track, manage, and eliminate your debts strategically</p>
         </div>
         <Button
           onClick={() => setShowAddModal(true)}

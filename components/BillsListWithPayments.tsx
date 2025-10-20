@@ -120,7 +120,7 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
 
   const getPaymentStatusIcon = (bill: Bill) => {
     if (paymentLoading === bill.id) {
-      return <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+      return <Loader2 className="h-4 w-4 animate-spin text-black dark:text-white" />
     }
 
     if (bill.is_overdue && !bill.is_paid) {
@@ -182,7 +182,7 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
         <div className="bg-white rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Bills</p>
+              <p className="text-sm font-medium text-black dark:text-white">Total Bills</p>
               <p className="text-2xl font-bold text-gray-900">{summary.total}</p>
             </div>
             <DollarSign className="h-8 w-8 text-blue-500" />
@@ -192,12 +192,12 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
         <div className="bg-white rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Paid</p>
+              <p className="text-sm font-medium text-black dark:text-white">Paid</p>
               <p className="text-2xl font-bold text-green-600">{summary.paid}</p>
             </div>
             <CheckCircle className="h-8 w-8 text-green-500" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-black dark:text-white mt-1">
             {formatCurrency(summary.paidAmount)}
           </p>
         </div>
@@ -205,12 +205,12 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
         <div className="bg-white rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Unpaid</p>
+              <p className="text-sm font-medium text-black dark:text-white">Unpaid</p>
               <p className="text-2xl font-bold text-blue-600">{summary.unpaid}</p>
             </div>
             <Clock className="h-8 w-8 text-blue-500" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-black dark:text-white mt-1">
             {formatCurrency(summary.unpaidAmount - bills.filter(bill => bill.is_overdue).reduce((sum, bill) => sum + bill.amount, 0))}
           </p>
         </div>
@@ -218,12 +218,12 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
         <div className="bg-white rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Overdue</p>
+              <p className="text-sm font-medium text-black dark:text-white">Overdue</p>
               <p className="text-2xl font-bold text-red-600">{summary.overdue}</p>
             </div>
             <AlertTriangle className="h-8 w-8 text-red-500" />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-black dark:text-white mt-1">
             {formatCurrency(bills.filter(bill => bill.is_overdue).reduce((sum, bill) => sum + bill.amount, 0))}
           </p>
         </div>
@@ -238,7 +238,7 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               filter === filterType
                 ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                : 'text-gray-600 hover:text-gray-900 border border-gray-200 hover:bg-gray-50'
+                : 'text-black dark:text-white hover:text-gray-900 border border-gray-200 hover:bg-gray-50'
             }`}
           >
             {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
@@ -253,7 +253,7 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
       {/* Bills List */}
       {filteredBills.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">
+          <p className="text-black dark:text-white">
             {filter === 'all'
               ? "No bills found. Add your first bill to get started!"
               : `No ${filter} bills found.`
@@ -300,7 +300,7 @@ export default function BillsListWithPayments({ bills: initialBills, onBillUpdat
                           )}
                         </div>
 
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center space-x-4 text-sm text-black dark:text-white mt-1">
                           <span className={dueDateInfo.color}>
                             {dueDateInfo.text}
                           </span>

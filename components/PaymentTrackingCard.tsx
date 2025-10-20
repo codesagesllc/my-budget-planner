@@ -89,7 +89,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
       case 'low': return 'text-green-600 bg-green-50 border-green-200'
       case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
       case 'high': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      default: return 'text-black dark:text-white bg-gray-50 border-gray-200'
     }
   }
 
@@ -97,7 +97,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
     switch (trend) {
       case 'improving': return <TrendingUp className="h-4 w-4 text-green-600" />
       case 'declining': return <TrendingDown className="h-4 w-4 text-red-600" />
-      default: return <Clock className="h-4 w-4 text-gray-600" />
+      default: return <Clock className="h-4 w-4 text-black dark:text-white" />
     }
   }
 
@@ -110,7 +110,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
       <Card className={className}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Payment Tracking</CardTitle>
-          <Target className="h-4 w-4 text-muted-foreground" />
+          <Target className="h-4 w-4 text-black dark:text-white" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -171,7 +171,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
         </div>
         <div className="flex items-center space-x-1">
           {getTrendIcon(data.recentTrend)}
-          <Target className="h-4 w-4 text-muted-foreground" />
+          <Target className="h-4 w-4 text-black dark:text-white" />
         </div>
       </CardHeader>
       <CardContent>
@@ -179,7 +179,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
           {/* Overall Performance */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">On-Time Rate</span>
+              <span className="text-sm text-black dark:text-white">On-Time Rate</span>
               <div className="flex items-center space-x-2">
                 {data.overallOnTimeRate >= 80 ? (
                   <Award className="h-4 w-4 text-green-600" />
@@ -196,7 +196,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
                 </span>
               </div>
             </div>
-            <div className="text-xs text-muted-foreground mb-3">
+            <div className="text-xs text-black dark:text-white mb-3">
               {data.totalBillsPaid} bills tracked • Trend: {data.recentTrend}
             </div>
 
@@ -250,7 +250,7 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
                         </span>
                       </div>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-xs text-black dark:text-white">
                       <span>{formatPercentage(bill.onTimePercentage)} on-time</span>
                       {bill.averageDaysLate > 0 && (
                         <span>Avg {Math.round(bill.averageDaysLate)}d late</span>
@@ -265,16 +265,16 @@ export function PaymentTrackingCard({ className }: PaymentTrackingCardProps) {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4 pt-2 border-t text-xs">
             <div>
-              <span className="text-muted-foreground block">This Month</span>
+              <span className="text-black dark:text-white block">This Month</span>
               <span className="font-medium">
                 {data.monthlyStats[0]?.onTimeRate ? formatPercentage(data.monthlyStats[0].onTimeRate) : 'N/A'}
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground block">Improvement</span>
+              <span className="text-black dark:text-white block">Improvement</span>
               <span className={`font-medium ${
                 data.recentTrend === 'improving' ? 'text-green-600' :
-                data.recentTrend === 'declining' ? 'text-red-600' : 'text-gray-600'
+                data.recentTrend === 'declining' ? 'text-red-600' : 'text-black dark:text-white'
               }`}>
                 {data.recentTrend}
               </span>

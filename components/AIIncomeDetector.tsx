@@ -182,7 +182,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
             <Brain className="h-5 w-5 text-purple-600" />
             AI Income Detection
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-black dark:text-white mt-1">
             Automatically detect recurring income from your transaction history
           </p>
         </div>
@@ -190,7 +190,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <X className="h-5 w-5 text-gray-500" />
+          <X className="h-5 w-5 text-black dark:text-white" />
         </button>
       </div>
 
@@ -201,7 +201,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
           <h4 className="text-lg font-medium text-gray-900 mb-2">
             Analyze Your Income Patterns
           </h4>
-          <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-black dark:text-white mb-6 max-w-md mx-auto">
             Our AI will scan your last 6 months of transactions to identify recurring deposits
             and categorize them as income sources.
           </p>
@@ -222,13 +222,13 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
           <Loader2 className="h-12 w-12 text-purple-600 animate-spin mx-auto mb-4" />
           <div className="space-y-2">
             <p className="text-gray-700 font-medium">🔍 Analyzing your transaction patterns...</p>
-            <div className="space-y-1 text-sm text-gray-600">
+            <div className="space-y-1 text-sm text-black dark:text-white">
               <p>• Scanning the last 90 days of transactions</p>
               <p>• Identifying recurring income deposits</p>
               <p>• Calculating frequency and amounts</p>
               <p>• Categorizing income sources</p>
             </div>
-            <p className="text-sm text-gray-500 mt-3">This usually takes 5-10 seconds</p>
+            <p className="text-sm text-black dark:text-white mt-3">This usually takes 5-10 seconds</p>
           </div>
         </div>
       )}
@@ -334,22 +334,22 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
                           
                           <div className="flex flex-wrap items-center gap-4 text-sm">
                             <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4 text-gray-400" />
+                              <DollarSign className="h-4 w-4 text-black dark:text-white" />
                               <span className="font-semibold text-gray-900">
                                 {formatCurrency(income.amount)}
                               </span>
                             </div>
                             
                             <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-600">
+                              <Calendar className="h-4 w-4 text-black dark:text-white" />
+                              <span className="text-black dark:text-white">
                                 {formatFrequency(income.frequency)}
                               </span>
                             </div>
                             
                             <div className="flex items-center gap-1">
-                              <TrendingUp className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-600">
+                              <TrendingUp className="h-4 w-4 text-black dark:text-white" />
+                              <span className="text-black dark:text-white">
                                 {income.occurrences} transactions
                               </span>
                             </div>
@@ -359,7 +359,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
                             <span className={`text-xs px-2 py-1 rounded-full ${getConfidenceColor(income.confidence)}`}>
                               {income.confidence}% confidence
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-black dark:text-white">
                               From {new Date(income.firstSeen).toLocaleDateString()} to{' '}
                               {new Date(income.lastSeen).toLocaleDateString()}
                             </span>

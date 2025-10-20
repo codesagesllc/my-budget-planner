@@ -131,23 +131,23 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
   }
 
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return 'text-green-600'
-    if (balance < 0) return 'text-red-600'
-    return 'text-gray-600'
+    if (balance > 0) return 'text-green-600 dark:text-green-400'
+    if (balance < 0) return 'text-red-600 dark:text-red-400'
+    return 'text-card-foreground'
   }
 
   const getBalanceIcon = (balance: number) => {
-    if (balance > 0) return <TrendingUp className="h-4 w-4 text-green-600" />
-    if (balance < 0) return <TrendingDown className="h-4 w-4 text-red-600" />
-    return <DollarSign className="h-4 w-4 text-gray-600" />
+    if (balance > 0) return <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+    if (balance < 0) return <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+    return <DollarSign className="h-4 w-4 text-card-foreground" />
   }
 
   if (loading) {
     return (
       <Card className={className}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium text-card-foreground">Remaining Balance</CardTitle>
+          <DollarSign className="h-4 w-4 text-card-foreground" />
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -162,7 +162,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
     return (
       <Card className={className}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
+          <CardTitle className="text-sm font-medium text-card-foreground">Remaining Balance</CardTitle>
           <AlertCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
@@ -173,6 +173,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
               variant="outline"
               size="sm"
               disabled={refreshing}
+              className="text-card-foreground border-input hover:bg-gray-100"
             >
               {refreshing ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -195,7 +196,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center space-x-2">
-          <CardTitle className="text-sm font-medium">Remaining Balance</CardTitle>
+          <CardTitle className="text-sm font-medium text-card-foreground">Remaining Balance</CardTitle>
           <div className="flex items-center space-x-1">
             {isRealtimeConnected && (
               <div className={`w-2 h-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} title={isUpdating ? 'Updating...' : 'Real-time updates active'} />
@@ -205,7 +206,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
               variant="ghost"
               size="sm"
               disabled={refreshing || isUpdating}
-              className="h-6 w-6 p-0"
+              className="h-6 w-6 p-0 text-card-foreground hover:text-card-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <RefreshCw className={`h-3 w-3 ${refreshing || isUpdating ? 'animate-spin' : ''}`} />
             </Button>
@@ -220,7 +221,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
             <div className={`text-2xl font-bold ${getBalanceColor(data.remainingBalance)}`}>
               {formatCurrency(data.remainingBalance)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-card-foreground">
               After bills and spending
             </p>
           </div>
@@ -250,7 +251,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
             </div>
 
             {/* Legend */}
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-card-foreground">
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-blue-500 rounded-full" />
                 <span>Spending</span>
@@ -303,7 +304,7 @@ export function RemainingBalanceCard({ className }: RemainingBalanceCardProps) {
           )}
 
           {/* Period Info */}
-          <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
+          <div className="flex items-center justify-between pt-2 border-t text-xs text-card-foreground">
             <div className="flex items-center space-x-1">
               <Calendar className="h-3 w-3" />
               <span>

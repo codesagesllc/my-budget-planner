@@ -115,38 +115,26 @@ export async function GET(request: NextRequest) {
     }, 0)
 
     // Get all transactions for the period that should count as spending
-    // First try with enhanced transaction fields, fallback to basic query if fields don't exist
-    let transactions
-    let transactionsError
+    const { data: allTransactions, error: transactionsError } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .gte('date', startDate.toISOString())
+      .lte('date', endDate.toISOString())
 
-    try {
-      // Try enhanced query first - include transactions where exclude_from_spending is false OR null
-      const result = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString())
-        .eq('transaction_type', 'expense')
-        .or('exclude_from_spending.is.null,exclude_from_spending.eq.false') // Include null (existing) and false values
+    // Filter transactions that should count as spending
+    const transactions = allTransactions?.filter(t => {
+      // Include all transactions that are NOT income
+      const isNotIncome = t.transaction_type !== 'income'
 
-      transactions = result.data
-      transactionsError = result.error
-    } catch (enhancedError) {
-      console.log('Enhanced transaction fields not available, falling back to basic query')
+      // Exclude transactions marked as bill payments (if field exists)
+      const isNotBillPayment = !t.is_bill_payment
 
-      // Fallback to basic query
-      const result = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString())
-        .eq('transaction_type', 'expense')
+      // Exclude transactions marked to exclude from spending (if field exists)
+      const notExcludedFromSpending = !t.exclude_from_spending
 
-      transactions = result.data
-      transactionsError = result.error
-    }
+      return isNotIncome && isNotBillPayment && notExcludedFromSpending
+    }) || []
 
     if (transactionsError) {
       console.error('Error fetching transactions:', transactionsError)

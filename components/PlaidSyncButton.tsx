@@ -105,7 +105,7 @@ export default function PlaidSyncButton({ userId, onSyncComplete, className }: P
         </Button>
 
         {lastSyncTime && (
-          <div className="flex items-center gap-1 text-sm text-gray-600">
+          <div className="flex items-center gap-1 text-sm text-black dark:text-white">
             <Clock className="h-3 w-3" />
             Last synced: {lastSyncTime.toLocaleTimeString()}
           </div>
@@ -195,10 +195,10 @@ export default function PlaidSyncButton({ userId, onSyncComplete, className }: P
                       </div>
 
                       {result.success && result.transactions !== undefined && (
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-black dark:text-white">
                           {result.transactions} new transactions
                           {result.duplicatesSkipped && result.duplicatesSkipped > 0 && (
-                            <span className="text-gray-500 ml-1">
+                            <span className="text-black dark:text-white ml-1">
                               ({result.duplicatesSkipped} duplicates skipped)
                             </span>
                           )}
@@ -207,7 +207,7 @@ export default function PlaidSyncButton({ userId, onSyncComplete, className }: P
                     </div>
 
                     {result.dateRange && (
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-black dark:text-white mt-1">
                         Synced {result.dateRange} of data
                       </div>
                     )}
@@ -219,7 +219,7 @@ export default function PlaidSyncButton({ userId, onSyncComplete, className }: P
                     )}
 
                     {result.message && (
-                      <div className="text-sm text-gray-600 mt-1">
+                      <div className="text-sm text-black dark:text-white mt-1">
                         {result.message}
                       </div>
                     )}

@@ -439,7 +439,7 @@ export default function ExpenseReport() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Expense Report</h2>
-            <p className="text-gray-600 mt-1">Comprehensive analysis of your bills, transactions, and spending patterns</p>
+            <p className="text-black dark:text-white mt-1">Comprehensive analysis of your bills, transactions, and spending patterns</p>
           </div>
           
           <div className="flex gap-2">
@@ -484,7 +484,7 @@ export default function ExpenseReport() {
             <ChartBar className="h-5 w-5 mr-2 text-blue-600" />
             Spending by Category
           </h3>
-          <p className="text-sm text-gray-600 mt-1">Total amount spent per category (bills + transactions)</p>
+          <p className="text-sm text-black dark:text-white mt-1">Total amount spent per category (bills + transactions)</p>
         </div>
         
         <ResponsiveContainer width="100%" height={300}>
@@ -518,7 +518,7 @@ export default function ExpenseReport() {
             <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
             Budget Burndown
           </h3>
-          <p className="text-sm text-gray-600 mt-1">Tracking spending against budget over time</p>
+          <p className="text-sm text-black dark:text-white mt-1">Tracking spending against budget over time</p>
         </div>
         
         {burndownData && burndownData.length > 0 && burndownData.some(d => d.ideal > 0 || d.actual > 0) ? (
@@ -556,7 +556,7 @@ export default function ExpenseReport() {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-64 text-black dark:text-white">
             <TrendingUp className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-center">
               No budget data available for burndown chart.
@@ -574,7 +574,7 @@ export default function ExpenseReport() {
             <DollarSign className="h-5 w-5 mr-2 text-purple-600" />
             Percentage of Income by Category
           </h3>
-          <p className="text-sm text-gray-600 mt-1">How much of your income goes to each category (bills + transactions)</p>
+          <p className="text-sm text-black dark:text-white mt-1">How much of your income goes to each category (bills + transactions)</p>
         </div>
         
         {frequencyData.length > 0 && totalMonthlyIncome > 0 ? (
@@ -637,7 +637,7 @@ export default function ExpenseReport() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-900">{formatCurrency(item.amount)}</span>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        <span className="text-xs text-black dark:text-white bg-gray-100 px-2 py-1 rounded">
                           {item.percentOfIncome.toFixed(1)}%
                         </span>
                       </div>
@@ -661,7 +661,7 @@ export default function ExpenseReport() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-64 text-black dark:text-white">
             <DollarSign className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-center">
               {totalMonthlyIncome === 0 
@@ -679,26 +679,26 @@ export default function ExpenseReport() {
             <Calendar className="h-5 w-5 mr-2 text-orange-600" />
             Spending Forecast
           </h3>
-          <p className="text-sm text-gray-600 mt-1">Projected spending for the next 30, 60, and 90 days</p>
+          <p className="text-sm text-black dark:text-white mt-1">Projected spending for the next 30, 60, and 90 days</p>
         </div>
         
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-black dark:text-white uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-black dark:text-white uppercase tracking-wider">
                   Current
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-black dark:text-white uppercase tracking-wider">
                   30 Days
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-black dark:text-white uppercase tracking-wider">
                   60 Days
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-black dark:text-white uppercase tracking-wider">
                   90 Days
                 </th>
               </tr>

@@ -36,9 +36,9 @@ export default function AccountsOverview({ accounts }: AccountsOverviewProps) {
   if (accounts.length === 0) {
     return (
       <div className="text-center py-12">
-        <Wallet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No accounts connected</h3>
-        <p className="text-gray-500">Connect your bank accounts to see your balances here</p>
+        <Wallet className="h-12 w-12 text-black dark:text-white mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-black dark:text-white mb-2">No accounts connected</h3>
+        <p className="text-black dark:text-white">Connect your bank accounts to see your balances here</p>
       </div>
     )
   }
@@ -51,13 +51,13 @@ export default function AccountsOverview({ accounts }: AccountsOverviewProps) {
             <div className={`p-2 rounded-lg ${getAccountColor(account.type)}`}>
               {getAccountIcon(account.type)}
             </div>
-            <span className="text-xs text-gray-500 uppercase">{account.type}</span>
+            <span className="text-xs text-black dark:text-white uppercase">{account.type}</span>
           </div>
-          <h3 className="font-medium text-gray-900 mb-1">{account.name}</h3>
-          <p className="text-2xl font-bold text-gray-900">
+          <h3 className="font-medium text-black dark:text-white mb-1">{account.name}</h3>
+          <p className="text-2xl font-bold text-black dark:text-white">
             {formatCurrency(account.balance)}
           </p>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-black dark:text-white mt-2">
             Last updated: {new Date(account.updated_at).toLocaleDateString()}
           </p>
         </div>

@@ -372,7 +372,7 @@ export default function PricingComponent() {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Choose Your Plan
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-black dark:text-white max-w-3xl mx-auto">
             Start with a 14-day free trial or choose the plan that fits your needs
           </p>
           {hasUsedFreeTrial && (
@@ -384,7 +384,7 @@ export default function PricingComponent() {
           )}
           {user && (
             <div className="mt-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-black dark:text-white">
                 Logged in as: <span className="font-semibold">{user.email}</span>
               </p>
             </div>
@@ -441,18 +441,18 @@ export default function PricingComponent() {
 
                 <div className="p-8">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-6">{plan.description}</p>
+                  <p className="text-black dark:text-white mb-6">{plan.description}</p>
                   
                   <div className="mb-8">
                     <span className="text-4xl font-bold text-gray-900">
                       ${plan.price}
                     </span>
-                    <span className="text-gray-600">/month</span>
+                    <span className="text-black dark:text-white">/month</span>
                     {plan.id === 'free_trial' && (
                       <p className="text-sm text-green-600 mt-2">No credit card required</p>
                     )}
                     {plan.id !== 'free_trial' && (
-                      <p className="text-sm text-gray-500 mt-2">14-day free trial included</p>
+                      <p className="text-sm text-black dark:text-white mt-2">14-day free trial included</p>
                     )}
                   </div>
 
@@ -473,7 +473,7 @@ export default function PricingComponent() {
                       plan.recommended
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
                         : isDisabled
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
+                        ? 'bg-gray-300 text-black dark:text-white cursor-not-allowed pointer-events-none'
                         : 'bg-gray-900 text-white hover:bg-gray-800'
                     } ${loading && selectedPlan === plan.id ? 'opacity-50 cursor-wait' : ''} ${
                       !loading && !isDisabled ? 'cursor-pointer hover:scale-105' : ''
@@ -524,19 +524,19 @@ export default function PricingComponent() {
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-start">
                         <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-600 text-sm">{feature}</span>
+                        <span className="text-black dark:text-white text-sm">{feature}</span>
                       </div>
                     ))}
                     
                     {plan.notIncluded && plan.notIncluded.length > 0 && (
                       <>
                         <div className="border-t pt-4 mt-4">
-                          <p className="text-sm font-semibold text-gray-500 mb-3">Not included:</p>
+                          <p className="text-sm font-semibold text-black dark:text-white mb-3">Not included:</p>
                         </div>
                         {plan.notIncluded.map((feature, index) => (
                           <div key={index} className="flex items-start opacity-50">
-                            <X className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-500 text-sm line-through">{feature}</span>
+                            <X className="h-5 w-5 text-black dark:text-white mr-3 flex-shrink-0 mt-0.5" />
+                            <span className="text-black dark:text-white text-sm line-through">{feature}</span>
                           </div>
                         ))}
                       </>
@@ -549,10 +549,10 @@ export default function PricingComponent() {
         </div>
 
         <div className="mt-16 text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="text-black dark:text-white mb-4">
             All plans include 256-bit SSL encryption, 99.9% uptime guarantee, and GDPR compliance
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black dark:text-white">
             Questions? Contact us at help-desk@codesages.net
           </p>
         </div>
@@ -563,7 +563,7 @@ export default function PricingComponent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-xl font-bold mb-4">Enter Your Email</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-black dark:text-white mb-4">
               We'll use this email to create your account after payment.
             </p>
             <form onSubmit={handleEmailSubmit}>
@@ -608,7 +608,7 @@ export default function PricingComponent() {
                 </button>
               </div>
             </form>
-            <p className="text-xs text-gray-500 mt-4">
+            <p className="text-xs text-black dark:text-white mt-4">
               You'll be redirected to Stripe's secure checkout. After payment, you'll create your account.
             </p>
           </div>

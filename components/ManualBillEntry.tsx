@@ -387,13 +387,13 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
                       Add
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Press Enter or click Add to create a custom category</p>
+                  <p className="text-xs text-black dark:text-white mt-1">Press Enter or click Add to create a custom category</p>
                 </div>
 
                 {/* Predefined Categories */}
                 {Object.entries(BILL_CATEGORY_GROUPS).map(([groupName, groupCategories]) => (
                   <div key={groupName}>
-                    <div className="px-3 py-1 bg-gray-100 text-xs font-medium text-gray-600 sticky top-0">
+                    <div className="px-3 py-1 bg-gray-100 text-xs font-medium text-black dark:text-white sticky top-0">
                       {groupName}
                     </div>
                     {groupCategories.map((category) => (
@@ -454,7 +454,7 @@ export default function ManualBillEntry({ userId, onSuccess, onCancel, editMode 
                 Mark as paid
               </span>
             </label>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-black dark:text-white mt-1">
               Check this box if this bill has been paid for the current period
             </p>
           </div>

@@ -723,7 +723,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
       case 'transfer':
         return <RefreshCw className="w-4 h-4 text-blue-600" />
       default:
-        return <DollarSign className="w-4 h-4 text-gray-600" />
+        return <DollarSign className="w-4 h-4 text-black" />
     }
   }
 
@@ -733,13 +733,13 @@ export default function TransactionsList({ transactions: initialTransactions, us
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-gray-900">Transactions</h3>
+            <h3 className="text-lg font-semibold text-black">Transactions</h3>
             {/* Realtime connection indicator */}
             {isRealtimeConnected && (
               <div className={`w-2 h-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} title={isUpdating ? 'Updating transactions...' : 'Real-time updates active'} />
             )}
           </div>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-black mt-1">
             Manage and categorize your transactions. Convert them to expenses or recurring bills.
           </p>
         </div>
@@ -756,11 +756,11 @@ export default function TransactionsList({ transactions: initialTransactions, us
       {/* Connected Banks Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-black flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-blue-500" />
             Connected Banks
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-black mt-1">
             Manage your connected bank accounts and sync transactions
           </p>
         </div>
@@ -779,7 +779,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
       <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" />
           <input
             type="text"
             placeholder="Search transactions..."
@@ -792,7 +792,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
         {/* Filter Controls */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label className="block text-sm font-medium text-black mb-1">Type</label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as any)}
@@ -806,7 +806,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="block text-sm font-medium text-black mb-1">Category</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -819,7 +819,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <label className="block text-sm font-medium text-black mb-1">From Date</label>
             <input
               type="date"
               value={dateRange.start}
@@ -829,7 +829,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <label className="block text-sm font-medium text-black mb-1">To Date</label>
             <input
               type="date"
               value={dateRange.end}
@@ -846,7 +846,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
             className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
               bulkActionMode 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 text-black hover:bg-gray-200'
             }`}
           >
             <CheckSquare className="w-4 h-4" />
@@ -897,22 +897,22 @@ export default function TransactionsList({ transactions: initialTransactions, us
                     />
                   </th>
                 )}
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-right text-xs font-medium text-black uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-black uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -920,7 +920,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={bulkActionMode ? 7 : 6} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={bulkActionMode ? 7 : 6} className="px-4 py-8 text-center text-black">
                     No transactions found
                   </td>
                 </tr>
@@ -937,14 +937,14 @@ export default function TransactionsList({ transactions: initialTransactions, us
                         />
                       </td>
                     )}
-                    <td className="px-4 py-3 text-sm text-gray-900">
+                    <td className="px-4 py-3 text-sm text-black">
                       {formatDate(transaction.date)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {getTransactionIcon(transaction.transaction_type || 'expense')}
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{transaction.description}</p>
+                          <p className="text-sm font-medium text-black">{transaction.description}</p>
                           {transaction.pending && (
                             <span className="text-xs text-amber-600 flex items-center gap-1">
                               <Clock className="w-3 h-3" />
@@ -955,7 +955,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-black">
                         {transaction.category || 'Uncategorized'}
                       </span>
                     </td>
@@ -1078,9 +1078,9 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
               {/* Transaction Details */}
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <p className="text-sm text-gray-600 mb-1">Transaction</p>
-                <p className="font-semibold text-gray-900">{conversionModal.transaction.description}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-black mb-1">Transaction</p>
+                <p className="font-semibold text-black">{conversionModal.transaction.description}</p>
+                <p className="text-sm text-black mt-1">
                   {formatDate(conversionModal.transaction.date)} • {formatCurrency(Math.abs(conversionModal.transaction.amount))}
                 </p>
               </div>
@@ -1102,7 +1102,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
                   {/* Category Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Categories * (Select all that apply)
                     </label>
 
@@ -1134,12 +1134,12 @@ export default function TransactionsList({ transactions: initialTransactions, us
                         onClick={() => setConversionModal(prev => ({ ...prev, showCategoryDropdown: !prev.showCategoryDropdown }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-left flex items-center justify-between"
                       >
-                        <span className="text-gray-700">
+                        <span className="text-black">
                           {conversionModal.selectedCategories.length === 0
                             ? 'Select categories...'
                             : `${conversionModal.selectedCategories.length} selected`}
                         </span>
-                        <Tag className="h-4 w-4 text-gray-400" />
+                        <Tag className="h-4 w-4 text-black" />
                       </button>
 
                       {/* Dropdown Menu */}
@@ -1165,13 +1165,13 @@ export default function TransactionsList({ transactions: initialTransactions, us
                                 Add
                               </button>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Press Enter or click Add to create a custom category</p>
+                            <p className="text-xs text-black mt-1">Press Enter or click Add to create a custom category</p>
                           </div>
 
                           {/* Predefined Categories */}
                           {Object.entries(BILL_CATEGORY_GROUPS).map(([groupName, groupCategories]) => (
                             <div key={groupName}>
-                              <div className="px-3 py-1 bg-gray-100 text-xs font-medium text-gray-600 sticky top-0">
+                              <div className="px-3 py-1 bg-gray-100 text-xs font-medium text-black sticky top-0">
                                 {groupName}
                               </div>
                               {groupCategories.map((category) => (
@@ -1199,7 +1199,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   <div className="flex gap-3">
                     <button
                       onClick={closeModal}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
                     >
                       Cancel
                     </button>
@@ -1225,7 +1225,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       Bill Name
                     </label>
                     <input
@@ -1238,7 +1238,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       Billing Cycle
                     </label>
                     <select
@@ -1256,7 +1256,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       Due Date
                     </label>
                     <input
@@ -1269,7 +1269,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-black mb-1">
                       Category
                     </label>
                     <select
@@ -1299,7 +1299,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                     <button
                       type="button"
                       onClick={() => setConversionModal({ isOpen: false, type: null, transaction: null, selectedCategories: [], showCategoryDropdown: false, customCategory: '', showCustomInput: false })}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
                     >
                       Cancel
                     </button>
@@ -1334,8 +1334,8 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
               {/* Transaction Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="font-semibold text-gray-900">{billLinkModal.transaction.description}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="font-semibold text-black">{billLinkModal.transaction.description}</p>
+                <p className="text-sm text-black mt-1">
                   {formatDate(billLinkModal.transaction.date)} • {formatCurrency(Math.abs(billLinkModal.transaction.amount))}
                 </p>
               </div>
@@ -1354,7 +1354,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     Select Bill to Link
                   </label>
                   <select
@@ -1376,7 +1376,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   <button
                     type="button"
                     onClick={() => setBillLinkModal({ isOpen: false, transaction: null, selectedBillId: '', bills: [] })}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
                   >
                     Cancel
                   </button>
@@ -1411,8 +1411,8 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
               {/* Transaction Info */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="font-semibold text-gray-900">{incomeLinkModal.transaction.description}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="font-semibold text-black">{incomeLinkModal.transaction.description}</p>
+                <p className="text-sm text-black mt-1">
                   {formatDate(incomeLinkModal.transaction.date)} • {formatCurrency(Math.abs(incomeLinkModal.transaction.amount))}
                 </p>
               </div>
@@ -1431,7 +1431,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-black mb-2">
                     Select Income Source to Link
                   </label>
                   <select
@@ -1452,7 +1452,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => setIncomeLinkModal({ isOpen: false, transaction: null, selectedIncomeId: '', incomeSources: [] })}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
                   >
                     Cancel
                   </button>
@@ -1487,8 +1487,8 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
               {/* Transaction Info */}
               <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-                <p className="font-semibold text-gray-900">{createIncomeModal.transaction.description}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="font-semibold text-black">{createIncomeModal.transaction.description}</p>
+                <p className="text-sm text-black mt-1">
                   {formatDate(createIncomeModal.transaction.date)} • {formatCurrency(Math.abs(createIncomeModal.transaction.amount))}
                 </p>
               </div>
@@ -1507,7 +1507,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
 
               <form onSubmit={handleCreateIncomeFromTransaction} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Income Source Name
                   </label>
                   <input
@@ -1521,7 +1521,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Frequency
                   </label>
                   <select
@@ -1539,7 +1539,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-black mb-1">
                     Category
                   </label>
                   <select
@@ -1562,7 +1562,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   <button
                     type="button"
                     onClick={() => setCreateIncomeModal({ isOpen: false, transaction: null })}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50"
                   >
                     Cancel
                   </button>
@@ -1604,7 +1604,7 @@ export default function TransactionsList({ transactions: initialTransactions, us
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {Object.entries(BILL_CATEGORY_GROUPS).map(([groupName, categories]) => (
                       <div key={groupName}>
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">{groupName}</h4>
+                        <h4 className="text-sm font-medium text-black mb-1">{groupName}</h4>
                         <div className="space-y-1 ml-3">
                           {categories.map(category => (
                             <label key={category} className="flex items-center">

@@ -28,9 +28,9 @@ export function UsageMeter({
         {limit ? (
           <CheckCircle className="h-4 w-4 text-green-500" />
         ) : (
-          <AlertCircle className="h-4 w-4 text-gray-400" />
+          <AlertCircle className="h-4 w-4 text-black dark:text-white" />
         )}
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm text-black dark:text-white">{label}</span>
       </div>
     )
   }
@@ -68,7 +68,7 @@ export function UsageMeter({
     return (
       <div className={cn('flex items-center gap-2', className)}>
         <div className="flex-1">
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
               className={cn('h-full transition-all duration-300', getColor())}
               style={{ width: `${percentage}%` }}
@@ -76,7 +76,7 @@ export function UsageMeter({
           </div>
         </div>
         {showNumbers && (
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-xs text-black dark:text-white whitespace-nowrap">
             {used}/{limit}
           </span>
         )}
@@ -89,14 +89,14 @@ export function UsageMeter({
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{label}</span>
         {showNumbers && (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-black dark:text-white">
             {used} / {limit} used
           </span>
         )}
       </div>
       
       <div className="relative">
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
           <div
             className={cn(
               'h-full transition-all duration-300',

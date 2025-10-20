@@ -482,7 +482,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       case 'success': return <Zap className="w-5 h-5 text-green-500" />
       case 'info': return <Activity className="w-5 h-5 text-blue-500" />
       case 'tip': return <Lightbulb className="w-5 h-5 text-purple-500" />
-      default: return <Brain className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+      default: return <Brain className="w-5 h-5 text-card-foreground" />
     }
   }
 
@@ -517,11 +517,11 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-blue-900">AI Financial Insights</h2>
+        <h2 className="text-2xl font-bold text-black">AI Financial Insights</h2>
         <button
           onClick={generateInsights}
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors flex items-center gap-2"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 disabled:bg-primary/50 transition-colors flex items-center gap-2"
           title="💡 Generate AI-powered financial insights based on your spending patterns, bills, and savings goals. Get personalized recommendations for budgeting, saving strategies, and actionable tips to improve your financial health."
         >
           {loading ? (
@@ -542,16 +542,16 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       {aiInsights.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {aiInsights.map((insight, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div key={index} className="bg-card rounded-lg border border-input p-4">
               <div className="flex items-start gap-3">
                 {getInsightIcon(insight.type)}
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{insight.title}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{insight.description}</p>
+                  <h4 className="font-semibold text-card-foreground">{insight.title}</h4>
+                  <p className="text-sm text-card-foreground mt-1">{insight.description}</p>
                   {insight.metric && (
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{insight.metric}:</span>
-                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="text-xs text-card-foreground">{insight.metric}:</span>
+                      <span className="text-sm font-semibold text-card-foreground">
                         {typeof insight.value === 'number' 
                           ? insight.value > 100 
                             ? formatCurrency(insight.value)
@@ -561,8 +561,8 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                       {insight.trend && (
                         <span className={`text-xs ${
                           insight.trend === 'up' ? 'text-green-600' : 
-                          insight.trend === 'down' ? 'text-red-600' : 
-                          'text-gray-600 dark:text-gray-300'
+                          insight.trend === 'down' ? 'text-red-600' :
+                          'text-card-foreground'
                         }`}>
                           {insight.trend === 'up' ? '↑' : insight.trend === 'down' ? '↓' : '→'}
                         </span>
@@ -578,8 +578,8 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Spending Trends */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Monthly Spending Trends</h3>
+        <div className="bg-card rounded-lg border border-input p-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Monthly Spending Trends</h3>
           <div className="space-y-3">
             {sortedMonths.length > 0 ? (
               sortedMonths.map(([month, data]) => {
@@ -594,9 +594,9 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                 return (
                   <div key={month} className={`flex items-center justify-between ${isEstimate ? 'opacity-75' : ''}`}>
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-600 dark:text-gray-300">{monthName}</span>
+                      <span className="text-card-foreground">{monthName}</span>
                       {isEstimate && (
-                        <span className="text-xs text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
                           est.
                         </span>
                       )}
@@ -618,10 +618,10 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
             ) : (
               // Show estimated monthly bills when no transaction data
               <div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">Based on your bills:</div>
+                <div className="text-sm text-card-foreground mb-3">Based on your bills:</div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 dark:text-gray-300">Monthly Bills Total</span>
+                    <span className="text-card-foreground">Monthly Bills Total</span>
                     <span className="font-medium text-red-600">
                       -{formatCurrency(bills.reduce((sum, bill) => {
                         if (!bill.is_active) return sum
@@ -636,7 +636,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                       }, 0))}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <div className="text-xs text-card-foreground mt-2">
                     Add transactions to see detailed spending trends
                   </div>
                 </div>
@@ -646,14 +646,14 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Top Spending Categories */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">Top Spending Categories</h3>
+        <div className="bg-card rounded-lg border border-input p-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Top Spending Categories</h3>
           <div className="space-y-3">
             {topCategories.length > 0 ? (
               topCategories.map(([category, amount]) => (
                 <div key={category} className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-300">{category}</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(amount)}</span>
+                  <span className="text-card-foreground">{category}</span>
+                  <span className="font-medium text-card-foreground">{formatCurrency(amount)}</span>
                 </div>
               ))
             ) : (
@@ -665,9 +665,9 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: cat.color }}
                     />
-                    <span className="text-gray-600 dark:text-gray-300">{cat.name}</span>
+                    <span className="text-card-foreground">{cat.name}</span>
                   </div>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(cat.value)}</span>
+                  <span className="font-medium text-card-foreground">{formatCurrency(cat.value)}</span>
                 </div>
               ))
             )}
@@ -675,24 +675,24 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Top Merchants by Spending */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Top Merchants by Spending</h3>
+        <div className="bg-card rounded-lg border border-input p-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Top Merchants by Spending</h3>
           <div className="space-y-3">
             {topMerchants.length > 0 ? (
               topMerchants.map((merchant) => (
                 <div key={merchant.name} className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-900 dark:text-gray-100 font-medium text-sm">{merchant.name}</span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(merchant.total)}</span>
+                    <span className="text-card-foreground font-medium text-sm">{merchant.name}</span>
+                    <span className="font-semibold text-card-foreground">{formatCurrency(merchant.total)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center justify-between text-xs text-card-foreground">
                     <span>{merchant.count} transaction{merchant.count !== 1 ? 's' : ''}</span>
                     <span>Avg: {formatCurrency(merchant.average)}</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-4 text-card-foreground">
                 <p className="text-sm">No merchant data available</p>
                 <p className="text-xs mt-1">Add expense transactions to see top merchants</p>
               </div>
@@ -701,16 +701,16 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         </div>
 
         {/* Bill Payment Schedule */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">Bill Payment Schedule</h3>
+        <div className="bg-card rounded-lg border border-input p-6">
+          <h3 className="text-lg font-semibold text-card-foreground mb-4">Bill Payment Schedule</h3>
           <div className="space-y-2">
             {bills.filter(b => b.is_active).slice(0, 5).map(bill => (
               <div key={bill.id} className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{bill.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{bill.billing_cycle}</p>
+                  <p className="text-sm font-medium text-card-foreground">{bill.name}</p>
+                  <p className="text-xs text-card-foreground">{bill.billing_cycle}</p>
                 </div>
-                <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(bill.amount)}</span>
+                <span className="font-medium text-card-foreground">{formatCurrency(bill.amount)}</span>
               </div>
             ))}
           </div>

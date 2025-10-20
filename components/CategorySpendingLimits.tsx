@@ -264,7 +264,7 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
       case 'warning': return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700'
       case 'danger': return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700'
       case 'exceeded': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
-      default: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600'
+      default: return 'text-black dark:text-black bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600'
     }
   }
 
@@ -316,16 +316,16 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
           Category Spending Limits
           <div className="flex items-center gap-1">
             <Zap className="h-4 w-4 text-orange-500" />
-            <span className="text-xs text-gray-500 dark:text-gray-400">Live</span>
+            <span className="text-xs text-black">Live</span>
           </div>
         </h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleManage} className="text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-            <Settings className="h-4 w-4 mr-1 text-gray-700 dark:text-gray-300" />
+          <Button variant="outline" size="sm" onClick={handleManage} className="text-black border-input hover:bg-gray-100">
+            <Settings className="h-4 w-4 mr-1 text-black" />
             Manage
           </Button>
-          <Button variant="outline" size="sm" onClick={handleAddLimit} className="text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-            <Plus className="h-4 w-4 mr-1 text-gray-700 dark:text-gray-300" />
+          <Button variant="outline" size="sm" onClick={handleAddLimit} className="text-black border-input hover:bg-gray-100">
+            <Plus className="h-4 w-4 mr-1 text-black" />
             Add Limit
           </Button>
         </div>
@@ -334,9 +334,9 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
       {categoryLimits.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">No Category Limits Set</h4>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <Target className="h-12 w-12 text-black mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-black mb-2">No Category Limits Set</h4>
+            <p className="text-black dark:text-gray-300 mb-4">
               Set spending limits for categories to track your budget progress.
             </p>
             <Button onClick={handleAddLimit}>
@@ -383,7 +383,7 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
                     value={Math.min(100, limit.percentageUsed)}
                     className="h-3"
                   />
-                  <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  <div className="flex justify-between text-xs text-black dark:text-gray-300 mt-1">
                     <span>{limit.percentageUsed.toFixed(1)}% used</span>
                     <span>${limit.remainingAmount.toFixed(2)} remaining</span>
                   </div>
@@ -411,11 +411,11 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Daily Allowance:</span>
+                      <span className="text-black dark:text-gray-300">Daily Allowance:</span>
                       <span className="font-medium">${limit.dailyAllowance.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Current Rate:</span>
+                      <span className="text-black dark:text-gray-300">Current Rate:</span>
                       <span className={`font-medium ${
                         (limit.recentSpending / 7) > limit.dailyAllowance ? 'text-red-600' : 'text-green-600'
                       }`}>
@@ -425,14 +425,14 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Days Left:</span>
+                      <span className="text-black dark:text-gray-300">Days Left:</span>
                       <span className="font-medium flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {limit.daysRemaining}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Projected:</span>
+                      <span className="text-black dark:text-gray-300">Projected:</span>
                       <span className={`font-medium ${
                         limit.projectedSpending > limit.monthly_limit ? 'text-red-600' : 'text-green-600'
                       }`}>
@@ -445,7 +445,7 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
                 {/* Recent Activity */}
                 <div className="bg-gray-50 rounded-lg p-3">
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-gray-600">Last 7 days:</span>
+                    <span className="text-black">Last 7 days:</span>
                     <span className="font-medium text-red-600">
                       -${limit.recentSpending.toFixed(2)}
                     </span>
@@ -458,11 +458,11 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
 
                 {/* Quick Actions */}
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 text-black" onClick={() => handleViewDetails(limit.category)}>
+                  <Button variant="outline" size="sm" className="flex-1 text-black border-input hover:bg-gray-100" onClick={() => handleViewDetails(limit.category)}>
                     <BarChart3 className="h-4 w-4 mr-1" />
                     View Details
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 text-black" onClick={() => handleAdjustLimit(limit.category)}>
+                  <Button variant="outline" size="sm" className="flex-1 text-black border-input hover:bg-gray-100" onClick={() => handleAdjustLimit(limit.category)}>
                     <Settings className="h-4 w-4 mr-1" />
                     Adjust Limit
                   </Button>
@@ -473,7 +473,7 @@ export default function CategorySpendingLimits({ userId, className }: CategorySp
         </div>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-black text-center">
         Last updated: {lastUpdate.toLocaleTimeString()} • Updates with new transactions
       </p>
 
@@ -600,7 +600,7 @@ function BudgetLimitForm({ userId, editingLimit, onSuccess, onCancel }: BudgetLi
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold flex items-center gap-2 text-black">
             <Target className="h-5 w-5" />
             {editingLimit ? 'Edit Budget Limit' : 'Add Budget Limit'}
           </h2>
@@ -623,7 +623,7 @@ function BudgetLimitForm({ userId, editingLimit, onSuccess, onCancel }: BudgetLi
               value={formData.category}
               onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
               disabled={!!editingLimit}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-600"
               placeholder="e.g., Food and Dining, Transportation"
             />
           </div>
@@ -631,34 +631,34 @@ function BudgetLimitForm({ userId, editingLimit, onSuccess, onCancel }: BudgetLi
           <div>
             <label className="block text-sm font-medium mb-1 text-black">Monthly Limit</label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-black dark:text-black" />
               <input
                 type="number"
                 step="0.01"
                 value={formData.monthlyLimit}
                 onChange={(e) => setFormData(prev => ({ ...prev, monthlyLimit: e.target.value }))}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0.00"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Warning Threshold (%)</label>
+            <label className="block text-sm font-medium mb-1 text-black">Warning Threshold (%)</label>
             <input
               type="number"
               min="1"
               max="100"
               value={formData.warningThreshold}
               onChange={(e) => setFormData(prev => ({ ...prev, warningThreshold: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="80"
             />
-            <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">Alert when spending reaches this percentage</p>
+            <p className="text-xs text-black dark:text-gray-300 mt-1">Alert when spending reaches this percentage</p>
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel} className="flex-1 text-black">
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1 text-black border-input hover:bg-gray-100">
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="flex-1">
@@ -690,7 +690,7 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold flex items-center gap-2 text-black">
             <BarChart3 className="h-5 w-5" />
             {category} Details
           </h2>
@@ -704,18 +704,18 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-600 dark:text-gray-300">Current Spending</p>
+                <p className="text-black dark:text-gray-300">Current Spending</p>
                 <p className="text-xl font-bold text-red-600">${limit.currentSpending.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-gray-600 dark:text-gray-300">Monthly Limit</p>
+                <p className="text-black dark:text-gray-300">Monthly Limit</p>
                 <p className="text-xl font-bold text-blue-600">${limit.monthly_limit.toFixed(2)}</p>
               </div>
             </div>
 
             <div className="mt-3">
               <Progress value={Math.min(100, limit.percentageUsed)} className="h-3" />
-              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300 mt-1">
+              <div className="flex justify-between text-xs text-black dark:text-gray-300 mt-1">
                 <span>{limit.percentageUsed.toFixed(1)}% used</span>
                 <span>${limit.remainingAmount.toFixed(2)} remaining</span>
               </div>
@@ -726,11 +726,11 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Daily Allowance:</span>
+                <span className="text-black dark:text-gray-300">Daily Allowance:</span>
                 <span className="font-medium">${limit.dailyAllowance.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Current Daily Rate:</span>
+                <span className="text-black dark:text-gray-300">Current Daily Rate:</span>
                 <span className={`font-medium ${
                   (limit.recentSpending / 7) > limit.dailyAllowance ? 'text-red-600' : 'text-green-600'
                 }`}>
@@ -738,17 +738,17 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Recent Spending (7d):</span>
+                <span className="text-black dark:text-gray-300">Recent Spending (7d):</span>
                 <span className="font-medium">${limit.recentSpending.toFixed(2)}</span>
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Days Remaining:</span>
+                <span className="text-black dark:text-gray-300">Days Remaining:</span>
                 <span className="font-medium">{limit.daysRemaining}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Projected Total:</span>
+                <span className="text-black dark:text-gray-300">Projected Total:</span>
                 <span className={`font-medium ${
                   limit.projectedSpending > limit.monthly_limit ? 'text-red-600' : 'text-green-600'
                 }`}>
@@ -756,7 +756,7 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Trend:</span>
+                <span className="text-black dark:text-gray-300">Trend:</span>
                 <span className={`font-medium capitalize ${
                   limit.trend === 'improving' ? 'text-green-600' :
                   limit.trend === 'worsening' ? 'text-red-600' : 'text-blue-600'
@@ -786,7 +786,7 @@ function CategoryDetailsView({ category, limit, onClose }: CategoryDetailsViewPr
           )}
 
           <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <Button variant="outline" onClick={onClose} className="flex-1 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <Button variant="outline" onClick={onClose} className="flex-1 text-black border-input hover:bg-gray-100">
               Close
             </Button>
           </div>
@@ -848,7 +848,7 @@ function ManageLimitsView({ userId, limits, onSuccess, onClose }: ManageLimitsVi
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold flex items-center gap-2 text-black">
             <Settings className="h-5 w-5" />
             Manage Budget Limits
           </h2>
@@ -860,8 +860,8 @@ function ManageLimitsView({ userId, limits, onSuccess, onClose }: ManageLimitsVi
         <div className="p-4 overflow-y-auto max-h-96">
           {limits.length === 0 ? (
             <div className="text-center py-8">
-              <Target className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-300">No budget limits created yet</p>
+              <Target className="h-12 w-12 text-black dark:text-black mx-auto mb-4" />
+              <p className="text-black dark:text-gray-300">No budget limits created yet</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -869,7 +869,7 @@ function ManageLimitsView({ userId, limits, onSuccess, onClose }: ManageLimitsVi
                 <div key={limit.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700/50 rounded-lg">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium capitalize text-gray-900 dark:text-gray-100">{limit.category}</span>
+                      <span className="font-medium capitalize text-black">{limit.category}</span>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         limit.status === 'safe' ? 'bg-green-100 text-green-700' :
                         limit.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
@@ -879,7 +879,7 @@ function ManageLimitsView({ userId, limits, onSuccess, onClose }: ManageLimitsVi
                         {limit.status}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                    <div className="text-sm text-black dark:text-gray-300">
                       ${limit.currentSpending.toFixed(2)} / ${limit.monthly_limit.toFixed(2)}
                       ({limit.percentageUsed.toFixed(1)}%)
                     </div>
@@ -911,7 +911,7 @@ function ManageLimitsView({ userId, limits, onSuccess, onClose }: ManageLimitsVi
         </div>
 
         <div className="flex gap-2 p-4 border-t">
-          <Button variant="outline" onClick={onClose} className="flex-1 text-black">
+          <Button variant="outline" onClick={onClose} className="flex-1 text-black border-input hover:bg-gray-100">
             Close
           </Button>
         </div>

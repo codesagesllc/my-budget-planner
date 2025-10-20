@@ -177,12 +177,12 @@ One-time car repair - 450 one-time October 15th`
         
         {uploadStatus === 'idle' && (
           <>
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-600 mb-2">
+            <Upload className="mx-auto h-12 w-12 text-black dark:text-white mb-4" />
+            <p className="text-black dark:text-white mb-2">
               {isDragActive ? 'Drop your file here' : 'Drag & drop your bills file'}
             </p>
-            <p className="text-sm text-gray-500">or click to select a file</p>
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-sm text-black dark:text-white">or click to select a file</p>
+            <p className="text-xs text-black dark:text-white mt-2">
               Supports: Spreadsheets (.csv, .xlsx), Plain text (.txt), Receipts, Invoices
             </p>
             <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
@@ -195,7 +195,7 @@ One-time car repair - 450 one-time October 15th`
         {uploadStatus === 'processing' && (
           <>
             <FileSpreadsheet className="mx-auto h-12 w-12 text-blue-500 mb-4 animate-pulse" />
-            <p className="text-gray-600">{statusMessage}</p>
+            <p className="text-black dark:text-white">{statusMessage}</p>
           </>
         )}
         
@@ -231,7 +231,7 @@ One-time car repair - 450 one-time October 15th`
             Download Plain Text Example
           </button>
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-black dark:text-white">
           You can upload spreadsheets, plain text lists, or even paste receipt text into a .txt file
         </p>
       </div>

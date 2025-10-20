@@ -124,38 +124,38 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Payment History</h2>
-              <p className="text-sm text-gray-600 mt-1">{debt.creditor_name}</p>
+              <p className="text-sm text-black dark:text-white mt-1">{debt.creditor_name}</p>
             </div>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-black dark:text-white" />
             </button>
           </div>
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Total Paid</p>
+              <p className="text-sm text-black dark:text-white">Total Paid</p>
               <p className="text-lg font-semibold text-gray-900">
                 {formatCurrency(totalPaid)}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Principal Paid</p>
+              <p className="text-sm text-black dark:text-white">Principal Paid</p>
               <p className="text-lg font-semibold text-green-600">
                 {formatCurrency(totalPrincipal)}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Interest Paid</p>
+              <p className="text-sm text-black dark:text-white">Interest Paid</p>
               <p className="text-lg font-semibold text-orange-600">
                 {formatCurrency(totalInterest)}
               </p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Current Balance</p>
+              <p className="text-sm text-black dark:text-white">Current Balance</p>
               <p className="text-lg font-semibold text-gray-900">
                 {formatCurrency(debt.current_balance)}
               </p>
@@ -166,13 +166,13 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading payments...</p>
+              <p className="text-black dark:text-white mt-2">Loading payments...</p>
             </div>
           ) : payments.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600">No payments recorded yet</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <DollarSign className="h-12 w-12 text-black dark:text-white mx-auto mb-3" />
+              <p className="text-black dark:text-white">No payments recorded yet</p>
+              <p className="text-sm text-black dark:text-white mt-1">
                 Click "Record Payment" to add your first payment
               </p>
             </div>
@@ -195,7 +195,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-2">
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <Calendar className="h-4 w-4 text-black dark:text-white" />
                           <span className="font-medium text-gray-900">
                             {formatDate(payment.payment_date)}
                           </span>
@@ -209,7 +209,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                       
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                          <p className="text-xs text-gray-500">Amount</p>
+                          <p className="text-xs text-black dark:text-white">Amount</p>
                           <p className="font-semibold text-gray-900">
                             {formatCurrency(payment.amount)}
                           </p>
@@ -217,7 +217,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                         
                         {payment.principal_amount !== undefined && (
                           <div>
-                            <p className="text-xs text-gray-500">Principal</p>
+                            <p className="text-xs text-black dark:text-white">Principal</p>
                             <p className="font-medium text-green-600">
                               {formatCurrency(payment.principal_amount)}
                             </p>
@@ -226,7 +226,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                         
                         {payment.interest_amount !== undefined && (
                           <div>
-                            <p className="text-xs text-gray-500">Interest</p>
+                            <p className="text-xs text-black dark:text-white">Interest</p>
                             <p className="font-medium text-orange-600">
                               {formatCurrency(payment.interest_amount)}
                             </p>
@@ -235,7 +235,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                         
                         {payment.remaining_balance !== undefined && (
                           <div>
-                            <p className="text-xs text-gray-500">Balance After</p>
+                            <p className="text-xs text-black dark:text-white">Balance After</p>
                             <p className="font-medium text-gray-700">
                               {formatCurrency(payment.remaining_balance)}
                             </p>
@@ -244,7 +244,7 @@ export function PaymentHistoryModal({ debt, onClose, onPaymentDeleted }: Payment
                       </div>
                       
                       {payment.notes && (
-                        <p className="text-sm text-gray-600 mt-2 italic">
+                        <p className="text-sm text-black dark:text-white mt-2 italic">
                           Note: {payment.notes}
                         </p>
                       )}

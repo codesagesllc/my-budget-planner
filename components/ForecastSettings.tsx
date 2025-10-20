@@ -43,7 +43,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'general' 
               ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-900'
+              : 'text-black dark:text-white hover:text-gray-900'
           }`}
         >
           General
@@ -53,7 +53,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'growth' 
               ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-900'
+              : 'text-black dark:text-white hover:text-gray-900'
           }`}
         >
           Income Growth
@@ -63,7 +63,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'inflation' 
               ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-900'
+              : 'text-black dark:text-white hover:text-gray-900'
           }`}
         >
           Inflation
@@ -73,7 +73,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
           className={`px-4 py-2 font-medium transition-colors ${
             activeTab === 'expenses' 
               ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-900'
+              : 'text-black dark:text-white hover:text-gray-900'
           }`}
         >
           Seasonal Expenses
@@ -97,7 +97,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., 20"
               />
-              <p className="text-xs text-gray-500 mt-1">Your savings goal as % of income</p>
+              <p className="text-xs text-black dark:text-white mt-1">Your savings goal as % of income</p>
             </div>
 
             <div>
@@ -112,7 +112,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., 5000"
               />
-              <p className="text-xs text-gray-500 mt-1">Current emergency fund saved</p>
+              <p className="text-xs text-black dark:text-white mt-1">Current emergency fund saved</p>
             </div>
           </>
         )}
@@ -138,7 +138,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Brain className="h-4 w-4 text-purple-600" />
                       <span className="font-medium text-gray-900">AI-Based Estimation</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Analyzes your Plaid transaction history to predict income growth patterns
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <TrendingUp className="h-4 w-4 text-green-600" />
                       <span className="font-medium text-gray-900">Historical Trend</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Uses your past income trends to project future growth
                     </p>
                   </div>
@@ -178,7 +178,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Settings className="h-4 w-4 text-blue-600" />
                       <span className="font-medium text-gray-900">Manual Rate</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Set your own annual growth rate
                     </p>
                   </div>
@@ -201,7 +201,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., 3.5"
                 />
-                <p className="text-xs text-gray-500 mt-1">Compound annual growth rate for income</p>
+                <p className="text-xs text-black dark:text-white mt-1">Compound annual growth rate for income</p>
               </div>
             )}
           </>
@@ -228,7 +228,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Brain className="h-4 w-4 text-purple-600" />
                       <span className="font-medium text-gray-900">AI-Based Analysis</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Analyzes your spending patterns from Plaid to estimate personal inflation
                     </p>
                   </div>
@@ -248,7 +248,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Percent className="h-4 w-4 text-orange-600" />
                       <span className="font-medium text-gray-900">Historical Expenses</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Uses your past expense increases to project inflation
                     </p>
                   </div>
@@ -268,7 +268,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Settings className="h-4 w-4 text-blue-600" />
                       <span className="font-medium text-gray-900">Manual Rate</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Set your own inflation rate
                     </p>
                   </div>
@@ -291,7 +291,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., 3.0"
                 />
-                <p className="text-xs text-gray-500 mt-1">Monthly compound inflation rate for expenses</p>
+                <p className="text-xs text-black dark:text-white mt-1">Monthly compound inflation rate for expenses</p>
               </div>
             )}
           </>
@@ -318,7 +318,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Brain className="h-4 w-4 text-purple-600" />
                       <span className="font-medium text-gray-900">AI Seasonal Analysis</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       AI analyzes your Plaid history to detect seasonal spending patterns
                     </p>
                   </div>
@@ -338,7 +338,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Calendar className="h-4 w-4 text-indigo-600" />
                       <span className="font-medium text-gray-900">Default Seasonal</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Uses typical seasonal patterns (holidays, summer, etc.)
                     </p>
                   </div>
@@ -358,7 +358,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                       <Settings className="h-4 w-4 text-blue-600" />
                       <span className="font-medium text-gray-900">Manual Adjustment</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-black dark:text-white mt-1">
                       Set your own monthly expense factors
                     </p>
                   </div>
@@ -374,7 +374,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                   {monthNames.map((month, index) => (
                     <div key={month} className="space-y-1">
-                      <label className="text-xs text-gray-600">{month}</label>
+                      <label className="text-xs text-black dark:text-white">{month}</label>
                       <input
                         type="number"
                         min="50"
@@ -391,7 +391,7 @@ export default function ForecastSettings({ userId, currentSettings, onSave, onCa
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-black dark:text-white mt-2">
                   100% = normal expenses, 120% = 20% higher, 80% = 20% lower
                 </p>
               </div>

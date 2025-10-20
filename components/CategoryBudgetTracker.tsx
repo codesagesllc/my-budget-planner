@@ -213,9 +213,9 @@ export default function CategoryBudgetTracker({ userId, className }: CategoryBud
       {categorySpending.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
-            <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-600 mb-2">No Budget Limits Set</h4>
-            <p className="text-gray-500 mb-4">
+            <DollarSign className="h-12 w-12 text-black dark:text-white mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-black dark:text-white mb-2">No Budget Limits Set</h4>
+            <p className="text-black dark:text-white mb-4">
               Set category budget limits to track your spending and get real-time alerts.
             </p>
             <Button>
@@ -279,11 +279,11 @@ export default function CategoryBudgetTracker({ userId, className }: CategoryBud
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Daily Average:</span>
+                      <span className="text-black dark:text-white">Daily Average:</span>
                       <span className="font-medium">${metric.dailyAverage.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Projected Total:</span>
+                      <span className="text-black dark:text-white">Projected Total:</span>
                       <span className={`font-medium ${
                         metric.projectedSpending > metric.budgetLimit ? 'text-red-600' : 'text-gray-900'
                       }`}>
@@ -293,14 +293,14 @@ export default function CategoryBudgetTracker({ userId, className }: CategoryBud
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Days Remaining:</span>
+                      <span className="text-black dark:text-white">Days Remaining:</span>
                       <span className="font-medium flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {metric.daysRemaining}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Daily Budget Left:</span>
+                      <span className="text-black dark:text-white">Daily Budget Left:</span>
                       <span className="font-medium">
                         ${metric.daysRemaining > 0 ? ((metric.budgetLimit - metric.currentSpending) / metric.daysRemaining).toFixed(2) : '0.00'}
                       </span>
@@ -332,7 +332,7 @@ export default function CategoryBudgetTracker({ userId, className }: CategoryBud
         </div>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-black dark:text-white text-center">
         Last updated: {lastUpdate.toLocaleTimeString()} • Updates in real-time
       </p>
     </div>

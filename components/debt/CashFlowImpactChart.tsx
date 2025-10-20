@@ -70,7 +70,7 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Cash Flow Impact Analysis</h2>
-        <p className="text-gray-600">
+        <p className="text-black dark:text-white">
           Understanding how debt payments affect your monthly cash flow
         </p>
       </div>
@@ -96,23 +96,23 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
           {/* Cash Flow Summary */}
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Monthly Income</span>
+              <span className="text-black dark:text-white">Monthly Income</span>
               <span className="font-semibold">{formatCurrency(snapshot.monthly_income)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Total Expenses</span>
+              <span className="text-black dark:text-white">Total Expenses</span>
               <span className="font-semibold text-red-600">
                 -{formatCurrency(snapshot.monthly_expenses)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Debt Payments</span>
+              <span className="text-black dark:text-white">Debt Payments</span>
               <span className="font-semibold text-orange-600">
                 -{formatCurrency(debts.reduce((sum, debt) => sum + (debt.minimum_payment || 0), 0))}
               </span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t">
-              <span className="text-gray-600 font-semibold">Available for Extra Payments</span>
+              <span className="text-black dark:text-white font-semibold">Available for Extra Payments</span>
               <span className="font-bold text-green-600">
                 {formatCurrency(snapshot.available_for_debt)}
               </span>
@@ -152,7 +152,7 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
-                  <span className="text-gray-600">{debt.creditor_name}</span>
+                  <span className="text-black dark:text-white">{debt.creditor_name}</span>
                 </div>
                 <span className="font-semibold">{formatCurrency(debt.minimum_payment || 0)}</span>
               </div>
@@ -167,7 +167,7 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
         <div className="space-y-3">
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Expenses</span>
+              <span className="text-black dark:text-white">Expenses</span>
               <span className="font-semibold">{expensePercentage.toFixed(1)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -180,7 +180,7 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
           
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Debt Payments</span>
+              <span className="text-black dark:text-white">Debt Payments</span>
               <span className="font-semibold">{debtPercentage.toFixed(1)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -193,7 +193,7 @@ export function CashFlowImpactChart({ snapshot, debts }: CashFlowImpactChartProp
           
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Available for Extra Payments</span>
+              <span className="text-black dark:text-white">Available for Extra Payments</span>
               <span className="font-semibold">{availablePercentage.toFixed(1)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
