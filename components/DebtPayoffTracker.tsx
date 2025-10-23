@@ -239,7 +239,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
           <div className="flex items-center gap-1 text-sm">
             <span className="text-black">Strategy:</span>
             <Button
-              variant={strategy === 'snowball' ? 'default' : 'outline'}
+              variant="outline"
               size="sm"
               onClick={() => setStrategy('snowball')}
               className={strategy === 'snowball' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-black border-input hover:bg-gray-100'}
@@ -247,7 +247,7 @@ export default function DebtPayoffTracker({ userId, className }: DebtPayoffTrack
               Snowball
             </Button>
             <Button
-              variant={strategy === 'avalanche' ? 'default' : 'outline'}
+              variant="outline"
               size="sm"
               onClick={() => setStrategy('avalanche')}
               className={strategy === 'avalanche' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'text-black border-input hover:bg-gray-100'}
