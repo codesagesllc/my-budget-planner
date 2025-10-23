@@ -143,7 +143,51 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
         'one-time': 0 // Don't include one-time in monthly calculations
       }
 
-      const monthlyAmount = source.amount * (multipliers[source.frequency] || 0)
+      // Normalize frequency to lowercase for matching
+      const normalizedFrequency = (source.frequency || '').toLowerCase()
+      const multiplier = multipliers[normalizedFrequency] || 1 // Default to monthly if unknown
+      const monthlyAmount = source.amount * multiplier
+
+      return total + monthlyAmount
+    }, 0)
+  }
+
+  // Helper function to calculate income for a specific month
+  const calculateIncomeForMonth = (monthKey: string) => {
+    const [year, month] = monthKey.split('-').map(Number)
+    const monthDate = new Date(year, month - 1, 1) // First day of the month
+
+    return incomeSources.reduce((total, source) => {
+      if (!source.is_active) return total
+
+      // Check if this income source is active during this month
+      const startDate = source.start_date ? new Date(source.start_date) : null
+      const endDate = source.end_date ? new Date(source.end_date) : null
+
+      // If start_date exists, check if month is after start
+      if (startDate && monthDate < new Date(startDate.getFullYear(), startDate.getMonth(), 1)) {
+        return total // Month is before income starts
+      }
+
+      // If end_date exists, check if month is before end
+      if (endDate && monthDate > new Date(endDate.getFullYear(), endDate.getMonth(), 1)) {
+        return total // Month is after income ends
+      }
+
+      // Income is active for this month - calculate amount
+      const multipliers: Record<string, number> = {
+        'weekly': 4.33333,
+        'biweekly': 2.16667,
+        'monthly': 1,
+        'quarterly': 0.33333,
+        'annual': 0.08333,
+        'one-time': 0 // One-time income should be handled separately
+      }
+
+      const normalizedFrequency = (source.frequency || '').toLowerCase()
+      const multiplier = multipliers[normalizedFrequency] || 1
+      const monthlyAmount = source.amount * multiplier
+
       return total + monthlyAmount
     }, 0)
   }
@@ -166,9 +210,6 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       }
     })
 
-    // Calculate monthly income from income sources
-    const monthlyIncomeFromSources = calculateMonthlyIncome()
-
     // Calculate monthly bills total
     const monthlyBillsTotal = bills.reduce((sum, bill) => {
       if (!bill.is_active) return sum
@@ -188,9 +229,9 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       ? historicalExpenses.reduce((sum, data) => sum + data.expenses, 0) / historicalExpenses.length
       : 0
 
-    // Add income from sources to all months (historical and future)
+    // Add income from sources to each month based on their active dates
     Object.keys(monthlyTotals).forEach(monthKey => {
-      monthlyTotals[monthKey].income = monthlyIncomeFromSources
+      monthlyTotals[monthKey].income = calculateIncomeForMonth(monthKey)
     })
 
     // Get current date and ensure we show the correct current month
@@ -202,7 +243,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
     // Add current month if it doesn't exist
     if (!monthlyTotals[currentMonthKey]) {
       monthlyTotals[currentMonthKey] = {
-        income: monthlyIncomeFromSources,
+        income: calculateIncomeForMonth(currentMonthKey),
         expenses: avgTransactionExpenses + monthlyBillsTotal,
         isEstimate: true
       }
@@ -220,7 +261,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
 
       // Always add bills to current month
       monthlyTotals[currentMonthKey].expenses += monthlyBillsTotal
-      monthlyTotals[currentMonthKey].income = monthlyIncomeFromSources
+      monthlyTotals[currentMonthKey].income = calculateIncomeForMonth(currentMonthKey)
     }
 
     // Add next 2 months estimates
@@ -229,7 +270,7 @@ export default function FinancialInsights({ transactions, bills, incomeSources, 
       const futureMonthKey = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}`
 
       monthlyTotals[futureMonthKey] = {
-        income: monthlyIncomeFromSources,
+        income: calculateIncomeForMonth(futureMonthKey),
         expenses: avgTransactionExpenses + monthlyBillsTotal,
         isEstimate: true
       }

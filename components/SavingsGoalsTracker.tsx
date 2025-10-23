@@ -285,7 +285,7 @@ export default function SavingsGoalsTracker({ userId, className }: SavingsGoalsT
             variant="outline"
             size="sm"
             onClick={() => setShowAddGoalPopup(!showAddGoalPopup)}
-            className="text-black dark:text-white"
+            className="text-black"
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Goal

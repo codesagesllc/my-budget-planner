@@ -312,7 +312,7 @@ export default function IncomeManagement({ userId, onUpdate }: IncomeManagementP
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-xl font-semibold text-gray-900">
                   {editingIncome ? 'Edit Income Source' : 'Add Income Source'}
                 </h2>
                 <button

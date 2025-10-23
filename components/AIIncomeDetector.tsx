@@ -31,8 +31,15 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedIncome, setEditedIncome] = useState<DetectedIncome[]>([]);
 
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{
+    found: number;
+    transactionsScanned: number;
+  } | null>(null);
+
   const detectIncome = async () => {
     setDetecting(true);
+    setHasAnalyzed(false);
     try {
       const response = await fetch('/api/ai/detect-income', {
         method: 'POST',
@@ -44,7 +51,12 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
       const data = await response.json();
       setDetectedIncome(data.detectedIncome || []);
       setEditedIncome(data.detectedIncome || []);
-      
+      setHasAnalyzed(true);
+      setAnalysisResult({
+        found: data.detectedIncome?.length || 0,
+        transactionsScanned: data.incomeTransactionsFound || 0
+      });
+
       // Auto-select high confidence items
       const autoSelected = new Set<number>();
       data.detectedIncome?.forEach((income: DetectedIncome, index: number) => {
@@ -66,6 +78,7 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
     } catch (error) {
       console.error('Error detecting income:', error);
       toast.error('Failed to analyze income patterns');
+      setHasAnalyzed(true);
     } finally {
       setDetecting(false);
     }
@@ -194,8 +207,8 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
         </button>
       </div>
 
-      {/* Detection Button */}
-      {detectedIncome.length === 0 && !detecting && (
+      {/* Detection Button - Initial State */}
+      {detectedIncome.length === 0 && !detecting && !hasAnalyzed && (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <Brain className="h-12 w-12 text-purple-600 mx-auto mb-4" />
           <h4 className="text-lg font-medium text-gray-900 mb-2">
@@ -205,14 +218,62 @@ export default function AIIncomeDetector({ userId, onIncomeCreated, onClose }: A
             Our AI will scan your last 6 months of transactions to identify recurring deposits
             and categorize them as income sources.
           </p>
-          <Button
-            onClick={detectIncome}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
-            title="🔍 AI will analyze your Plaid transaction history to automatically detect recurring income patterns like salary, freelance payments, and other regular deposits. It identifies frequency, amounts, and categorizes income sources for easy setup."
-          >
-            <Brain className="h-4 w-4 mr-2" />
-            Start Analysis
-          </Button>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={detectIncome}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+              title="🔍 AI will analyze your Plaid transaction history to automatically detect recurring income patterns like salary, freelance payments, and other regular deposits. It identifies frequency, amounts, and categorizes income sources for easy setup."
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Start Analysis
+            </Button>
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="text-black"
+            >
+              Skip
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* No Income Found State */}
+      {detectedIncome.length === 0 && !detecting && hasAnalyzed && (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            No Recurring Income Patterns Found
+          </h4>
+          <p className="text-sm text-black dark:text-white mb-4 max-w-md mx-auto">
+            {analysisResult?.transactionsScanned === 0 ? (
+              <>
+                No income transactions found in your history. Try syncing your bank account
+                or manually add your income sources.
+              </>
+            ) : (
+              <>
+                Analyzed {analysisResult?.transactionsScanned} income transactions but couldn't
+                identify any recurring patterns. You can manually add your income sources instead.
+              </>
+            )}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={detectIncome}
+              variant="outline"
+              className="text-purple-600 border-purple-300 hover:bg-purple-50"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+            <Button
+              onClick={onClose}
+              className="bg-gray-600 hover:bg-gray-700 text-white"
+            >
+              Close
+            </Button>
+          </div>
         </div>
       )}
 

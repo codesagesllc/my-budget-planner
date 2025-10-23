@@ -286,17 +286,17 @@ export function DebtStrategySelector({ debts, onStrategyGenerated }: DebtStrateg
             variant="outline"
             onClick={() => setShowForm(false)}
             disabled={loading}
-            className="text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="text-black border-input hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             Back
           </Button>
-          
+
           <div className="flex space-x-3">
             <Button
               variant="outline"
               onClick={() => setSelectedStrategy('ai_optimized' as StrategyType)}
               disabled={loading}
-              className="text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="text-black border-input hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Change Strategy
             </Button>
