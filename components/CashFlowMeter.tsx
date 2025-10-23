@@ -277,19 +277,19 @@ export default function CashFlowMeter({ userId, className }: CashFlowMeterProps)
 
           {/* Projections */}
           <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-            <h4 className="font-medium text-sm flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
+            <h4 className="font-medium text-sm flex items-center gap-2 text-black">
+              <Calendar className="h-4 w-4 text-black" />
               Month-End Projection
             </h4>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-black dark:text-white">Projected Balance:</p>
+                <p className="text-black">Projected Balance:</p>
                 <p className={`font-semibold ${projectedEndOfMonth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   ${projectedEndOfMonth.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-black dark:text-white">Days Until Empty:</p>
+                <p className="text-black">Days Until Empty:</p>
                 <p className="font-semibold text-orange-600">
                   {current.daysUntilEmpty === Infinity ? '∞' : current.daysUntilEmpty}
                 </p>
