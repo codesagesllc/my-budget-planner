@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       .lte('date', endDate.toISOString())
 
     // Filter transactions that should count as spending
-    const transactions = allTransactions?.filter(t => {
+    const transactions = allTransactions?.filter((t: DatabaseTransaction) => {
       // Include all transactions that are NOT income
       const isNotIncome = t.transaction_type !== 'income'
 
