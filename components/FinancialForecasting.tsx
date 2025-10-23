@@ -1534,7 +1534,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
                           )}
                         </>
                       ) : (
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-card-foreground border border-gray-200">
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
                           N/A
                         </span>
                       )}

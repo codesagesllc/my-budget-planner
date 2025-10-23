@@ -121,14 +121,14 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-card-foreground">Current Balance</p>
-                <p className="text-lg font-semibold text-card-foreground">
+                <p className="text-sm text-black">Current Balance</p>
+                <p className="text-lg font-semibold text-gray-900">
                   {formatCurrency(debt.current_balance)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-card-foreground">Minimum Payment</p>
-                <p className="text-lg font-semibold text-card-foreground">
+                <p className="text-sm text-black">Minimum Payment</p>
+                <p className="text-lg font-semibold text-gray-900">
                   {formatCurrency(debt.minimum_payment || 0)}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(debt.minimum_payment!)}
-                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                    className="px-3 py-1 text-sm text-black bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                   >
                     Min: {formatCurrency(debt.minimum_payment)}
                   </button>
@@ -176,7 +176,7 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(debt.minimum_payment! * 2)}
-                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                    className="px-3 py-1 text-sm text-black bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                   >
                     2x Min: {formatCurrency(debt.minimum_payment * 2)}
                   </button>
@@ -184,7 +184,7 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                 <button
                   type="button"
                   onClick={() => handleQuickAmount(debt.current_balance)}
-                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  className="px-3 py-1 text-sm text-black bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                 >
                   Pay Off: {formatCurrency(debt.current_balance)}
                 </button>
@@ -291,7 +291,7 @@ export function RecordPaymentModal({ debt, onClose, onPaymentRecorded }: RecordP
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 text-card-foreground border-input hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="flex-1 text-black border-input hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Cancel
               </Button>

@@ -794,6 +794,29 @@ export default function DashboardClient({
               </button>
             )
           })}
+
+          {/* Settings and Sign Out */}
+          <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+            <Link href="/dashboard/settings">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="font-medium">Settings</span>
+              </button>
+            </Link>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false)
+                handleSignOut()
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sign Out</span>
+            </button>
+          </div>
         </nav>
       </div>
 
@@ -878,7 +901,22 @@ export default function DashboardClient({
             })}
           </nav>
           
-          <div className="absolute bottom-0 w-full p-4 border-t border-blue-700/50">
+          <div className="absolute bottom-0 w-full p-4 border-t border-blue-700/50 space-y-2">
+            <Link href="/dashboard/settings">
+              <button
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 text-blue-200 hover:bg-blue-800/30 hover:text-white rounded-lg transition-all group relative`}
+              >
+                <Settings className={`${sidebarCollapsed ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                {!sidebarCollapsed && (
+                  <span className="font-medium">Settings</span>
+                )}
+                {sidebarCollapsed && (
+                  <span className="absolute left-full ml-2 px-2 py-1 bg-blue-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                    Settings
+                  </span>
+                )}
+              </button>
+            </Link>
             <button
               onClick={handleSignOut}
               className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 text-red-300 hover:bg-red-900/20 hover:text-red-200 rounded-lg transition-all group relative`}
