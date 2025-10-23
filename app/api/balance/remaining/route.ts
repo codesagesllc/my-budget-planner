@@ -125,15 +125,8 @@ export async function GET(request: NextRequest) {
     // Filter transactions that should count as spending
     const transactions = allTransactions?.filter((t: DatabaseTransaction) => {
       // Include all transactions that are NOT income
-      const isNotIncome = t.transaction_type !== 'income'
-
-      // Exclude transactions marked as bill payments (if field exists)
-      const isNotBillPayment = !t.is_bill_payment
-
-      // Exclude transactions marked to exclude from spending (if field exists)
-      const notExcludedFromSpending = !t.exclude_from_spending
-
-      return isNotIncome && isNotBillPayment && notExcludedFromSpending
+      // This will include expenses and transfers as spending
+      return t.transaction_type !== 'income'
     }) || []
 
     if (transactionsError) {
