@@ -216,7 +216,7 @@ const [tempEmergencyFund, setTempEmergencyFund] = useState(0)
     let oneTimeExpenses = 0
     let transactionSpending = 0
 
-    // Calculate bills (recurring and one-time)
+    // Calculate bills (recurring and one-time) for this month
     bills.forEach(bill => {
       if (!bill.is_active) return
 
